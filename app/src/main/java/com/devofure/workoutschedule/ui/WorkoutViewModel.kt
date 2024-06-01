@@ -3,6 +3,8 @@ package com.devofure.workoutschedule.ui
 import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.devofure.workoutschedule.data.Workout
 import com.google.gson.Gson
@@ -12,26 +14,27 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.io.InputStreamReader
 
-class WorkoutViewModel(private val application: Application) : AndroidViewModel(application) {
+class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
+    private val context: Context = application.applicationContext
     private val _workouts = MutableStateFlow<Map<String, List<Workout>>>(emptyMap())
     val workouts: StateFlow<Map<String, List<Workout>>> = _workouts
 
     init {
         viewModelScope.launch {
-            val sharedPreferences = application.applicationContext.getSharedPreferences("WorkoutApp", Context.MODE_PRIVATE)
+            val sharedPreferences = context.getSharedPreferences("WorkoutApp", Context.MODE_PRIVATE)
             val isFirstLaunch = sharedPreferences.getBoolean("isFirstLaunch", true)
 
             if (isFirstLaunch) {
                 loadWorkoutsFromJson()
                 sharedPreferences.edit().putBoolean("isFirstLaunch", false).apply()
             } else {
-                _workouts.value = loadSampleWorkouts()
+                loadWorkoutsFromPreferences()
             }
         }
     }
 
     private fun loadWorkoutsFromJson() {
-        val inputStream = application.applicationContext.assets.open("exercises.json")
+        val inputStream = context.assets.open("exercises.json")
         val reader = InputStreamReader(inputStream)
         val jsonObject = Gson().fromJson(reader, JsonObject::class.java)
         val workoutType = object : TypeToken<List<Workout>>() {}.type
@@ -51,6 +54,28 @@ class WorkoutViewModel(private val application: Application) : AndroidViewModel(
         }
 
         _workouts.value = workoutsByDay
+        saveWorkoutsToPreferences(workoutsByDay)
+    }
+
+    private fun loadWorkoutsFromPreferences() {
+        val sharedPreferences = context.getSharedPreferences("WorkoutApp", Context.MODE_PRIVATE)
+        val workoutsJson = sharedPreferences.getString("workouts", null)
+
+        if (workoutsJson != null) {
+            val workoutType = object : TypeToken<Map<String, List<Workout>>>() {}.type
+            val workoutsByDay: Map<String, List<Workout>> = Gson().fromJson(workoutsJson, workoutType)
+            _workouts.value = workoutsByDay
+        } else {
+            _workouts.value = loadSampleWorkouts()
+        }
+    }
+
+    private fun saveWorkoutsToPreferences(workouts: Map<String, List<Workout>>) {
+        val sharedPreferences = context.getSharedPreferences("WorkoutApp", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        val workoutsJson = Gson().toJson(workouts)
+        editor.putString("workouts", workoutsJson)
+        editor.apply()
     }
 
     private fun loadSampleWorkouts(): Map<String, List<Workout>> {
@@ -71,6 +96,7 @@ class WorkoutViewModel(private val application: Application) : AndroidViewModel(
                 }
             } else entry.value
         }
+        saveWorkoutsToPreferences(_workouts.value)
     }
 
     fun onAllWorkoutsChecked(day: String, isChecked: Boolean) {
@@ -79,6 +105,21 @@ class WorkoutViewModel(private val application: Application) : AndroidViewModel(
                 entry.value.map { it.copy(isDone = isChecked) }
             } else entry.value
         }
+        saveWorkoutsToPreferences(_workouts.value)
+    }
+
+    fun addWorkout(day: String, workout: Workout) {
+        _workouts.value = _workouts.value.toMutableMap().apply {
+            this[day] = this[day]?.toMutableList()?.apply { add(workout) } ?: listOf(workout)
+        }
+        saveWorkoutsToPreferences(_workouts.value)
+    }
+
+    fun removeWorkout(day: String, workout: Workout) {
+        _workouts.value = _workouts.value.toMutableMap().apply {
+            this[day] = this[day]?.filter { it.id != workout.id } ?: emptyList()
+        }
+        saveWorkoutsToPreferences(_workouts.value)
     }
 }
 

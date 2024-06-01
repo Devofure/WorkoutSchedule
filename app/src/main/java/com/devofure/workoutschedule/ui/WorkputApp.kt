@@ -1,6 +1,5 @@
 package com.devofure.workoutschedule.ui
 
-import android.app.Application
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -8,12 +7,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.devofure.workoutschedule.data.Workout
 import kotlinx.coroutines.launch
 
@@ -24,6 +23,9 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
     val scaffoldState = rememberScaffoldState()
     val coroutineScope = rememberCoroutineScope()
 
+    var selectedWorkout by remember { mutableStateOf<Workout?>(null) }
+    var showDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
@@ -33,7 +35,7 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { /* Handle add workout */ }) {
+            FloatingActionButton(onClick = { /* Show dialog to add a workout */ }) {
                 Icon(Icons.Filled.Add, contentDescription = "Add Workout")
             }
         }
@@ -62,9 +64,19 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
 
             LazyColumn {
                 items(workouts) { workout ->
-                    ExpandableWorkoutItem(workout = workout, onWorkoutChecked = { isChecked ->
-                        workoutViewModel.onWorkoutChecked(daysOfWeek[selectedTabIndex], workout, isChecked)
-                    })
+                    WorkoutItem(
+                        workout = workout,
+                        onWorkoutChecked = { isChecked ->
+                            workoutViewModel.onWorkoutChecked(daysOfWeek[selectedTabIndex], workout, isChecked)
+                        },
+                        onWorkoutRemove = {
+                            workoutViewModel.removeWorkout(daysOfWeek[selectedTabIndex], workout)
+                        },
+                        onWorkoutDetail = {
+                            selectedWorkout = workout
+                            showDialog = true
+                        }
+                    )
                 }
             }
 
@@ -91,12 +103,24 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
                 Text(text = "Mark all as done")
             }
         }
+
+        if (showDialog && selectedWorkout != null) {
+            showWorkoutDetailDialog(selectedWorkout!!) {
+                showDialog = false
+            }
+        }
     }
 }
 
 @Composable
-fun ExpandableWorkoutItem(workout: Workout, onWorkoutChecked: (Boolean) -> Unit) {
+fun WorkoutItem(
+    workout: Workout,
+    onWorkoutChecked: (Boolean) -> Unit,
+    onWorkoutRemove: () -> Unit,
+    onWorkoutDetail: () -> Unit
+) {
     var expanded by remember { mutableStateOf(false) }
+    var showMenu by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -105,38 +129,71 @@ fun ExpandableWorkoutItem(workout: Workout, onWorkoutChecked: (Boolean) -> Unit)
             .clickable { expanded = !expanded },
         elevation = 4.dp
     ) {
-        Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth()
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+        Column {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
                 Checkbox(
                     checked = workout.isDone,
                     onCheckedChange = onWorkoutChecked
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = workout.name, style = MaterialTheme.typography.h6)
-            }
-            if (expanded) {
-                Text(text = workout.description, style = MaterialTheme.typography.body2)
-                // Add more detailed information here
-                Text(text = "Force: ${workout.force}", style = MaterialTheme.typography.body2)
-                Text(text = "Level: ${workout.level}", style = MaterialTheme.typography.body2)
-                Text(text = "Mechanic: ${workout.mechanic}", style = MaterialTheme.typography.body2)
-                Text(text = "Equipment: ${workout.equipment}", style = MaterialTheme.typography.body2)
-                Text(text = "Primary Muscles: ${workout.primaryMuscles.joinToString()}", style = MaterialTheme.typography.body2)
-                if (workout.secondaryMuscles.isNotEmpty()) {
-                    Text(text = "Secondary Muscles: ${workout.secondaryMuscles.joinToString()}", style = MaterialTheme.typography.body2)
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = workout.name, style = MaterialTheme.typography.h6)
+                    Text(text = workout.description, style = MaterialTheme.typography.body2)
+                    if (expanded) {
+                        Text(text = "Instructions: ${workout.instructions.joinToString(" ")}")
+                    }
                 }
-                workout.instructions.forEachIndexed { index, instruction ->
-                    Text(text = "${index + 1}. $instruction", style = MaterialTheme.typography.body2)
+                IconButton(onClick = { showMenu = true }) {
+                    Icon(Icons.Filled.MoreVert, contentDescription = "More options")
+                }
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(onClick = {
+                        showMenu = false
+                        onWorkoutDetail()
+                    }) {
+                        Text("Details")
+                    }
+                    DropdownMenuItem(onClick = {
+                        showMenu = false
+                        onWorkoutRemove()
+                    }) {
+                        Text("Remove")
+                    }
                 }
             }
         }
     }
 }
 
+@Composable
+fun showWorkoutDetailDialog(workout: Workout, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = workout.name) },
+        text = {
+            Column {
+                Text(text = workout.description)
+                Text(text = "Equipment: ${workout.equipment}")
+                Text(text = "Primary Muscles: ${workout.primaryMuscles.joinToString(", ")}")
+                Text(text = "Secondary Muscles: ${workout.secondaryMuscles.joinToString(", ")}")
+                Text(text = "Instructions: ${workout.instructions.joinToString(" ")}")
+            }
+        },
+        confirmButton = {
+            Button(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    )
+}
 
 @Composable
 fun WorkoutProgress(workouts: List<Workout>) {
