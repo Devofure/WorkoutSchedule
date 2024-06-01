@@ -1,15 +1,64 @@
 package com.devofure.workoutschedule.ui
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import android.content.Context
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.*
 import com.devofure.workoutschedule.data.Workout
+import com.google.gson.Gson
+import com.google.gson.JsonObject
+import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import java.io.InputStreamReader
 
-class WorkoutViewModel : ViewModel() {
-    private val _workouts = MutableStateFlow(sampleWorkouts)
+class WorkoutViewModel(private val application: Application) : AndroidViewModel(application) {
+    private val _workouts = MutableStateFlow<Map<String, List<Workout>>>(emptyMap())
+    val workouts: StateFlow<Map<String, List<Workout>>> = _workouts
+
+    init {
+        viewModelScope.launch {
+            val sharedPreferences = application.applicationContext.getSharedPreferences("WorkoutApp", Context.MODE_PRIVATE)
+            val isFirstLaunch = sharedPreferences.getBoolean("isFirstLaunch", true)
+
+            if (isFirstLaunch) {
+                loadWorkoutsFromJson()
+                sharedPreferences.edit().putBoolean("isFirstLaunch", false).apply()
+            } else {
+                _workouts.value = loadSampleWorkouts()
+            }
+        }
+    }
+
+    private fun loadWorkoutsFromJson() {
+        val inputStream = application.applicationContext.assets.open("exercises.json")
+        val reader = InputStreamReader(inputStream)
+        val jsonObject = Gson().fromJson(reader, JsonObject::class.java)
+        val workoutType = object : TypeToken<List<Workout>>() {}.type
+        val workoutsList: List<Workout> = Gson().fromJson(jsonObject.getAsJsonArray("exercises"), workoutType)
+
+        val workoutsByDay = workoutsList.groupBy { workout ->
+            when (workout.name) {
+                "Bench Press", "Incline Dumbbell Press", "Chest Flyes", "Tricep Dips", "Tricep Pushdowns" -> "Mon"
+                "Pull-Ups", "Bent Over Rows", "Lat Pulldowns", "Bicep Curls", "Hammer Curls" -> "Tue"
+                "Squats", "Leg Press", "Leg Curls", "Leg Extensions", "Calf Raises" -> "Wed"
+                "Shoulder Press", "Lateral Raises", "Front Raises", "Reverse Flyes", "Plank", "Russian Twists" -> "Thu"
+                "Incline Bench Press", "Dumbbell Flyes", "T-Bar Rows", "Single-Arm Rows" -> "Fri"
+                "Deadlifts", "Lunges", "Glute Bridges", "Leg Raises", "Bicycle Crunches" -> "Sat"
+                "Light Cardio", "Stretching or Yoga" -> "Sun"
+                else -> "Other"
+            }
+        }
+
+        _workouts.value = workoutsByDay
+    }
+
+    private fun loadSampleWorkouts(): Map<String, List<Workout>> {
+        return sampleWorkouts
+    }
 
     fun workoutsForDay(day: String): StateFlow<List<Workout>> {
-        return _workouts
+        return workouts
             .map { it[day] ?: emptyList() }
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     }
