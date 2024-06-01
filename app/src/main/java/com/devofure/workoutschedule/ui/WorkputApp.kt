@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.devofure.workoutschedule.data.Workout
+import com.devofure.workoutschedule.data.Exercise
 import kotlinx.coroutines.launch
 
 @Composable
@@ -25,6 +26,7 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
 
     var selectedWorkout by remember { mutableStateOf<Workout?>(null) }
     var showDialog by remember { mutableStateOf(false) }
+    var showAddWorkoutDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -35,7 +37,7 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { /* Show dialog to add a workout */ }) {
+            FloatingActionButton(onClick = { showAddWorkoutDialog = true }) {
                 Icon(Icons.Filled.Add, contentDescription = "Add Workout")
             }
         }
@@ -109,6 +111,24 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
                 showDialog = false
             }
         }
+
+        if (showAddWorkoutDialog) {
+            AddWorkoutDialog(
+                allExercises = workoutViewModel.allExercises.collectAsState().value,
+                onAddWorkout = { selectedExercises ->
+                    workoutViewModel.addWorkouts(daysOfWeek[selectedTabIndex], selectedExercises.map { exercise ->
+                        Workout(
+                            id = exercise.id,
+                            exercise = exercise,
+                            sets = 3,
+                            reps = 10
+                        )
+                    })
+                    showAddWorkoutDialog = false
+                },
+                onDismiss = { showAddWorkoutDialog = false }
+            )
+        }
     }
 }
 
@@ -142,10 +162,10 @@ fun WorkoutItem(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = workout.name, style = MaterialTheme.typography.h6)
-                    Text(text = workout.description, style = MaterialTheme.typography.body2)
+                    Text(text = workout.exercise.name, style = MaterialTheme.typography.h6)
+                    Text(text = "${workout.sets} sets of ${workout.reps} reps", style = MaterialTheme.typography.body2)
                     if (expanded) {
-                        Text(text = "Instructions: ${workout.instructions.joinToString(" ")}")
+                        Text(text = "Instructions: ${workout.exercise.instructions.joinToString(" ")}")
                     }
                 }
                 IconButton(onClick = { showMenu = true }) {
@@ -177,14 +197,16 @@ fun WorkoutItem(
 fun showWorkoutDetailDialog(workout: Workout, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = workout.name) },
+        title = { Text(text = workout.exercise.name) },
         text = {
             Column {
-                Text(text = workout.description)
-                Text(text = "Equipment: ${workout.equipment}")
-                Text(text = "Primary Muscles: ${workout.primaryMuscles.joinToString(", ")}")
-                Text(text = "Secondary Muscles: ${workout.secondaryMuscles.joinToString(", ")}")
-                Text(text = "Instructions: ${workout.instructions.joinToString(" ")}")
+                Text(text = workout.exercise.name)
+                Text(text = "Sets: ${workout.sets}")
+                Text(text = "Reps: ${workout.reps}")
+                Text(text = "Equipment: ${workout.exercise.equipment}")
+                Text(text = "Primary Muscles: ${workout.exercise.primaryMuscles.joinToString(", ")}")
+                Text(text = "Secondary Muscles: ${workout.exercise.secondaryMuscles.joinToString(", ")}")
+                Text(text = "Instructions: ${workout.exercise.instructions.joinToString(" ")}")
             }
         },
         confirmButton = {
@@ -219,4 +241,64 @@ fun WorkoutProgress(workouts: List<Workout>) {
             color = MaterialTheme.colors.primary
         )
     }
+}
+
+@Composable
+fun AddWorkoutDialog(
+    allExercises: List<Exercise>,
+    onAddWorkout: (List<Exercise>) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var selectedExercises by remember { mutableStateOf<List<Exercise>>(emptyList()) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Add Exercises") },
+        text = {
+            LazyColumn {
+                items(allExercises) { exercise ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                            .clickable {
+                                selectedExercises = if (selectedExercises.contains(exercise)) {
+                                    selectedExercises - exercise
+                                } else {
+                                    selectedExercises + exercise
+                                }
+                            }
+                    ) {
+                        Checkbox(
+                            checked = selectedExercises.contains(exercise),
+                            onCheckedChange = {
+                                selectedExercises = if (it) {
+                                    selectedExercises + exercise
+                                } else {
+                                    selectedExercises - exercise
+                                }
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(exercise.name)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onAddWorkout(selectedExercises)
+                }
+            ) {
+                Text("Add")
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
