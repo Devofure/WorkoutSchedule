@@ -1,4 +1,3 @@
-// MyWorkoutsTheme.kt
 package com.devofure.workoutschedule.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -6,19 +5,29 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import com.devofure.workoutschedule.ui.settings.ThemeType
 
-private val DarkColorPalette = darkColors(
-    primary = Color(0xFFBB86FC),
-    primaryVariant = Color(0xFF3700B3),
-    secondary = Color(0xFF03DAC6)
+private val LightColorPalette = lightColors(
+    primary = Gray700,
+    primaryVariant = Gray600,
+    secondary = Gray500,
+    background = White,
+    onPrimary = White,
+    onSecondary = White,
+    onBackground = Gray900,
+    onSurface = Gray900
 )
 
-private val LightColorPalette = lightColors(
-    primary = Color(0xFF6200EE),
-    primaryVariant = Color(0xFF3700B3),
-    secondary = Color(0xFF03DAC6)
+private val DarkColorPalette = darkColors(
+    primary = Gray400,
+    primaryVariant = Gray500,
+    secondary = Gray300,
+    background = Gray900,
+    surface = Gray800,
+    onPrimary = Gray900,
+    onSecondary = Gray900,
+    onBackground = White,
+    onSurface = White
 )
 
 @Composable

@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -42,6 +43,9 @@ fun WorkoutItem(
     onWorkoutEdit: () -> Unit,
 ) {
     var showMenu by remember { mutableStateOf(false) }
+
+    val textAlpha = if (workout.isDone) 0.5f else 1f
+    val textColor = if (workout.isDone) Color.Gray else MaterialTheme.typography.body2.color
 
     Card(
         modifier = Modifier
@@ -69,14 +73,14 @@ fun WorkoutItem(
                 ) {
                     Text(
                         text = workout.exercise.name,
-                        style = MaterialTheme.typography.h6,
+                        style = MaterialTheme.typography.h6.copy(color = textColor.copy(alpha = textAlpha)),
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Start
                     )
                     if (workout.sets != null && workout.reps != null)
                         Text(
                             text = "${workout.sets} sets of ${workout.reps} reps",
-                            style = MaterialTheme.typography.body2,
+                            style = MaterialTheme.typography.body2.copy(color = textColor.copy(alpha = textAlpha)),
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Start
                         )
@@ -113,10 +117,32 @@ fun WorkoutItem(
             }
             if (expanded) {
                 Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)) {
-                    Text(
-                        text = workout.exercise.instructions.joinToString(" "),
-                        style = MaterialTheme.typography.body2
-                    )
+                    workout.exercise.instructions.forEachIndexed { _, instruction ->
+                        Row(
+                            verticalAlignment = Alignment.Top,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        ) {
+                            Text(
+                                text = "\u2022", // Bullet point
+                                style = MaterialTheme.typography.body2.copy(
+                                    color = textColor.copy(
+                                        alpha = textAlpha
+                                    )
+                                ),
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+                            Text(
+                                text = instruction,
+                                style = MaterialTheme.typography.body2.copy(
+                                    color = textColor.copy(
+                                        alpha = textAlpha
+                                    )
+                                ),
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Start
+                            )
+                        }
+                    }
                 }
             }
         }

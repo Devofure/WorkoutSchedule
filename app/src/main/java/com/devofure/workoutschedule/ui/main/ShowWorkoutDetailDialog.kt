@@ -3,20 +3,24 @@ package com.devofure.workoutschedule.ui.main
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.Timer
@@ -28,15 +32,30 @@ import androidx.compose.ui.unit.dp
 import com.devofure.workoutschedule.data.Workout
 
 @Composable
-fun ShowWorkoutDetailDialog(workout: Workout, onEdit: () -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = workout.exercise.name, style = MaterialTheme.typography.h6) },
-        text = {
+fun ShowWorkoutDetailScreen(workout: Workout, onEdit: () -> Unit, onDismiss: () -> Unit) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = workout.exercise.name, style = MaterialTheme.typography.h6) },
+                navigationIcon = {
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.Filled.Close, contentDescription = "Close")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onEdit) {
+                        Icon(Icons.Filled.Edit, contentDescription = "Edit")
+                    }
+                }
+            )
+        },
+        content = { paddingValues ->
             Column(
                 modifier = Modifier
+                    .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp)
+                    .fillMaxSize()
             ) {
                 workout.sets?.let {
                     DetailItem(
@@ -86,17 +105,6 @@ fun ShowWorkoutDetailDialog(workout: Workout, onEdit: () -> Unit, onDismiss: () 
                         label = "Instructions",
                         value = workout.exercise.instructions.joinToString(" ")
                     )
-                }
-            }
-        },
-        confirmButton = {
-            Row {
-                Button(onClick = onEdit) {
-                    Text("Edit")
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = onDismiss) {
-                    Text("Close")
                 }
             }
         }
