@@ -175,7 +175,7 @@ fun WorkoutItem(
                     Text(text = workout.exercise.name, style = MaterialTheme.typography.h6)
                     Text(text = "${workout.sets} sets of ${workout.reps} reps", style = MaterialTheme.typography.body2)
                     if (expanded) {
-                        Text(text = "Instructions: ${workout.exercise.instructions.joinToString(" ")}")
+                        Text(text = workout.exercise.instructions.joinToString(" "))
                     }
                 }
                 IconButton(onClick = { showMenu = true }) {
