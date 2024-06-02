@@ -1,3 +1,4 @@
+// MainActivity.kt
 package com.devofure.workoutschedule
 
 import android.app.NotificationChannel
@@ -27,30 +28,34 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         createNotificationChannel()
         setContent {
-            val workoutViewModel: WorkoutViewModel = viewModel()
-            val settingsViewModel: SettingsViewModel = viewModel()
-            val isFirstLaunch by workoutViewModel.isFirstLaunch.collectAsState()
-            var showSettings by remember { mutableStateOf(false) }
+            MainContent()
+        }
+    }
 
-            val currentTheme by settingsViewModel.theme.collectAsState() // Collect theme state
+    @Composable
+    fun MainContent() {
+        val workoutViewModel: WorkoutViewModel = viewModel()
+        val settingsViewModel: SettingsViewModel = viewModel()
+        val isFirstLaunch by workoutViewModel.isFirstLaunch.collectAsState()
+        val currentTheme by settingsViewModel.theme.collectAsState()
+        var showSettings by remember { mutableStateOf(false) }
 
-            MyWorkoutsTheme(themeType = currentTheme) { // Pass theme state to MyWorkoutsTheme
-                if (isFirstLaunch) {
-                    AskUserToGenerateSampleSchedule(workoutViewModel)
+        MyWorkoutsTheme(themeType = currentTheme) {
+            if (isFirstLaunch) {
+                AskUserToGenerateSampleSchedule(workoutViewModel)
+            } else {
+                if (showSettings) {
+                    SettingsScreen(
+                        settingsViewModel = settingsViewModel,
+                        onBack = { showSettings = false },
+                        currentTheme = currentTheme,
+                        onThemeChange = { settingsViewModel.setTheme(it) }
+                    )
                 } else {
-                    if (showSettings) {
-                        SettingsScreen(
-                            settingsViewModel = settingsViewModel,
-                            onBack = { showSettings = false },
-                            currentTheme = currentTheme, // Pass collected theme
-                            onThemeChange = { settingsViewModel.setTheme(it) }
-                        )
-                    } else {
-                        WorkoutApp(
-                            workoutViewModel = workoutViewModel,
-                            onSettingsClick = { showSettings = true }
-                        )
-                    }
+                    WorkoutApp(
+                        workoutViewModel = workoutViewModel,
+                        onSettingsClick = { showSettings = true }
+                    )
                 }
             }
         }

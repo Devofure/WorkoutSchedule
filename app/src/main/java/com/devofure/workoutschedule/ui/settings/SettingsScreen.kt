@@ -92,7 +92,6 @@ fun SettingsScreen(
                     onDismiss = { showThemeDialog = false },
                     onThemeChange = { newTheme ->
                         onThemeChange(newTheme)
-                        showThemeDialog = false
                     }
                 )
             }
