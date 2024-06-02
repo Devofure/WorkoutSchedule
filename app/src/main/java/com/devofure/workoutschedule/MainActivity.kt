@@ -16,8 +16,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.devofure.workoutschedule.ui.WorkoutApp
-import com.devofure.workoutschedule.ui.WorkoutViewModel
+import com.devofure.workoutschedule.ui.main.WorkoutApp
+import com.devofure.workoutschedule.ui.main.WorkoutViewModel
 import com.devofure.workoutschedule.ui.settings.SettingsScreen
 import com.devofure.workoutschedule.ui.settings.SettingsViewModel
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme

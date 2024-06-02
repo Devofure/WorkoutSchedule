@@ -1,4 +1,4 @@
-package com.devofure.workoutschedule.ui
+package com.devofure.workoutschedule.ui.main
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
