@@ -27,6 +27,7 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
     var selectedWorkout by remember { mutableStateOf<Workout?>(null) }
     var showDialog by remember { mutableStateOf(false) }
     var showAddWorkoutDialog by remember { mutableStateOf(false) }
+    var expandedWorkoutIds by remember { mutableStateOf(setOf<Int>()) }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -68,6 +69,14 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
                 items(workouts) { workout ->
                     WorkoutItem(
                         workout = workout,
+                        expanded = expandedWorkoutIds.contains(workout.id),
+                        onExpandToggle = {
+                            expandedWorkoutIds = if (expandedWorkoutIds.contains(workout.id)) {
+                                expandedWorkoutIds - workout.id
+                            } else {
+                                expandedWorkoutIds + workout.id
+                            }
+                        },
                         onWorkoutChecked = { workoutId, isChecked ->
                             workoutViewModel.onWorkoutChecked(daysOfWeek[selectedTabIndex], workoutId, isChecked)
                         },
@@ -81,7 +90,6 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
                     )
                 }
             }
-
 
             val allChecked = workouts.all { it.isDone }
             Row(
@@ -136,18 +144,19 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
 @Composable
 fun WorkoutItem(
     workout: Workout,
+    expanded: Boolean,
+    onExpandToggle: () -> Unit,
     onWorkoutChecked: (Int, Boolean) -> Unit,
     onWorkoutRemove: () -> Unit,
     onWorkoutDetail: () -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
     var showMenu by remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
             .padding(vertical = 8.dp)
             .fillMaxWidth()
-            .clickable { expanded = !expanded },
+            .clickable { onExpandToggle() },
         elevation = 4.dp
     ) {
         Column {
