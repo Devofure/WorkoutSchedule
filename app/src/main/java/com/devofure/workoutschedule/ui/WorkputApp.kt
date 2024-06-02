@@ -65,7 +65,9 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
 
             WorkoutProgress(workouts)
 
-            LazyColumn {
+            LazyColumn(
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+            ) {
                 items(workouts) { workout ->
                     WorkoutItem(
                         workout = workout,
@@ -172,10 +174,22 @@ fun WorkoutItem(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(modifier = Modifier.weight(1f)) {
-                    Text(text = workout.exercise.name, style = MaterialTheme.typography.h6)
-                    Text(text = "${workout.sets} sets of ${workout.reps} reps", style = MaterialTheme.typography.body2)
+                    Text(
+                        text = workout.exercise.name,
+                        style = MaterialTheme.typography.h6,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                    Text(
+                        text = "${workout.sets} sets of ${workout.reps} reps",
+                        style = MaterialTheme.typography.body2,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
                     if (expanded) {
-                        Text(text = workout.exercise.instructions.joinToString(" "))
+                        Text(
+                            text = workout.exercise.instructions.joinToString(" "),
+                            style = MaterialTheme.typography.body2,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
                     }
                 }
                 IconButton(onClick = { showMenu = true }) {
