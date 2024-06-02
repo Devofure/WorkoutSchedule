@@ -27,91 +27,43 @@ fun EditWorkoutDialog(
         title = { Text("Edit Workout") },
         text = {
             Column(modifier = Modifier.padding(16.dp)) {
-                OutlinedTextField(
+                ValidatedTextField(
                     value = sets,
                     onValueChange = { sets = it },
-                    label = { Text("Sets") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = setsError != null,
+                    label = "Sets",
+                    error = setsError,
+                    keyboardType = KeyboardType.Number
                 )
-                if (setsError != null) {
-                    Text(
-                        text = setsError ?: "",
-                        color = MaterialTheme.colors.error,
-                        style = MaterialTheme.typography.caption,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                }
                 Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
+                ValidatedTextField(
                     value = reps,
                     onValueChange = { reps = it },
-                    label = { Text("Reps") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = repsError != null,
+                    label = "Reps",
+                    error = repsError,
+                    keyboardType = KeyboardType.Number
                 )
-                if (repsError != null) {
-                    Text(
-                        text = repsError ?: "",
-                        color = MaterialTheme.colors.error,
-                        style = MaterialTheme.typography.caption,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                }
                 Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
+                ValidatedTextField(
                     value = duration,
                     onValueChange = { duration = it },
-                    label = { Text("Duration (mins)") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
-                    isError = durationError != null,
+                    label = "Duration (mins)",
+                    error = durationError,
+                    keyboardType = KeyboardType.Number
                 )
-                if (durationError != null) {
-                    Text(
-                        text = durationError ?: "",
-                        color = MaterialTheme.colors.error,
-                        style = MaterialTheme.typography.caption,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                }
             }
         },
         confirmButton = {
             Button(onClick = {
-                var valid = true
+                val validationResult = validateWorkoutInput(sets, reps, duration)
+                setsError = validationResult.setsError
+                repsError = validationResult.repsError
+                durationError = validationResult.durationError
 
-                val setsValue = sets.toIntOrNull()
-                if (sets.isNotBlank() && setsValue == null) {
-                    setsError = "Invalid number"
-                    valid = false
-                } else {
-                    setsError = null
-                }
-
-                val repsValue = reps.toIntOrNull()
-                if (reps.isNotBlank() && repsValue == null) {
-                    repsError = "Invalid number"
-                    valid = false
-                } else {
-                    repsError = null
-                }
-
-                val durationValue = duration.toIntOrNull()
-                if (duration.isNotBlank() && durationValue == null) {
-                    durationError = "Invalid number"
-                    valid = false
-                } else {
-                    durationError = null
-                }
-
-                if (valid) {
+                if (validationResult.isValid) {
                     val updatedWorkout = workout.copy(
-                        sets = setsValue,
-                        reps = repsValue,
-                        duration = durationValue
+                        sets = sets.toIntOrNull(),
+                        reps = reps.toIntOrNull(),
+                        duration = duration.toIntOrNull()
                     )
                     onSave(updatedWorkout)
                     onDismiss()
@@ -127,3 +79,63 @@ fun EditWorkoutDialog(
         }
     )
 }
+
+@Composable
+fun ValidatedTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    error: String?,
+    keyboardType: KeyboardType
+) {
+    Column {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(label) },
+            keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
+            modifier = Modifier.fillMaxWidth(),
+            isError = error != null
+        )
+        if (error != null) {
+            Text(
+                text = error,
+                color = MaterialTheme.colors.error,
+                style = MaterialTheme.typography.caption,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+        }
+    }
+}
+
+fun validateWorkoutInput(sets: String, reps: String, duration: String): ValidationResult {
+    var isValid = true
+    var setsError: String? = null
+    var repsError: String? = null
+    var durationError: String? = null
+
+    if (sets.isNotBlank() && sets.toIntOrNull() == null) {
+        setsError = "Invalid number"
+        isValid = false
+    }
+
+    if (reps.isNotBlank() && reps.toIntOrNull() == null) {
+        repsError = "Invalid number"
+        isValid = false
+    }
+
+    if (duration.isNotBlank() && duration.toIntOrNull() == null) {
+        durationError = "Invalid number"
+        isValid = false
+    }
+
+    return ValidationResult(isValid, setsError, repsError, durationError)
+}
+
+data class ValidationResult(
+    val isValid: Boolean,
+    val setsError: String?,
+    val repsError: String?,
+    val durationError: String?
+)
+
