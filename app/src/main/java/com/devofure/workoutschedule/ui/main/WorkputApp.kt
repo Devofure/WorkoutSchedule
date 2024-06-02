@@ -1,3 +1,4 @@
+// WorkoutApp.kt
 package com.devofure.workoutschedule.ui.main
 
 import androidx.compose.foundation.layout.Arrangement
@@ -38,6 +39,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.devofure.workoutschedule.data.Workout
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 
 @Composable
@@ -55,6 +57,14 @@ fun WorkoutApp(
     var showAddWorkoutScreen by remember { mutableStateOf(false) }
     var showWorkoutDetailScreen by remember { mutableStateOf(false) }
     var expandedWorkoutIds by remember { mutableStateOf(setOf<Int>()) }
+
+    val systemUiController = rememberSystemUiController()
+    val useDarkIcons = MaterialTheme.colors.isLight
+
+    systemUiController.setSystemBarsColor(
+        color = MaterialTheme.colors.primary,
+        darkIcons = useDarkIcons
+    )
 
     when {
         showAddWorkoutScreen -> {

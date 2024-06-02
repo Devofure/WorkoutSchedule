@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -21,7 +22,9 @@ import com.devofure.workoutschedule.ui.main.WorkoutApp
 import com.devofure.workoutschedule.ui.main.WorkoutViewModel
 import com.devofure.workoutschedule.ui.settings.SettingsScreen
 import com.devofure.workoutschedule.ui.settings.SettingsViewModel
+import com.devofure.workoutschedule.ui.settings.ThemeType
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,10 +44,21 @@ class MainActivity : ComponentActivity() {
         var showSettings by remember { mutableStateOf(false) }
 
         MyWorkoutsTheme(themeType = currentTheme) {
+            val systemUiController = rememberSystemUiController()
+            val useDarkIcons = currentTheme == ThemeType.LIGHT
+
             if (isFirstLaunch) {
+                systemUiController.setSystemBarsColor(
+                    color = MaterialTheme.colors.background,
+                    darkIcons = useDarkIcons
+                )
                 AskUserToGenerateSampleSchedule(workoutViewModel)
             } else {
                 if (showSettings) {
+                    systemUiController.setSystemBarsColor(
+                        color = MaterialTheme.colors.background,
+                        darkIcons = useDarkIcons
+                    )
                     SettingsScreen(
                         settingsViewModel = settingsViewModel,
                         onBack = { showSettings = false },
@@ -52,6 +66,10 @@ class MainActivity : ComponentActivity() {
                         onThemeChange = { settingsViewModel.setTheme(it) }
                     )
                 } else {
+                    systemUiController.setSystemBarsColor(
+                        color = MaterialTheme.colors.primary,
+                        darkIcons = useDarkIcons
+                    )
                     WorkoutApp(
                         workoutViewModel = workoutViewModel,
                         onSettingsClick = { showSettings = true }
