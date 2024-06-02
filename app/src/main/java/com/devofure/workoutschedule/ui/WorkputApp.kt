@@ -62,13 +62,12 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
                 }
             }
 
-            val workouts by workoutViewModel.workoutsForDay(daysOfWeek[selectedTabIndex]).collectAsState()
+            val workouts by workoutViewModel.workoutsForDay(daysOfWeek[selectedTabIndex])
+                .collectAsState()
 
             WorkoutProgress(workouts)
 
-            LazyColumn(
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-            ) {
+            LazyColumn {
                 items(workouts) { workout ->
                     WorkoutItem(
                         workout = workout,
@@ -81,7 +80,11 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
                             }
                         },
                         onWorkoutChecked = { workoutId, isChecked ->
-                            workoutViewModel.onWorkoutChecked(daysOfWeek[selectedTabIndex], workoutId, isChecked)
+                            workoutViewModel.onWorkoutChecked(
+                                daysOfWeek[selectedTabIndex],
+                                workoutId,
+                                isChecked
+                            )
                         },
                         onWorkoutRemove = {
                             workoutViewModel.removeWorkout(daysOfWeek[selectedTabIndex], workout)
@@ -105,7 +108,10 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
                 Checkbox(
                     checked = allChecked,
                     onCheckedChange = { isChecked ->
-                        workoutViewModel.onAllWorkoutsChecked(daysOfWeek[selectedTabIndex], isChecked)
+                        workoutViewModel.onAllWorkoutsChecked(
+                            daysOfWeek[selectedTabIndex],
+                            isChecked
+                        )
                         if (isChecked) {
                             coroutineScope.launch {
                                 scaffoldState.snackbarHostState.showSnackbar("All workouts completed!")
@@ -119,7 +125,7 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
         }
 
         if (showDialog && selectedWorkout != null) {
-            showWorkoutDetailDialog(selectedWorkout!!) {
+            ShowWorkoutDetailDialog(selectedWorkout!!) {
                 showDialog = false
             }
         }
@@ -128,14 +134,7 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
             AddWorkoutDialog(
                 allExercises = workoutViewModel.allExercises.collectAsState().value,
                 onAddWorkout = { selectedExercises ->
-                    workoutViewModel.addWorkouts(daysOfWeek[selectedTabIndex], selectedExercises.map { exercise ->
-                        Workout(
-                            id = workoutViewModel.getNextWorkoutId(),
-                            exercise = exercise,
-                            sets = 3,
-                            reps = 10
-                        )
-                    })
+                    workoutViewModel.addWorkouts(daysOfWeek[selectedTabIndex], selectedExercises)
                     showAddWorkoutDialog = false
                 },
                 onDismiss = { showAddWorkoutDialog = false }
@@ -162,14 +161,12 @@ fun WorkoutItem(
             .clickable { onExpandToggle() },
         elevation = 4.dp
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
+        Column {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
             ) {
                 Checkbox(
                     checked = workout.isDone,
@@ -177,15 +174,14 @@ fun WorkoutItem(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(modifier = Modifier.weight(1f)) {
+                    Text(text = workout.exercise.name, style = MaterialTheme.typography.h6)
                     Text(
-                        text = workout.exercise.name,
-                        style = MaterialTheme.typography.h6,
-                        modifier = Modifier.padding(bottom = 4.dp)
-                    )
-                    Text(
-                        text = "${workout.sets} sets of ${workout.reps} reps",
-                        style = MaterialTheme.typography.body2,
-                        modifier = Modifier.padding(bottom = 4.dp)
+                        text = when {
+                            workout.sets != null && workout.reps != null -> "${workout.sets} sets of ${workout.reps} reps"
+                            workout.duration != null -> "Duration: ${workout.duration} mins"
+                            else -> ""
+                        },
+                        style = MaterialTheme.typography.body2
                     )
                 }
                 Box {
@@ -213,19 +209,19 @@ fun WorkoutItem(
                 }
             }
             if (expanded) {
-                Text(
-                    text = workout.exercise.instructions.joinToString(" "),
-                    style = MaterialTheme.typography.body2,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    Text(
+                        text = workout.exercise.instructions.joinToString(" "),
+                        style = MaterialTheme.typography.body2
+                    )
+                }
             }
         }
     }
 }
 
-
 @Composable
-fun showWorkoutDetailDialog(workout: Workout, onDismiss: () -> Unit) {
+fun ShowWorkoutDetailDialog(workout: Workout, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = workout.exercise.name) },
@@ -263,7 +259,10 @@ fun WorkoutProgress(workouts: List<Workout>) {
             .fillMaxWidth()
             .padding(vertical = 16.dp)
     ) {
-        Text(text = "Progress: $completedWorkouts / $totalWorkouts", style = MaterialTheme.typography.body1)
+        Text(
+            text = "Progress: $completedWorkouts / $totalWorkouts",
+            style = MaterialTheme.typography.body1
+        )
         LinearProgressIndicator(
             progress = progress,
             modifier = Modifier
@@ -319,9 +318,7 @@ fun AddWorkoutDialog(
         },
         confirmButton = {
             Button(
-                onClick = {
-                    onAddWorkout(selectedExercises)
-                }
+                onClick = { onAddWorkout(selectedExercises) }
             ) {
                 Text("Add")
             }

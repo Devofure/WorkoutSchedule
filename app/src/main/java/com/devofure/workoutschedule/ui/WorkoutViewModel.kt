@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val exerciseRepository = ExerciseRepository(application.applicationContext)
     private val _workouts = MutableStateFlow<Map<String, List<Workout>>>(emptyMap())
-    val workouts: StateFlow<Map<String, List<Workout>>> = _workouts
+    private val workouts: StateFlow<Map<String, List<Workout>>> = _workouts
     val allExercises: StateFlow<List<Exercise>> = exerciseRepository.exercises
     private val sharedPreferences =
         application.applicationContext.getSharedPreferences("WorkoutApp", Context.MODE_PRIVATE)
@@ -67,7 +67,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         val workoutsByDay = sampleExercises.mapValues { (day, exercises) ->
             exercises.mapNotNull { exerciseName ->
                 exerciseRepository.getExerciseByName(exerciseName)?.let { exercise ->
-                    Workout(id = nextWorkoutId++, exercise = exercise, sets = 3, reps = 10)
+                    Workout(id = nextWorkoutId++, exercise = exercise)
                 }
             }
         }
@@ -90,10 +90,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             _workouts.value = loadedWorkouts
             nextWorkoutId = loadedWorkouts.values.flatten().maxOfOrNull { it.id + 1 } ?: 1
         }
-    }
-
-    fun getNextWorkoutId(): Int {
-        return nextWorkoutId++
     }
 
     fun workoutsForDay(day: String): StateFlow<List<Workout>> {
@@ -123,10 +119,17 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         saveUserSchedule(_workouts.value)
     }
 
-    fun addWorkouts(day: String, newWorkouts: List<Workout>) {
+    fun addWorkouts(day: String, exercises: List<Exercise>) {
         _workouts.value = _workouts.value.toMutableMap().apply {
             val existingWorkouts = this[day]?.toMutableList() ?: mutableListOf()
-            existingWorkouts.addAll(newWorkouts.map { it.copy(id = getNextWorkoutId()) })
+            exercises.forEach { exercise ->
+                existingWorkouts.add(
+                    Workout(
+                        id = getNextWorkoutId(),
+                        exercise = exercise
+                    )
+                )
+            }
             this[day] = existingWorkouts
         }
         saveUserSchedule(_workouts.value)
@@ -141,5 +144,9 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             }
         }
         saveUserSchedule(_workouts.value)
+    }
+
+    private fun getNextWorkoutId(): Int {
+        return nextWorkoutId++
     }
 }
