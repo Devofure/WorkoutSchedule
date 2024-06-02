@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.devofure.workoutschedule.data.Workout
@@ -42,16 +43,24 @@ fun WorkoutItem(
                     onCheckedChange = { isChecked -> onWorkoutChecked(workout.id, isChecked) }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(text = workout.exercise.name, style = MaterialTheme.typography.h6)
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.Start
+                ) {
                     Text(
-                        text = when {
-                            workout.sets != null && workout.reps != null -> "${workout.sets} sets of ${workout.reps} reps"
-                            workout.duration != null -> "Duration: ${workout.duration} mins"
-                            else -> ""
-                        },
-                        style = MaterialTheme.typography.body2
+                        text = workout.exercise.name,
+                        style = MaterialTheme.typography.h6,
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Start
                     )
+                    if (workout.sets != null && workout.reps != null)
+                        Text(
+                            text = "${workout.sets} sets of ${workout.reps} reps",
+                            style = MaterialTheme.typography.body2,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
                 }
                 Box {
                     IconButton(onClick = { showMenu = true }) {
@@ -78,7 +87,7 @@ fun WorkoutItem(
                 }
             }
             if (expanded) {
-                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)) {
                     Text(
                         text = workout.exercise.instructions.joinToString(" "),
                         style = MaterialTheme.typography.body2
