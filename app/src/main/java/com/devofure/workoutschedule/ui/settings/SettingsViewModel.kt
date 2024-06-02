@@ -1,3 +1,4 @@
+// SettingsViewModel.kt
 package com.devofure.workoutschedule.ui.settings
 
 import android.app.AlarmManager
@@ -11,10 +12,26 @@ import com.devofure.workoutschedule.receiver.ReminderReceiver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 enum class ThemeType {
     LIGHT, DARK, SYSTEM
+}
+
+data class ReminderTime(
+    val hour: Int,
+    val minute: Int
+) {
+    fun format(): String {
+        val calendar = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, hour)
+            set(Calendar.MINUTE, minute)
+        }
+        val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
+        return timeFormat.format(calendar.time)
+    }
 }
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
@@ -24,15 +41,19 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     val theme: StateFlow<ThemeType> = _theme
 
     private val _reminderTime =
-        MutableStateFlow(sharedPreferences.getString("reminderTime", "") ?: "")
-    val reminderTime: StateFlow<String> = _reminderTime
+        MutableStateFlow(ReminderTime(0, 0))
+    val reminderTime: StateFlow<ReminderTime> = _reminderTime
 
     init {
+        val savedHour = sharedPreferences.getInt("reminderHour", 0)
+        val savedMinute = sharedPreferences.getInt("reminderMinute", 0)
+        _reminderTime.value = ReminderTime(savedHour, savedMinute)
+
         val savedTheme = sharedPreferences.getString("theme", ThemeType.SYSTEM.name)
         _theme.value = ThemeType.valueOf(savedTheme!!)
     }
 
-    fun setReminder(reminderTime: String) {
+    fun setReminder(reminderTime: ReminderTime) {
         val context = getApplication<Application>().applicationContext
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -56,27 +77,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             PendingIntent.FLAG_IMMUTABLE // Use FLAG_IMMUTABLE
         )
 
-        // Split the time into components
-        val timeParts = reminderTime.split(" ")
-        val time = timeParts[0]
-        val period = timeParts[1]
-
-        val hourMinuteParts = time.split(":")
-        val hour = hourMinuteParts[0].toInt()
-        val minute = hourMinuteParts[1].toInt()
-
-        // Adjust hour for AM/PM
-        val adjustedHour = if (period.equals("PM", ignoreCase = true) && hour != 12) {
-            hour + 12
-        } else if (period.equals("AM", ignoreCase = true) && hour == 12) {
-            0
-        } else {
-            hour
-        }
-
         val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, adjustedHour)
-            set(Calendar.MINUTE, minute)
+            set(Calendar.HOUR_OF_DAY, reminderTime.hour)
+            set(Calendar.MINUTE, reminderTime.minute)
             set(Calendar.SECOND, 0)
         }
 
@@ -86,7 +89,8 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             pendingIntent
         )
 
-        sharedPreferences.edit().putString("reminderTime", reminderTime).apply()
+        sharedPreferences.edit().putInt("reminderHour", reminderTime.hour)
+            .putInt("reminderMinute", reminderTime.minute).apply()
         _reminderTime.update { reminderTime }
     }
 

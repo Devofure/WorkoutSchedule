@@ -1,14 +1,20 @@
 // SettingsScreenTest.kt
 package com.devofure.workoutschedule.ui.settings
 
+import android.Manifest
+import android.content.Context
+import android.os.Build
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.devofure.workoutschedule.MainActivity
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,6 +24,27 @@ class SettingsScreenTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
+
+    @Before
+    fun grantPermissions() {
+        // Grant POST_NOTIFICATIONS permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val instrumentation = InstrumentationRegistry.getInstrumentation()
+            val uiAutomation = instrumentation.uiAutomation
+            uiAutomation.executeShellCommand(
+                "pm grant ${ApplicationProvider.getApplicationContext<Context>().packageName} ${Manifest.permission.POST_NOTIFICATIONS}"
+            ).close()
+        }
+
+        // Grant SCHEDULE_EXACT_ALARM permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val instrumentation = InstrumentationRegistry.getInstrumentation()
+            val uiAutomation = instrumentation.uiAutomation
+            uiAutomation.executeShellCommand(
+                "appops set ${ApplicationProvider.getApplicationContext<Context>().packageName} SCHEDULE_EXACT_ALARM allow"
+            ).close()
+        }
+    }
 
     @Test
     fun testSettingsScreenDisplaysCorrectly() {
@@ -42,6 +69,7 @@ class SettingsScreenTest {
         composeTestRule.onNodeWithText("Delete Schedule").assertExists()
         composeTestRule.onNodeWithText("Theme Settings").assertExists()
     }
+
     @Test
     fun testThemeChange() {
         val settingsViewModel = SettingsViewModel(composeTestRule.activity.application)

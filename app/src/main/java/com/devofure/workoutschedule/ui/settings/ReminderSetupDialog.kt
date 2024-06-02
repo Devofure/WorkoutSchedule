@@ -1,3 +1,4 @@
+// ReminderSetupDialog.kt
 package com.devofure.workoutschedule.ui.settings
 
 import android.Manifest
@@ -20,15 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Locale
 
 @Composable
 fun ReminderSetupDialog(
-    currentReminderTime: String,
+    currentReminderTime: ReminderTime,
     onDismiss: () -> Unit,
-    onSave: (String) -> Unit
+    onSave: (ReminderTime) -> Unit
 ) {
     var reminderTime by remember { mutableStateOf(currentReminderTime) }
     var showTimePicker by remember { mutableStateOf(false) }
@@ -64,9 +62,9 @@ fun ReminderSetupDialog(
                 }) {
                     Text("Pick Time")
                 }
-                if (reminderTime.isNotEmpty()) {
+                if (reminderTime.format().isNotEmpty()) {
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Selected Time: $reminderTime")
+                    Text("Selected Time: ${reminderTime.format()}")
                 }
             }
         },
@@ -83,26 +81,12 @@ fun ReminderSetupDialog(
     )
 
     if (showTimePicker) {
-        val initialTime = if (currentReminderTime.isNotEmpty()) {
-            val timeParts = currentReminderTime.split(" ")
-            val time = timeParts[0].split(":")
-            Pair(time[0].toInt(), time[1].toInt())
-        } else {
-            Pair(
-                Calendar.getInstance().get(Calendar.HOUR_OF_DAY),
-                Calendar.getInstance().get(Calendar.MINUTE)
-            )
-        }
+        val initialTime = Pair(reminderTime.hour, reminderTime.minute)
 
         TimePickerDialog(
             context,
             { _, hourOfDay, minute ->
-                val calendar = Calendar.getInstance().apply {
-                    set(Calendar.HOUR_OF_DAY, hourOfDay)
-                    set(Calendar.MINUTE, minute)
-                }
-                val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
-                reminderTime = timeFormat.format(calendar.time)
+                reminderTime = ReminderTime(hourOfDay, minute)
                 showTimePicker = false
             },
             initialTime.first,
