@@ -161,12 +161,14 @@ fun WorkoutItem(
             .clickable { onExpandToggle() },
         elevation = 4.dp
     ) {
-        Column {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             ) {
                 Checkbox(
                     checked = workout.isDone,
@@ -184,13 +186,6 @@ fun WorkoutItem(
                         style = MaterialTheme.typography.body2,
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
-                    if (expanded) {
-                        Text(
-                            text = workout.exercise.instructions.joinToString(" "),
-                            style = MaterialTheme.typography.body2,
-                            modifier = Modifier.padding(top = 4.dp)
-                        )
-                    }
                 }
                 IconButton(onClick = { showMenu = true }) {
                     Icon(Icons.Filled.MoreVert, contentDescription = "More options")
@@ -213,9 +208,17 @@ fun WorkoutItem(
                     }
                 }
             }
+            if (expanded) {
+                Text(
+                    text = workout.exercise.instructions.joinToString(" "),
+                    style = MaterialTheme.typography.body2,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
         }
     }
 }
+
 
 @Composable
 fun showWorkoutDetailDialog(workout: Workout, onDismiss: () -> Unit) {
