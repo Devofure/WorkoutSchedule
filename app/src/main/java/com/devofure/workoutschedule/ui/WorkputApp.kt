@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.devofure.workoutschedule.data.Workout
@@ -187,24 +188,27 @@ fun WorkoutItem(
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
                 }
-                IconButton(onClick = { showMenu = true }) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = "More options")
-                }
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false }
-                ) {
-                    DropdownMenuItem(onClick = {
-                        showMenu = false
-                        onWorkoutDetail()
-                    }) {
-                        Text("Details")
+                Box {
+                    IconButton(onClick = { showMenu = true }) {
+                        Icon(Icons.Filled.MoreVert, contentDescription = "More options")
                     }
-                    DropdownMenuItem(onClick = {
-                        showMenu = false
-                        onWorkoutRemove()
-                    }) {
-                        Text("Remove")
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false },
+                        offset = DpOffset(x = (-16).dp, y = 0.dp)
+                    ) {
+                        DropdownMenuItem(onClick = {
+                            showMenu = false
+                            onWorkoutDetail()
+                        }) {
+                            Text("Details")
+                        }
+                        DropdownMenuItem(onClick = {
+                            showMenu = false
+                            onWorkoutRemove()
+                        }) {
+                            Text("Remove")
+                        }
                     }
                 }
             }
