@@ -13,43 +13,44 @@ import com.devofure.workoutschedule.data.Exercise
 
 @Composable
 fun AddWorkoutDialog(
-    allExercises: List<Exercise>,
+    workoutViewModel: WorkoutViewModel,
     onAddWorkout: (List<Exercise>) -> Unit,
     onDismiss: () -> Unit
 ) {
     var selectedExercises by remember { mutableStateOf<List<Exercise>>(emptyList()) }
+    var searchQuery by remember { mutableStateOf("") }
+
+    LaunchedEffect(searchQuery) {
+        workoutViewModel.searchExercises(searchQuery)
+    }
+
+    val filteredExercises by workoutViewModel.filteredExercises.collectAsState()
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Add Exercises") },
         text = {
-            LazyColumn {
-                items(allExercises) { exercise ->
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                            .clickable {
+            Column {
+                TextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    label = { Text("Search Exercises") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                LazyColumn {
+                    items(filteredExercises) { exercise ->
+                        ExerciseItem(
+                            exercise = exercise,
+                            isSelected = selectedExercises.contains(exercise),
+                            onSelected = {
                                 selectedExercises = if (selectedExercises.contains(exercise)) {
                                     selectedExercises - exercise
                                 } else {
                                     selectedExercises + exercise
                                 }
                             }
-                    ) {
-                        Checkbox(
-                            checked = selectedExercises.contains(exercise),
-                            onCheckedChange = {
-                                selectedExercises = if (it) {
-                                    selectedExercises + exercise
-                                } else {
-                                    selectedExercises - exercise
-                                }
-                            }
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(exercise.name)
                     }
                 }
             }
@@ -67,4 +68,31 @@ fun AddWorkoutDialog(
             }
         }
     )
+}
+
+@Composable
+fun ExerciseItem(
+    exercise: Exercise,
+    isSelected: Boolean,
+    onSelected: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable { onSelected() }
+    ) {
+        Checkbox(
+            checked = isSelected,
+            onCheckedChange = { onSelected() }
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Column {
+            Text(text = exercise.name, style = MaterialTheme.typography.subtitle1)
+            Text(text = "Equipment: ${exercise.equipment}", style = MaterialTheme.typography.body2)
+            Text(text = "Primary Muscles: ${exercise.primaryMuscles.joinToString(", ")}", style = MaterialTheme.typography.body2)
+            Text(text = "Secondary Muscles: ${exercise.secondaryMuscles.joinToString(", ")}", style = MaterialTheme.typography.body2)
+        }
+    }
 }

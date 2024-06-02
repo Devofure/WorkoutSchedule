@@ -45,7 +45,7 @@ fun ShowWorkoutDetailDialog(workout: Workout, onEdit: () -> Unit, onDismiss: () 
                         value = "$it mins"
                     )
                 }
-                if (workout.exercise.equipment.isNotEmpty()) {
+                if (workout.exercise.equipment?.isNotEmpty() == true) {
                     DetailItem(
                         icon = Icons.Default.Build,
                         label = "Equipment",

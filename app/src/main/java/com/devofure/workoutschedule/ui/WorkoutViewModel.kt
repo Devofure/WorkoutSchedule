@@ -26,6 +26,9 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
     private var nextWorkoutId = 1
 
+    private val _filteredExercises = MutableStateFlow<List<Exercise>>(emptyList())
+    val filteredExercises: StateFlow<List<Exercise>> = _filteredExercises
+
     init {
         viewModelScope.launch {
             val isFirstLaunch = sharedPreferences.getBoolean("isFirstLaunch", true)
@@ -67,7 +70,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         val workoutsByDay = sampleExercises.mapValues { (day, exercises) ->
             exercises.mapNotNull { exerciseName ->
                 exerciseRepository.getExerciseByName(exerciseName)?.let { exercise ->
-                    Workout(id = nextWorkoutId++, exercise = exercise)
+                    Workout(id = getNextWorkoutId(), exercise = exercise)
                 }
             }
         }
@@ -160,5 +163,11 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
     private fun getNextWorkoutId(): Int {
         return nextWorkoutId++
+    }
+
+    fun searchExercises(query: String) {
+        viewModelScope.launch {
+            _filteredExercises.value = exerciseRepository.searchExercises(query)
+        }
     }
 }

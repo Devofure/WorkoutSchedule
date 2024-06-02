@@ -80,9 +80,9 @@ fun WorkoutItem(
                         }
                         DropdownMenuItem(onClick = {
                             showMenu = false
-                            onWorkoutEdit() // Trigger edit action
+                            onWorkoutEdit()
                         }) {
-                            Text("Edit Workout")
+                            Text("Edit")
                         }
                         DropdownMenuItem(onClick = {
                             showMenu = false

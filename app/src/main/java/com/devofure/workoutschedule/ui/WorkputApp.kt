@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.devofure.workoutschedule.data.Workout
+import com.devofure.workoutschedule.data.Exercise
 import kotlinx.coroutines.launch
 
 @Composable
@@ -59,8 +60,7 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
                 }
             }
 
-            val workouts by workoutViewModel.workoutsForDay(daysOfWeek[selectedTabIndex])
-                .collectAsState()
+            val workouts by workoutViewModel.workoutsForDay(daysOfWeek[selectedTabIndex]).collectAsState()
 
             WorkoutProgress(workouts)
 
@@ -149,7 +149,7 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
 
         if (showAddWorkoutDialog) {
             AddWorkoutDialog(
-                allExercises = workoutViewModel.allExercises.collectAsState().value,
+                workoutViewModel = workoutViewModel,
                 onAddWorkout = { selectedExercises ->
                     workoutViewModel.addWorkouts(daysOfWeek[selectedTabIndex], selectedExercises)
                     showAddWorkoutDialog = false

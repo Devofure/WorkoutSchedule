@@ -15,7 +15,7 @@ data class Exercise(
     val force: String,
     val level: String,
     val mechanic: String?,
-    val equipment: String,
+    val equipment: String?,
     val primaryMuscles: List<String>,
     val secondaryMuscles: List<String>,
     val instructions: List<String>,
@@ -54,6 +54,16 @@ class ExerciseRepository(private val context: Context) {
     fun getExerciseByName(name: String): Exercise? {
         return exercises.value.find { it.name == name }
     }
+
+    fun searchExercises(query: String): List<Exercise> {
+        return exercises.value.filter {
+            it.name.contains(query, ignoreCase = true) ||
+                    it.equipment?.contains(query, ignoreCase = true) == true ||
+                    it.primaryMuscles.any { muscle -> muscle.contains(query, ignoreCase = true) } ||
+                    it.secondaryMuscles.any { muscle -> muscle.contains(query, ignoreCase = true) }
+        }
+    }
+
 
     private data class ExerciseWrapper(
         val exercises: List<Exercise>
