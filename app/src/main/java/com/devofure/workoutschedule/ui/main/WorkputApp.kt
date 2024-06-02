@@ -1,3 +1,4 @@
+// WorkoutApp.kt
 package com.devofure.workoutschedule.ui.main
 
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.devofure.workoutschedule.data.Workout
@@ -151,7 +153,8 @@ fun WorkoutApp(
                                 scaffoldState.snackbarHostState.showSnackbar("All workouts completed!")
                             }
                         }
-                    }
+                    },
+                    modifier = Modifier.testTag("markAllAsDoneCheckbox")
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = "Mark all as done")

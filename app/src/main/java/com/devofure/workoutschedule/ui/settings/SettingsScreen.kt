@@ -1,3 +1,4 @@
+// SettingsScreen.kt
 package com.devofure.workoutschedule.ui.settings
 
 import androidx.compose.foundation.clickable
