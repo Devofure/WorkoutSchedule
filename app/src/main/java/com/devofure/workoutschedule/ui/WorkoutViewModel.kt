@@ -4,23 +4,22 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.devofure.workoutschedule.data.Workout
 import com.devofure.workoutschedule.data.Exercise
 import com.devofure.workoutschedule.data.ExerciseRepository
+import com.devofure.workoutschedule.data.Workout
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-
-enum class ThemeType {
-    LIGHT, DARK, SYSTEM
-}
 
 class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val exerciseRepository = ExerciseRepository(application.applicationContext)
     private val _workouts = MutableStateFlow<Map<String, List<Workout>>>(emptyMap())
     private val workouts: StateFlow<Map<String, List<Workout>>> = _workouts
-    val allExercises: StateFlow<List<Exercise>> = exerciseRepository.exercises
     private val sharedPreferences =
         application.applicationContext.getSharedPreferences("WorkoutApp", Context.MODE_PRIVATE)
     private val gson = Gson()
@@ -33,9 +32,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     private val _filteredExercises = MutableStateFlow<List<Exercise>>(emptyList())
     val filteredExercises: StateFlow<List<Exercise>> = _filteredExercises
 
-    private val _theme = MutableStateFlow(ThemeType.SYSTEM)
-    val theme: StateFlow<ThemeType> = _theme
-
     init {
         viewModelScope.launch {
             val isFirstLaunch = sharedPreferences.getBoolean("isFirstLaunch", true)
@@ -43,8 +39,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             if (!isFirstLaunch) {
                 loadUserSchedule()
             }
-            val savedTheme = sharedPreferences.getString("theme", ThemeType.SYSTEM.name)
-            _theme.value = ThemeType.valueOf(savedTheme!!)
         }
     }
 
@@ -178,20 +172,5 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             _filteredExercises.value = exerciseRepository.searchExercises(query)
         }
-    }
-
-    fun setReminder(reminderTime: String) {
-        // Save reminder time and set up notifications
-        // Implement your reminder setup logic here
-    }
-
-    fun deleteAllWorkouts() {
-        _workouts.value = emptyMap()
-        saveUserSchedule(emptyMap())
-    }
-
-    fun setTheme(themeType: ThemeType) {
-        _theme.value = themeType
-        sharedPreferences.edit().putString("theme", themeType.name).apply()
     }
 }

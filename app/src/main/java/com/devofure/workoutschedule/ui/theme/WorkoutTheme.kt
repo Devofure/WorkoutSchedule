@@ -1,9 +1,12 @@
 package com.devofure.workoutschedule.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.darkColors
+import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.devofure.workoutschedule.ui.settings.ThemeType
 
 private val DarkColorPalette = darkColors(
     primary = Color(0xFFBB86FC),
@@ -18,11 +21,11 @@ private val LightColorPalette = lightColors(
 )
 
 @Composable
-fun MyWorkoutsTheme(content: @Composable () -> Unit) {
-    val colors = if (isSystemInDarkTheme()) {
-        DarkColorPalette
-    } else {
-        LightColorPalette
+fun MyWorkoutsTheme(themeType: ThemeType = ThemeType.SYSTEM, content: @Composable () -> Unit) {
+    val colors = when (themeType) {
+        ThemeType.LIGHT -> LightColorPalette
+        ThemeType.DARK -> DarkColorPalette
+        ThemeType.SYSTEM -> if (isSystemInDarkTheme()) DarkColorPalette else LightColorPalette
     }
 
     MaterialTheme(
