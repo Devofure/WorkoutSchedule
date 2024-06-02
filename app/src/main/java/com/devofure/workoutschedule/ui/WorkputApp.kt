@@ -6,13 +6,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.devofure.workoutschedule.data.Workout
-import com.devofure.workoutschedule.data.Exercise
+import com.devofure.workoutschedule.ui.settings.SettingsScreen
 import kotlinx.coroutines.launch
 
 @Composable
@@ -21,6 +22,7 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val scaffoldState = rememberScaffoldState()
     val coroutineScope = rememberCoroutineScope()
+    var showSettings by remember { mutableStateOf(false) }
 
     var selectedWorkout by remember { mutableStateOf<Workout?>(null) }
     var showDialog by remember { mutableStateOf(false) }
@@ -33,6 +35,11 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
         topBar = {
             TopAppBar(
                 title = { Text("Workout Schedule") },
+                actions = {
+                    IconButton(onClick = { showSettings = true }) {
+                        Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                    }
+                },
                 backgroundColor = MaterialTheme.colors.primary
             )
         },
@@ -155,6 +162,15 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
                     showAddWorkoutDialog = false
                 },
                 onDismiss = { showAddWorkoutDialog = false }
+            )
+        }
+
+        if (showSettings) {
+            SettingsScreen(
+                workoutViewModel = workoutViewModel,
+                onBack = { showSettings = false },
+                currentTheme = workoutViewModel.theme.collectAsState().value,
+                onThemeChange = { workoutViewModel.setTheme(it) }
             )
         }
     }
