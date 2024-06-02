@@ -68,8 +68,8 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
                 items(workouts) { workout ->
                     WorkoutItem(
                         workout = workout,
-                        onWorkoutChecked = { isChecked ->
-                            workoutViewModel.onWorkoutChecked(daysOfWeek[selectedTabIndex], workout, isChecked)
+                        onWorkoutChecked = { workoutId, isChecked ->
+                            workoutViewModel.onWorkoutChecked(daysOfWeek[selectedTabIndex], workoutId, isChecked)
                         },
                         onWorkoutRemove = {
                             workoutViewModel.removeWorkout(daysOfWeek[selectedTabIndex], workout)
@@ -81,6 +81,7 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
                     )
                 }
             }
+
 
             val allChecked = workouts.all { it.isDone }
             Row(
@@ -135,7 +136,7 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
 @Composable
 fun WorkoutItem(
     workout: Workout,
-    onWorkoutChecked: (Boolean) -> Unit,
+    onWorkoutChecked: (Int, Boolean) -> Unit,
     onWorkoutRemove: () -> Unit,
     onWorkoutDetail: () -> Unit
 ) {
@@ -158,7 +159,7 @@ fun WorkoutItem(
             ) {
                 Checkbox(
                     checked = workout.isDone,
-                    onCheckedChange = onWorkoutChecked
+                    onCheckedChange = { isChecked -> onWorkoutChecked(workout.id, isChecked) }
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(modifier = Modifier.weight(1f)) {

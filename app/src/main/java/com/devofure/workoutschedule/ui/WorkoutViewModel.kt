@@ -13,16 +13,18 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
-    private val context: Context = application.applicationContext
-    private val exerciseRepository = ExerciseRepository(context)
+    private val exerciseRepository = ExerciseRepository(application.applicationContext)
     private val _workouts = MutableStateFlow<Map<String, List<Workout>>>(emptyMap())
-    val workouts: StateFlow<Map<String, List<Workout>>> = _workouts
+    private val workouts: StateFlow<Map<String, List<Workout>>> = _workouts
     val allExercises: StateFlow<List<Exercise>> = exerciseRepository.exercises
-    private val sharedPreferences = context.getSharedPreferences("WorkoutApp", Context.MODE_PRIVATE)
+    private val sharedPreferences =
+        application.applicationContext.getSharedPreferences("WorkoutApp", Context.MODE_PRIVATE)
     private val gson = Gson()
 
     private val _isFirstLaunch = MutableStateFlow(true)
     val isFirstLaunch: StateFlow<Boolean> = _isFirstLaunch
+
+    private var nextWorkoutId = 1
 
     init {
         viewModelScope.launch {
@@ -44,6 +46,13 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun declineSampleSchedule() {
+        viewModelScope.launch {
+            sharedPreferences.edit().putBoolean("isFirstLaunch", false).apply()
+            _isFirstLaunch.value = false
+        }
+    }
+
     private fun loadWorkoutsFromExercises(): Map<String, List<Workout>> {
         val sampleExercises = mapOf(
             "Mon" to listOf("3/4 Sit-Up", "90/90 Hamstring"),
@@ -58,7 +67,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         val workoutsByDay = sampleExercises.mapValues { (day, exercises) ->
             exercises.mapNotNull { exerciseName ->
                 exerciseRepository.getExerciseByName(exerciseName)?.let { exercise ->
-                    Workout(id = exercise.id, exercise = exercise, sets = 3, reps = 10)
+                    Workout(id = nextWorkoutId++, exercise = exercise, sets = 3, reps = 10)
                 }
             }
         }
@@ -76,8 +85,10 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         val workoutsJson = sharedPreferences.getString("userSchedule", null)
         if (!workoutsJson.isNullOrEmpty()) {
             val workoutType = object : TypeToken<Map<String, List<Workout>>>() {}.type
-            val loadedWorkouts: Map<String, List<Workout>> = gson.fromJson(workoutsJson, workoutType)
+            val loadedWorkouts: Map<String, List<Workout>> =
+                gson.fromJson(workoutsJson, workoutType)
             _workouts.value = loadedWorkouts
+            nextWorkoutId = loadedWorkouts.values.flatten().maxOfOrNull { it.id + 1 } ?: 1
         }
     }
 
@@ -87,13 +98,14 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     }
 
-    fun onWorkoutChecked(day: String, workout: Workout, isChecked: Boolean) {
-        _workouts.value = _workouts.value.mapValues { entry ->
-            if (entry.key == day) {
-                entry.value.map {
-                    if (it.id == workout.id) it.copy(isDone = isChecked) else it
-                }
-            } else entry.value
+    fun onWorkoutChecked(day: String, workoutId: Int, isChecked: Boolean) {
+        _workouts.value = _workouts.value.toMutableMap().apply {
+            val updatedWorkouts = this[day]?.map {
+                if (it.id == workoutId) it.copy(isDone = isChecked) else it
+            }
+            if (updatedWorkouts != null) {
+                this[day] = updatedWorkouts
+            }
         }
         saveUserSchedule(_workouts.value)
     }
@@ -110,7 +122,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     fun addWorkouts(day: String, newWorkouts: List<Workout>) {
         _workouts.value = _workouts.value.toMutableMap().apply {
             val existingWorkouts = this[day]?.toMutableList() ?: mutableListOf()
-            existingWorkouts.addAll(newWorkouts)
+            existingWorkouts.addAll(newWorkouts.map { it.copy(id = nextWorkoutId++) })
             this[day] = existingWorkouts
         }
         saveUserSchedule(_workouts.value)
