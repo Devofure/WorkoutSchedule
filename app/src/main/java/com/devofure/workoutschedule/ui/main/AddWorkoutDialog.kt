@@ -1,21 +1,28 @@
+// AddWorkoutScreen.kt
 package com.devofure.workoutschedule.ui.main
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Checkbox
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
+import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,10 +36,10 @@ import androidx.compose.ui.unit.dp
 import com.devofure.workoutschedule.data.Exercise
 
 @Composable
-fun AddWorkoutDialog(
+fun AddWorkoutScreen(
     workoutViewModel: WorkoutViewModel,
     onAddWorkout: (List<Exercise>) -> Unit,
-    onDismiss: () -> Unit
+    onBack: () -> Unit
 ) {
     var selectedExercises by remember { mutableStateOf<List<Exercise>>(emptyList()) }
     var searchQuery by remember { mutableStateOf("") }
@@ -43,48 +50,58 @@ fun AddWorkoutDialog(
 
     val filteredExercises by workoutViewModel.filteredExercises.collectAsState()
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Add Exercises") },
-        text = {
-            Column {
-                TextField(
-                    value = searchQuery,
-                    onValueChange = { searchQuery = it },
-                    label = { Text("Search Exercises") },
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                LazyColumn {
-                    items(filteredExercises) { exercise ->
-                        ExerciseItem(
-                            exercise = exercise,
-                            isSelected = selectedExercises.contains(exercise),
-                            onSelected = {
-                                selectedExercises = if (selectedExercises.contains(exercise)) {
-                                    selectedExercises - exercise
-                                } else {
-                                    selectedExercises + exercise
-                                }
-                            }
-                        )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Add Exercises") },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Filled.Close, contentDescription = "Close")
                     }
                 }
-            }
+            )
         },
-        confirmButton = {
+        bottomBar = {
             Button(
-                onClick = { onAddWorkout(selectedExercises) }
+                onClick = { onAddWorkout(selectedExercises) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             ) {
                 Text("Add")
             }
-        },
-        dismissButton = {
-            Button(onClick = onDismiss) {
-                Text("Cancel")
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .padding(16.dp)
+                .fillMaxSize()
+        ) {
+            TextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                label = { Text("Search Exercises") },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            LazyColumn {
+                items(filteredExercises) { exercise ->
+                    ExerciseItem(
+                        exercise = exercise,
+                        isSelected = selectedExercises.contains(exercise),
+                        onSelected = {
+                            selectedExercises = if (selectedExercises.contains(exercise)) {
+                                selectedExercises - exercise
+                            } else {
+                                selectedExercises + exercise
+                            }
+                        }
+                    )
+                }
             }
         }
-    )
+    }
 }
 
 @Composable

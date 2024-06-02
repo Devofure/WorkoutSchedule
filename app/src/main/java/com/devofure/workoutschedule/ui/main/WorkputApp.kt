@@ -54,144 +54,147 @@ fun WorkoutApp(
     var selectedWorkout by remember { mutableStateOf<Workout?>(null) }
     var showDialog by remember { mutableStateOf(false) }
     var showEditWorkoutDialog by remember { mutableStateOf(false) }
-    var showAddWorkoutDialog by remember { mutableStateOf(false) }
+    var showAddWorkoutScreen by remember { mutableStateOf(false) }
     var expandedWorkoutIds by remember { mutableStateOf(setOf<Int>()) }
 
-    Scaffold(
-        scaffoldState = scaffoldState,
-        topBar = {
-            TopAppBar(
-                title = { Text("Workout Schedule") },
-                backgroundColor = MaterialTheme.colors.primary,
-                actions = {
-                    IconButton(onClick = onSettingsClick) {
-                        Icon(Icons.Filled.Settings, contentDescription = "Settings")
+    if (showAddWorkoutScreen) {
+        AddWorkoutScreen(
+            workoutViewModel = workoutViewModel,
+            onAddWorkout = { selectedExercises ->
+                workoutViewModel.addWorkouts(daysOfWeek[selectedTabIndex], selectedExercises)
+                showAddWorkoutScreen = false
+            },
+            onBack = { showAddWorkoutScreen = false }
+        )
+    } else {
+        Scaffold(
+            scaffoldState = scaffoldState,
+            topBar = {
+                TopAppBar(
+                    title = { Text("Workout Schedule") },
+                    backgroundColor = MaterialTheme.colors.primary,
+                    actions = {
+                        IconButton(onClick = onSettingsClick) {
+                            Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                        }
+                    }
+                )
+            },
+            floatingActionButton = {
+                FloatingActionButton(onClick = { showAddWorkoutScreen = true }) {
+                    Icon(Icons.Filled.Add, contentDescription = "Add Workout")
+                }
+            }
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+            ) {
+                TabRow(
+                    selectedTabIndex = selectedTabIndex,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                ) {
+                    daysOfWeek.forEachIndexed { index, day ->
+                        Tab(
+                            text = { Text(day, modifier = Modifier.padding(8.dp)) },
+                            selected = selectedTabIndex == index,
+                            onClick = { selectedTabIndex = index }
+                        )
                     }
                 }
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { showAddWorkoutDialog = true }) {
-                Icon(Icons.Filled.Add, contentDescription = "Add Workout")
-            }
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-        ) {
-            TabRow(
-                selectedTabIndex = selectedTabIndex,
-                modifier = Modifier.padding(bottom = 16.dp)
-            ) {
-                daysOfWeek.forEachIndexed { index, day ->
-                    Tab(
-                        text = { Text(day, modifier = Modifier.padding(8.dp)) },
-                        selected = selectedTabIndex == index,
-                        onClick = { selectedTabIndex = index }
-                    )
+
+                val workouts by workoutViewModel.workoutsForDay(daysOfWeek[selectedTabIndex])
+                    .collectAsState()
+
+                WorkoutProgress(workouts)
+
+                LazyColumn {
+                    items(workouts) { workout ->
+                        WorkoutItem(
+                            workout = workout,
+                            expanded = expandedWorkoutIds.contains(workout.id),
+                            onExpandToggle = {
+                                expandedWorkoutIds = if (expandedWorkoutIds.contains(workout.id)) {
+                                    expandedWorkoutIds - workout.id
+                                } else {
+                                    expandedWorkoutIds + workout.id
+                                }
+                            },
+                            onWorkoutChecked = { workoutId, isChecked ->
+                                workoutViewModel.onWorkoutChecked(
+                                    daysOfWeek[selectedTabIndex],
+                                    workoutId,
+                                    isChecked
+                                )
+                            },
+                            onWorkoutRemove = {
+                                workoutViewModel.removeWorkout(
+                                    daysOfWeek[selectedTabIndex],
+                                    workout
+                                )
+                            },
+                            onWorkoutDetail = {
+                                selectedWorkout = workout
+                                showDialog = true
+                            },
+                            onWorkoutEdit = {
+                                selectedWorkout = workout
+                                showEditWorkoutDialog = true
+                            } // Pass the edit function
+                        )
+                    }
                 }
-            }
 
-            val workouts by workoutViewModel.workoutsForDay(daysOfWeek[selectedTabIndex])
-                .collectAsState()
-
-            WorkoutProgress(workouts)
-
-            LazyColumn {
-                items(workouts) { workout ->
-                    WorkoutItem(
-                        workout = workout,
-                        expanded = expandedWorkoutIds.contains(workout.id),
-                        onExpandToggle = {
-                            expandedWorkoutIds = if (expandedWorkoutIds.contains(workout.id)) {
-                                expandedWorkoutIds - workout.id
-                            } else {
-                                expandedWorkoutIds + workout.id
-                            }
-                        },
-                        onWorkoutChecked = { workoutId, isChecked ->
-                            workoutViewModel.onWorkoutChecked(
+                val allChecked = workouts.all { it.isDone }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .padding(vertical = 16.dp)
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Checkbox(
+                        checked = allChecked,
+                        onCheckedChange = { isChecked ->
+                            workoutViewModel.onAllWorkoutsChecked(
                                 daysOfWeek[selectedTabIndex],
-                                workoutId,
                                 isChecked
                             )
+                            if (isChecked) {
+                                coroutineScope.launch {
+                                    scaffoldState.snackbarHostState.showSnackbar("All workouts completed!")
+                                }
+                            }
                         },
-                        onWorkoutRemove = {
-                            workoutViewModel.removeWorkout(daysOfWeek[selectedTabIndex], workout)
-                        },
-                        onWorkoutDetail = {
-                            selectedWorkout = workout
-                            showDialog = true
-                        },
-                        onWorkoutEdit = {
-                            selectedWorkout = workout
-                            showEditWorkoutDialog = true
-                        } // Pass the edit function
+                        modifier = Modifier.testTag("markAllAsDoneCheckbox")
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(text = "Mark all as done")
                 }
             }
 
-            val allChecked = workouts.all { it.isDone }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(vertical = 16.dp)
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Checkbox(
-                    checked = allChecked,
-                    onCheckedChange = { isChecked ->
-                        workoutViewModel.onAllWorkoutsChecked(
-                            daysOfWeek[selectedTabIndex],
-                            isChecked
-                        )
-                        if (isChecked) {
-                            coroutineScope.launch {
-                                scaffoldState.snackbarHostState.showSnackbar("All workouts completed!")
-                            }
-                        }
+            if (showDialog && selectedWorkout != null) {
+                ShowWorkoutDetailDialog(
+                    workout = selectedWorkout!!,
+                    onEdit = {
+                        showDialog = false
+                        showEditWorkoutDialog = true
                     },
-                    modifier = Modifier.testTag("markAllAsDoneCheckbox")
+                    onDismiss = { showDialog = false }
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Mark all as done")
             }
-        }
 
-        if (showDialog && selectedWorkout != null) {
-            ShowWorkoutDetailDialog(
-                workout = selectedWorkout!!,
-                onEdit = {
-                    showDialog = false
-                    showEditWorkoutDialog = true
-                },
-                onDismiss = { showDialog = false }
-            )
-        }
-
-        if (showEditWorkoutDialog && selectedWorkout != null) {
-            EditWorkoutDialog(
-                workout = selectedWorkout!!,
-                onSave = { updatedWorkout ->
-                    workoutViewModel.updateWorkout(daysOfWeek[selectedTabIndex], updatedWorkout)
-                    showEditWorkoutDialog = false
-                },
-                onDismiss = { showEditWorkoutDialog = false }
-            )
-        }
-
-        if (showAddWorkoutDialog) {
-            AddWorkoutDialog(
-                workoutViewModel = workoutViewModel,
-                onAddWorkout = { selectedExercises ->
-                    workoutViewModel.addWorkouts(daysOfWeek[selectedTabIndex], selectedExercises)
-                    showAddWorkoutDialog = false
-                },
-                onDismiss = { showAddWorkoutDialog = false }
-            )
+            if (showEditWorkoutDialog && selectedWorkout != null) {
+                EditWorkoutDialog(
+                    workout = selectedWorkout!!,
+                    onSave = { updatedWorkout ->
+                        workoutViewModel.updateWorkout(daysOfWeek[selectedTabIndex], updatedWorkout)
+                        showEditWorkoutDialog = false
+                    },
+                    onDismiss = { showEditWorkoutDialog = false }
+                )
+            }
         }
     }
 }
