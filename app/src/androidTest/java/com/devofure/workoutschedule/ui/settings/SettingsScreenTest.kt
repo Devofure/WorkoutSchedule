@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.devofure.workoutschedule.MainActivity
+import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,13 +21,27 @@ class SettingsScreenTest {
 
     @Test
     fun testSettingsScreenDisplaysCorrectly() {
+        val settingsViewModel = SettingsViewModel(composeTestRule.activity.application)
+
+        composeTestRule.activity.runOnUiThread {
+            composeTestRule.activity.setContent {
+                MyWorkoutsTheme {
+                    SettingsScreen(
+                        settingsViewModel = settingsViewModel,
+                        onBack = {},
+                        currentTheme = settingsViewModel.theme.collectAsState().value,
+                        onThemeChange = { settingsViewModel.setTheme(it) }
+                    )
+                }
+            }
+        }
+
         // Check if the Settings screen is displayed
         composeTestRule.onNodeWithText("Settings").assertExists()
         composeTestRule.onNodeWithText("Workout Reminders").assertExists()
         composeTestRule.onNodeWithText("Delete Schedule").assertExists()
         composeTestRule.onNodeWithText("Theme Settings").assertExists()
     }
-
     @Test
     fun testThemeChange() {
         val settingsViewModel = SettingsViewModel(composeTestRule.activity.application)
@@ -82,7 +97,7 @@ class SettingsScreenTest {
                 SettingsScreen(
                     settingsViewModel = settingsViewModel,
                     onBack = {},
-                    currentTheme = ThemeType.SYSTEM,
+                    currentTheme = settingsViewModel.theme.collectAsState().value,
                     onThemeChange = { settingsViewModel.setTheme(it) }
                 )
             }
@@ -91,11 +106,19 @@ class SettingsScreenTest {
         // Open the Reminder Setup Dialog
         composeTestRule.onNodeWithText("Workout Reminders").performClick()
 
+        // Ensure the dialog is displayed
+        composeTestRule.onNodeWithText("Pick Time").assertExists()
+
         // Pick a time (this requires UI interaction, so we'll just assert the dialog appears)
         composeTestRule.onNodeWithText("Pick Time").performClick()
 
+        // Ensure the time picker dialog is displayed (you might need to adjust this part depending on your implementation)
+        composeTestRule.waitForIdle()
+
         // Close the dialog
         composeTestRule.onNodeWithText("Save").performClick()
+
+        // Verify the main screen is displayed again
         composeTestRule.onNodeWithText("Workout Reminders").assertExists()
     }
 
@@ -108,7 +131,7 @@ class SettingsScreenTest {
                 SettingsScreen(
                     settingsViewModel = settingsViewModel,
                     onBack = {},
-                    currentTheme = ThemeType.SYSTEM,
+                    currentTheme = settingsViewModel.theme.collectAsState().value,
                     onThemeChange = { settingsViewModel.setTheme(it) }
                 )
             }
