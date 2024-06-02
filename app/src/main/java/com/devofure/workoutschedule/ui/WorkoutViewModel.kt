@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val exerciseRepository = ExerciseRepository(application.applicationContext)
     private val _workouts = MutableStateFlow<Map<String, List<Workout>>>(emptyMap())
-    private val workouts: StateFlow<Map<String, List<Workout>>> = _workouts
+    val workouts: StateFlow<Map<String, List<Workout>>> = _workouts
     val allExercises: StateFlow<List<Exercise>> = exerciseRepository.exercises
     private val sharedPreferences =
         application.applicationContext.getSharedPreferences("WorkoutApp", Context.MODE_PRIVATE)
@@ -92,6 +92,10 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun getNextWorkoutId(): Int {
+        return nextWorkoutId++
+    }
+
     fun workoutsForDay(day: String): StateFlow<List<Workout>> {
         return workouts
             .map { it[day] ?: emptyList() }
@@ -122,7 +126,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     fun addWorkouts(day: String, newWorkouts: List<Workout>) {
         _workouts.value = _workouts.value.toMutableMap().apply {
             val existingWorkouts = this[day]?.toMutableList() ?: mutableListOf()
-            existingWorkouts.addAll(newWorkouts.map { it.copy(id = nextWorkoutId++) })
+            existingWorkouts.addAll(newWorkouts.map { it.copy(id = getNextWorkoutId()) })
             this[day] = existingWorkouts
         }
         saveUserSchedule(_workouts.value)

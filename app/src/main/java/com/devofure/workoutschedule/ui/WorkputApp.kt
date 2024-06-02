@@ -127,7 +127,7 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
                 onAddWorkout = { selectedExercises ->
                     workoutViewModel.addWorkouts(daysOfWeek[selectedTabIndex], selectedExercises.map { exercise ->
                         Workout(
-                            id = exercise.id,
+                            id = workoutViewModel.getNextWorkoutId(),
                             exercise = exercise,
                             sets = 3,
                             reps = 10
