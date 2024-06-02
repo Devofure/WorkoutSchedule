@@ -1,21 +1,11 @@
 package com.devofure.workoutschedule.ui
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.devofure.workoutschedule.data.Workout
 
@@ -41,8 +31,9 @@ fun EditWorkoutDialog(
                     value = sets,
                     onValueChange = { sets = it },
                     label = { Text("Sets") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
-                    isError = setsError != null
+                    isError = setsError != null,
                 )
                 if (setsError != null) {
                     Text(
@@ -57,8 +48,9 @@ fun EditWorkoutDialog(
                     value = reps,
                     onValueChange = { reps = it },
                     label = { Text("Reps") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
-                    isError = repsError != null
+                    isError = repsError != null,
                 )
                 if (repsError != null) {
                     Text(
@@ -73,8 +65,9 @@ fun EditWorkoutDialog(
                     value = duration,
                     onValueChange = { duration = it },
                     label = { Text("Duration (mins)") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier.fillMaxWidth(),
-                    isError = durationError != null
+                    isError = durationError != null,
                 )
                 if (durationError != null) {
                     Text(
