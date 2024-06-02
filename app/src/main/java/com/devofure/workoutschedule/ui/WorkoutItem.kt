@@ -20,7 +20,8 @@ fun WorkoutItem(
     onExpandToggle: () -> Unit,
     onWorkoutChecked: (Int, Boolean) -> Unit,
     onWorkoutRemove: () -> Unit,
-    onWorkoutDetail: () -> Unit
+    onWorkoutDetail: () -> Unit,
+    onWorkoutEdit: () -> Unit,
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -59,7 +60,7 @@ fun WorkoutItem(
                             text = "${workout.sets} sets of ${workout.reps} reps",
                             style = MaterialTheme.typography.body2,
                             modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center
+                            textAlign = TextAlign.Start
                         )
                 }
                 Box {
@@ -76,6 +77,12 @@ fun WorkoutItem(
                             onWorkoutDetail()
                         }) {
                             Text("Details")
+                        }
+                        DropdownMenuItem(onClick = {
+                            showMenu = false
+                            onWorkoutEdit() // Trigger edit action
+                        }) {
+                            Text("Edit Workout")
                         }
                         DropdownMenuItem(onClick = {
                             showMenu = false

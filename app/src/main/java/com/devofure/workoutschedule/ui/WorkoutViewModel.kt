@@ -146,6 +146,18 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         saveUserSchedule(_workouts.value)
     }
 
+    fun updateWorkout(day: String, updatedWorkout: Workout) {
+        _workouts.value = _workouts.value.toMutableMap().apply {
+            val updatedWorkouts = this[day]?.map {
+                if (it.id == updatedWorkout.id) updatedWorkout else it
+            }
+            if (updatedWorkouts != null) {
+                this[day] = updatedWorkouts
+            }
+        }
+        saveUserSchedule(_workouts.value)
+    }
+
     private fun getNextWorkoutId(): Int {
         return nextWorkoutId++
     }

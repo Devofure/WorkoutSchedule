@@ -1,7 +1,7 @@
 package com.devofure.workoutschedule.ui
 
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -14,7 +14,7 @@ import androidx.compose.ui.Alignment
 import com.devofure.workoutschedule.data.Workout
 
 @Composable
-fun ShowWorkoutDetailDialog(workout: Workout, onDismiss: () -> Unit) {
+fun ShowWorkoutDetailDialog(workout: Workout, onEdit: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = workout.exercise.name, style = MaterialTheme.typography.h6) },
@@ -76,8 +76,14 @@ fun ShowWorkoutDetailDialog(workout: Workout, onDismiss: () -> Unit) {
             }
         },
         confirmButton = {
-            Button(onClick = onDismiss) {
-                Text("Close")
+            Row {
+                Button(onClick = onEdit) {
+                    Text("Edit")
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(onClick = onDismiss) {
+                    Text("Close")
+                }
             }
         }
     )

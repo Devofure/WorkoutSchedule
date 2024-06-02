@@ -23,6 +23,7 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
 
     var selectedWorkout by remember { mutableStateOf<Workout?>(null) }
     var showDialog by remember { mutableStateOf(false) }
+    var showEditWorkoutDialog by remember { mutableStateOf(false) }
     var showAddWorkoutDialog by remember { mutableStateOf(false) }
     var expandedWorkoutIds by remember { mutableStateOf(setOf<Int>()) }
 
@@ -88,7 +89,11 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
                         onWorkoutDetail = {
                             selectedWorkout = workout
                             showDialog = true
-                        }
+                        },
+                        onWorkoutEdit = {
+                            selectedWorkout = workout
+                            showEditWorkoutDialog = true
+                        } // Pass the edit function
                     )
                 }
             }
@@ -121,9 +126,25 @@ fun WorkoutApp(workoutViewModel: WorkoutViewModel = viewModel()) {
         }
 
         if (showDialog && selectedWorkout != null) {
-            ShowWorkoutDetailDialog(selectedWorkout!!) {
-                showDialog = false
-            }
+            ShowWorkoutDetailDialog(
+                workout = selectedWorkout!!,
+                onEdit = {
+                    showDialog = false
+                    showEditWorkoutDialog = true
+                },
+                onDismiss = { showDialog = false }
+            )
+        }
+
+        if (showEditWorkoutDialog && selectedWorkout != null) {
+            EditWorkoutDialog(
+                workout = selectedWorkout!!,
+                onSave = { updatedWorkout ->
+                    workoutViewModel.updateWorkout(daysOfWeek[selectedTabIndex], updatedWorkout)
+                    showEditWorkoutDialog = false
+                },
+                onDismiss = { showEditWorkoutDialog = false }
+            )
         }
 
         if (showAddWorkoutDialog) {
