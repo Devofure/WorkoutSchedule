@@ -80,10 +80,6 @@ fun WorkoutApp(
         showWorkoutDetailScreen && selectedWorkout != null -> {
             ShowWorkoutDetailScreen(
                 workout = selectedWorkout!!,
-                onEdit = {
-                    showWorkoutDetailScreen = false
-                    showEditWorkoutScreen = true
-                },
                 onDismiss = { showWorkoutDetailScreen = false }
             )
         }

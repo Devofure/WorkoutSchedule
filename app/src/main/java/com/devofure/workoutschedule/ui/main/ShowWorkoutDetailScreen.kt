@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.devofure.workoutschedule.data.Workout
 
 @Composable
-fun ShowWorkoutDetailScreen(workout: Workout, onEdit: () -> Unit, onDismiss: () -> Unit) {
+fun ShowWorkoutDetailScreen(workout: Workout, onDismiss: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -47,7 +47,7 @@ fun ShowWorkoutDetailScreen(workout: Workout, onEdit: () -> Unit, onDismiss: () 
                     .fillMaxSize()
             ) {
                 workout.repsList?.let {
-                    SectionHeader(title = "Reps per Set")
+                    SectionHeader(title = "Sets & Reps")
                     it.forEachIndexed { index, reps ->
                         Text(
                             text = "Set ${index + 1}: $reps reps",
@@ -55,7 +55,7 @@ fun ShowWorkoutDetailScreen(workout: Workout, onEdit: () -> Unit, onDismiss: () 
                             modifier = Modifier.padding(horizontal = 8.dp)
                         )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
+                    SectionSpacer()
                 }
 
                 workout.duration?.let {
@@ -90,7 +90,7 @@ fun ShowWorkoutDetailScreen(workout: Workout, onEdit: () -> Unit, onDismiss: () 
                             Text(
                                 text = "\u2022", // Bullet point
                                 style = MaterialTheme.typography.body2.copy(color = Color.Gray),
-                                modifier = Modifier.padding(end = 8.dp)
+                                modifier = Modifier.padding(end = 4.dp, start = 8.dp)
                             )
                             Text(
                                 text = instruction,
@@ -112,7 +112,7 @@ fun SectionHeader(title: String) {
         text = title,
         style = MaterialTheme.typography.subtitle1,
         color = MaterialTheme.colors.primary,
-        modifier = Modifier.padding(bottom = 4.dp),
+        modifier = Modifier.padding(bottom = 2.dp),
     )
 }
 
@@ -126,7 +126,12 @@ fun DetailItem(label: String, value: String) {
                 style = MaterialTheme.typography.body1,
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            SectionSpacer()
         }
     }
+}
+
+@Composable
+private fun SectionSpacer() {
+    Spacer(modifier = Modifier.height(12.dp))
 }
