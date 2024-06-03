@@ -32,6 +32,9 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     private val _filteredExercises = MutableStateFlow<List<Exercise>>(emptyList())
     val filteredExercises: StateFlow<List<Exercise>> = _filteredExercises
 
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
+
     init {
         viewModelScope.launch {
             val isFirstLaunch = sharedPreferences.getBoolean("isFirstLaunch", true)
@@ -170,7 +173,9 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
     fun searchExercises(query: String) {
         viewModelScope.launch {
+            _isLoading.value = true
             _filteredExercises.value = exerciseRepository.searchExercises(query)
+            _isLoading.value = false
         }
     }
 }
