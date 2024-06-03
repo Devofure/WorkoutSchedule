@@ -27,10 +27,10 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -38,6 +38,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.devofure.workoutschedule.data.Exercise
@@ -51,30 +53,55 @@ fun AddWorkoutScreen(
 ) {
     var selectedExercises by remember { mutableStateOf<List<Exercise>>(emptyList()) }
     var isSearchExpanded by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
 
     val searchQuery by workoutViewModel.searchQuery.collectAsState()
     val filteredExercises by workoutViewModel.filteredExercises.collectAsState()
     val isLoading by workoutViewModel.isLoading.collectAsState()
+
+    LaunchedEffect(isSearchExpanded) {
+        if (isSearchExpanded) {
+            focusRequester.requestFocus()
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     if (isSearchExpanded) {
-                        TextField(
-                            value = searchQuery,
-                            onValueChange = { workoutViewModel.searchQuery.value = it },
-                            placeholder = { Text("Search Exercises") },
-                            singleLine = true,
-                            colors = TextFieldDefaults.textFieldColors(
-                                backgroundColor = MaterialTheme.colors.primary.copy(alpha = 0.1f),
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                textColor = Color.White,
-                                placeholderColor = Color.White.copy(alpha = 0.5f)
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            TextField(
+                                value = searchQuery,
+                                onValueChange = { workoutViewModel.searchQuery.value = it },
+                                placeholder = { Text("Search Exercises") },
+                                singleLine = true,
+                                colors = TextFieldDefaults.textFieldColors(
+                                    textColor = Color.White,
+                                    placeholderColor = Color.White.copy(alpha = 0.5f),
+                                    cursorColor = Color.White,
+                                ),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .focusRequester(focusRequester)
+                            )
+                            IconButton(
+                                onClick = {
+                                    workoutViewModel.searchQuery.value = ""
+                                    isSearchExpanded = false
+                                },
+                                modifier = Modifier.align(Alignment.CenterEnd)
+                            ) {
+                                Icon(
+                                    Icons.Filled.Close,
+                                    contentDescription = "Close",
+                                    tint = Color.White
+                                )
+                            }
+                        }
                     } else {
                         Column {
                             Text("Add Exercises", style = MaterialTheme.typography.h6)
@@ -88,14 +115,7 @@ fun AddWorkoutScreen(
                     }
                 },
                 actions = {
-                    if (isSearchExpanded) {
-                        IconButton(onClick = {
-                            workoutViewModel.searchQuery.value = ""
-                            isSearchExpanded = false
-                        }) {
-                            Icon(Icons.Filled.Close, contentDescription = "Close")
-                        }
-                    } else {
+                    if (!isSearchExpanded) {
                         IconButton(onClick = { isSearchExpanded = true }) {
                             Icon(Icons.Filled.Search, contentDescription = "Search")
                         }
