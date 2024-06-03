@@ -1,3 +1,4 @@
+// MainActivity.kt
 package com.devofure.workoutschedule
 
 import android.app.NotificationChannel
@@ -42,7 +43,6 @@ class MainActivity : ComponentActivity() {
         val currentTheme by settingsViewModel.theme.collectAsState()
         val navController = rememberNavController()
         val systemUiController = rememberSystemUiController()
-        val useDarkIcons = currentTheme == ThemeType.LIGHT
 
         MyWorkoutsTheme(themeType = currentTheme) {
             NavHost(navController = navController, startDestination = "main") {
@@ -50,7 +50,7 @@ class MainActivity : ComponentActivity() {
                     if (isFirstLaunch) {
                         systemUiController.setSystemBarsColor(
                             color = MaterialTheme.colors.background,
-                            darkIcons = !MaterialTheme.colors.isLight
+                            darkIcons = currentTheme != ThemeType.DARK
                         )
                         AskUserToGenerateSampleSchedule(workoutViewModel)
                     } else {
@@ -67,7 +67,7 @@ class MainActivity : ComponentActivity() {
                 composable("settings") {
                     systemUiController.setSystemBarsColor(
                         color = MaterialTheme.colors.background,
-                        darkIcons = !MaterialTheme.colors.isLight
+                        darkIcons = currentTheme != ThemeType.DARK
                     )
                     SettingsScreen(
                         settingsViewModel = settingsViewModel,
