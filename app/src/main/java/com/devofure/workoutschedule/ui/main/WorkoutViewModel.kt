@@ -72,13 +72,13 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
     private fun loadWorkoutsFromExercises(): Map<String, List<Workout>> {
         val sampleExercises = mapOf(
-            "Mon" to listOf("3/4 Sit-Up", "90/90 Hamstring"),
-            "Tue" to listOf("Ab Crunch Machine", "Ab Roller"),
-            "Wed" to listOf("Adductor", "Adductor/Groin"),
-            "Thu" to listOf("Advanced Kettlebell Windmill", "Air Bike"),
-            "Fri" to listOf("All Fours Quad Stretch", "Alternate Hammer Curl"),
-            "Sat" to listOf("Alternate Heel Touchers", "Alternate Incline Dumbbell Curl"),
-            "Sun" to listOf("Alternate Leg Diagonal Bound", "Alternating Cable Shoulder Press")
+            "Monday" to listOf("3/4 Sit-Up", "90/90 Hamstring"),
+            "Tuesday" to listOf("Ab Crunch Machine", "Ab Roller"),
+            "Wednesday" to listOf("Adductor", "Adductor/Groin"),
+            "Thursday" to listOf("Advanced Kettlebell Windmill", "Air Bike"),
+            "Friday" to listOf("All Fours Quad Stretch", "Alternate Hammer Curl"),
+            "Saturday" to listOf("Alternate Heel Touchers", "Alternate Incline Dumbbell Curl"),
+            "Sunday" to listOf("Alternate Leg Diagonal Bound", "Alternating Cable Shoulder Press")
         )
 
         val workoutsByDay = sampleExercises.mapValues { (day, exercises) ->
