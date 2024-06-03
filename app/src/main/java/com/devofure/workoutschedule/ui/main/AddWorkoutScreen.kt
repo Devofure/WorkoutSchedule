@@ -27,9 +27,10 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,15 +46,13 @@ import com.devofure.workoutschedule.data.Exercise
 fun AddWorkoutScreen(
     workoutViewModel: WorkoutViewModel,
     onAddWorkout: (List<Exercise>) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    day: String
 ) {
     var selectedExercises by remember { mutableStateOf<List<Exercise>>(emptyList()) }
-    var searchQuery by remember { mutableStateOf("") }
+    var isSearchExpanded by remember { mutableStateOf(false) }
 
-    LaunchedEffect(searchQuery) {
-        workoutViewModel.searchExercises(searchQuery)
-    }
-
+    val searchQuery by workoutViewModel.searchQuery.collectAsState()
     val filteredExercises by workoutViewModel.filteredExercises.collectAsState()
     val isLoading by workoutViewModel.isLoading.collectAsState()
 
@@ -61,25 +60,45 @@ fun AddWorkoutScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    TextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        placeholder = { Text("Search Exercises") },
-                        singleLine = true,
-                        colors = TextFieldDefaults.textFieldColors(
-                            focusedIndicatorColor = Color.White,
-                            unfocusedIndicatorColor = Color.White,
-                            textColor = Color.White,
-                            placeholderColor = Color.White
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(Color.Transparent)
-                    )
+                    if (isSearchExpanded) {
+                        TextField(
+                            value = searchQuery,
+                            onValueChange = { workoutViewModel.searchQuery.value = it },
+                            placeholder = { Text("Search Exercises") },
+                            singleLine = true,
+                            colors = TextFieldDefaults.textFieldColors(
+                                backgroundColor = MaterialTheme.colors.primary.copy(alpha = 0.1f),
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                textColor = Color.White,
+                                placeholderColor = Color.White.copy(alpha = 0.5f)
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    } else {
+                        Column {
+                            Text("Add Exercises", style = MaterialTheme.typography.h6)
+                            Text(day, style = MaterialTheme.typography.subtitle2)
+                        }
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.Close, contentDescription = "Close")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    if (isSearchExpanded) {
+                        IconButton(onClick = {
+                            workoutViewModel.searchQuery.value = ""
+                            isSearchExpanded = false
+                        }) {
+                            Icon(Icons.Filled.Close, contentDescription = "Close")
+                        }
+                    } else {
+                        IconButton(onClick = { isSearchExpanded = true }) {
+                            Icon(Icons.Filled.Search, contentDescription = "Search")
+                        }
                     }
                 },
                 backgroundColor = MaterialTheme.colors.primary,

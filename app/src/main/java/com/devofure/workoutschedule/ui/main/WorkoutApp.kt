@@ -27,7 +27,6 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -47,7 +46,7 @@ fun WorkoutApp(
     onSettingsClick: () -> Unit
 ) {
     val daysOfWeek = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    var selectedTabIndex by remember { mutableStateOf(0) }
     val scaffoldState = rememberScaffoldState()
     val coroutineScope = rememberCoroutineScope()
 
@@ -69,6 +68,7 @@ fun WorkoutApp(
         showAddWorkoutScreen -> {
             AddWorkoutScreen(
                 workoutViewModel = workoutViewModel,
+                day = daysOfWeek[selectedTabIndex],
                 onAddWorkout = { selectedExercises ->
                     workoutViewModel.addWorkouts(daysOfWeek[selectedTabIndex], selectedExercises)
                     showAddWorkoutScreen = false

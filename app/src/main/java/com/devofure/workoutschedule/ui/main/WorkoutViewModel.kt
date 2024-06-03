@@ -35,12 +35,20 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
+    val searchQuery = MutableStateFlow("")
+
     init {
         viewModelScope.launch {
             val isFirstLaunch = sharedPreferences.getBoolean("isFirstLaunch", true)
             _isFirstLaunch.value = isFirstLaunch
             if (!isFirstLaunch) {
                 loadUserSchedule()
+            }
+        }
+
+        viewModelScope.launch {
+            searchQuery.collect { query ->
+                searchExercises(query)
             }
         }
     }
@@ -171,11 +179,9 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         return nextWorkoutId++
     }
 
-    fun searchExercises(query: String) {
-        viewModelScope.launch {
-            _isLoading.value = true
-            _filteredExercises.value = exerciseRepository.searchExercises(query)
-            _isLoading.value = false
-        }
+    private suspend fun searchExercises(query: String) {
+        _isLoading.value = true
+        _filteredExercises.value = exerciseRepository.searchExercises(query)
+        _isLoading.value = false
     }
 }
