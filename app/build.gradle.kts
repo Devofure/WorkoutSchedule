@@ -59,6 +59,7 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.gson)
     implementation(libs.material)
+    implementation(libs.timber)
 
     // Testing dependencies
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

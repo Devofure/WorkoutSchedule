@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
@@ -18,12 +16,8 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.FormatListNumbered
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,7 +39,7 @@ fun ShowWorkoutDetailScreen(workout: Workout, onEdit: () -> Unit, onDismiss: () 
                 },
                 actions = {
                     IconButton(onClick = onEdit) {
-                        Icon(Icons.Filled.Edit, contentDescription = "Edit")
+                        Icon(Icons.Default.Edit, contentDescription = "Edit")
                     }
                 }
             )
@@ -58,13 +52,6 @@ fun ShowWorkoutDetailScreen(workout: Workout, onEdit: () -> Unit, onDismiss: () 
                     .padding(16.dp)
                     .fillMaxSize()
             ) {
-                workout.sets?.let {
-                    DetailItem(
-                        icon = Icons.Default.FormatListNumbered,
-                        label = "Sets",
-                        value = it.toString()
-                    )
-                }
                 workout.repsList?.let {
                     Column {
                         Text(
@@ -72,7 +59,6 @@ fun ShowWorkoutDetailScreen(workout: Workout, onEdit: () -> Unit, onDismiss: () 
                             style = MaterialTheme.typography.subtitle1,
                             color = MaterialTheme.colors.primary
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
                         it.forEachIndexed { index, reps ->
                             Text(
                                 text = "Set ${index + 1}: $reps reps",
@@ -82,29 +68,19 @@ fun ShowWorkoutDetailScreen(workout: Workout, onEdit: () -> Unit, onDismiss: () 
                     }
                 }
                 workout.duration?.let {
-                    DetailItem(
-                        icon = Icons.Default.Timer,
-                        label = "Duration",
-                        value = "$it mins"
-                    )
+                    DetailItem(label = "Duration", value = "$it mins")
                 }
                 if (workout.exercise.equipment?.isNotEmpty() == true) {
-                    DetailItem(
-                        icon = Icons.Default.Build,
-                        label = "Equipment",
-                        value = workout.exercise.equipment
-                    )
+                    DetailItem(label = "Equipment", value = workout.exercise.equipment)
                 }
                 if (workout.exercise.primaryMuscles.isNotEmpty()) {
                     DetailItem(
-                        icon = Icons.Default.FitnessCenter,
                         label = "Primary Muscles",
                         value = workout.exercise.primaryMuscles.joinToString(", ")
                     )
                 }
                 if (workout.exercise.secondaryMuscles.isNotEmpty()) {
                     DetailItem(
-                        icon = Icons.Default.FitnessCenter,
                         label = "Secondary Muscles",
                         value = workout.exercise.secondaryMuscles.joinToString(", ")
                     )
@@ -143,20 +119,13 @@ fun ShowWorkoutDetailScreen(workout: Workout, onEdit: () -> Unit, onDismiss: () 
 }
 
 @Composable
-fun DetailItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, value: String) {
+fun DetailItem(label: String, value: String) {
     Row(
         modifier = Modifier
             .padding(vertical = 4.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colors.primary,
-            modifier = Modifier.size(24.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
         Column {
             Text(text = label, style = MaterialTheme.typography.body2, color = Color.Gray)
             Text(text = value, style = MaterialTheme.typography.body1)
