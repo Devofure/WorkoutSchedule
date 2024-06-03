@@ -65,12 +65,21 @@ fun ShowWorkoutDetailScreen(workout: Workout, onEdit: () -> Unit, onDismiss: () 
                         value = it.toString()
                     )
                 }
-                workout.reps?.let {
-                    DetailItem(
-                        icon = Icons.Default.FormatListNumbered,
-                        label = "Reps",
-                        value = it.toString()
-                    )
+                workout.repsList?.let {
+                    Column {
+                        Text(
+                            text = "Reps per Set",
+                            style = MaterialTheme.typography.subtitle1,
+                            color = MaterialTheme.colors.primary
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        it.forEachIndexed { index, reps ->
+                            Text(
+                                text = "Set ${index + 1}: $reps reps",
+                                style = MaterialTheme.typography.body1
+                            )
+                        }
+                    }
                 }
                 workout.duration?.let {
                     DetailItem(

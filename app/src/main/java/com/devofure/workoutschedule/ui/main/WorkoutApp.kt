@@ -52,7 +52,7 @@ fun WorkoutApp(
     val coroutineScope = rememberCoroutineScope()
 
     var selectedWorkout by remember { mutableStateOf<Workout?>(null) }
-    var showEditWorkoutDialog by remember { mutableStateOf(false) }
+    var showEditWorkoutScreen by remember { mutableStateOf(false) }
     var showAddWorkoutScreen by remember { mutableStateOf(false) }
     var showWorkoutDetailScreen by remember { mutableStateOf(false) }
     var expandedWorkoutIds by remember { mutableStateOf(setOf<Int>()) }
@@ -82,9 +82,20 @@ fun WorkoutApp(
                 workout = selectedWorkout!!,
                 onEdit = {
                     showWorkoutDetailScreen = false
-                    showEditWorkoutDialog = true
+                    showEditWorkoutScreen = true
                 },
                 onDismiss = { showWorkoutDetailScreen = false }
+            )
+        }
+
+        showEditWorkoutScreen && selectedWorkout != null -> {
+            EditWorkoutScreen(
+                workout = selectedWorkout!!,
+                onSave = { updatedWorkout ->
+                    workoutViewModel.updateWorkout(daysOfWeek[selectedTabIndex], updatedWorkout)
+                    showEditWorkoutScreen = false
+                },
+                onDismiss = { showEditWorkoutScreen = false }
             )
         }
 
@@ -162,7 +173,7 @@ fun WorkoutApp(
                                 },
                                 onWorkoutEdit = {
                                     selectedWorkout = workout
-                                    showEditWorkoutDialog = true
+                                    showEditWorkoutScreen = true
                                 }
                             )
                         }
@@ -194,20 +205,6 @@ fun WorkoutApp(
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(text = "Mark all as done")
                     }
-                }
-
-                if (showEditWorkoutDialog && selectedWorkout != null) {
-                    EditWorkoutDialog(
-                        workout = selectedWorkout!!,
-                        onSave = { updatedWorkout ->
-                            workoutViewModel.updateWorkout(
-                                daysOfWeek[selectedTabIndex],
-                                updatedWorkout
-                            )
-                            showEditWorkoutDialog = false
-                        },
-                        onDismiss = { showEditWorkoutDialog = false }
-                    )
                 }
             }
         }
