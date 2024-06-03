@@ -17,7 +17,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,11 +36,6 @@ fun ShowWorkoutDetailScreen(workout: Workout, onEdit: () -> Unit, onDismiss: () 
                         Icon(Icons.Filled.Close, contentDescription = "Close")
                     }
                 },
-                actions = {
-                    IconButton(onClick = onEdit) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit")
-                    }
-                }
             )
         },
         content = { paddingValues ->
@@ -53,63 +47,57 @@ fun ShowWorkoutDetailScreen(workout: Workout, onEdit: () -> Unit, onDismiss: () 
                     .fillMaxSize()
             ) {
                 workout.repsList?.let {
-                    Column {
+                    SectionHeader(title = "Reps per Set")
+                    it.forEachIndexed { index, reps ->
                         Text(
-                            text = "Reps per Set",
-                            style = MaterialTheme.typography.subtitle1,
-                            color = MaterialTheme.colors.primary
+                            text = "Set ${index + 1}: $reps reps",
+                            style = MaterialTheme.typography.body1,
+                            modifier = Modifier.padding(horizontal = 8.dp)
                         )
-                        it.forEachIndexed { index, reps ->
-                            Text(
-                                text = "Set ${index + 1}: $reps reps",
-                                style = MaterialTheme.typography.body1
-                            )
-                        }
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
+
                 workout.duration?.let {
                     DetailItem(label = "Duration", value = "$it mins")
                 }
+
                 if (workout.exercise.equipment?.isNotEmpty() == true) {
                     DetailItem(label = "Equipment", value = workout.exercise.equipment)
                 }
+
                 if (workout.exercise.primaryMuscles.isNotEmpty()) {
                     DetailItem(
                         label = "Primary Muscles",
                         value = workout.exercise.primaryMuscles.joinToString(", ")
                     )
                 }
+
                 if (workout.exercise.secondaryMuscles.isNotEmpty()) {
                     DetailItem(
                         label = "Secondary Muscles",
                         value = workout.exercise.secondaryMuscles.joinToString(", ")
                     )
                 }
+
                 if (workout.exercise.instructions.isNotEmpty()) {
-                    Column(modifier = Modifier.padding(top = 16.dp)) {
-                        Text(
-                            text = "Instructions",
-                            style = MaterialTheme.typography.subtitle1,
-                            color = MaterialTheme.colors.primary
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        workout.exercise.instructions.forEachIndexed { _, instruction ->
-                            Row(
-                                verticalAlignment = Alignment.Top,
-                                modifier = Modifier.padding(bottom = 4.dp)
-                            ) {
-                                Text(
-                                    text = "\u2022", // Bullet point
-                                    style = MaterialTheme.typography.body2.copy(color = Color.Gray),
-                                    modifier = Modifier.padding(end = 8.dp)
-                                )
-                                Text(
-                                    text = instruction,
-                                    style = MaterialTheme.typography.body2,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    textAlign = TextAlign.Start
-                                )
-                            }
+                    SectionHeader(title = "Instructions")
+                    workout.exercise.instructions.forEachIndexed { _, instruction ->
+                        Row(
+                            verticalAlignment = Alignment.Top,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        ) {
+                            Text(
+                                text = "\u2022", // Bullet point
+                                style = MaterialTheme.typography.body2.copy(color = Color.Gray),
+                                modifier = Modifier.padding(end = 8.dp)
+                            )
+                            Text(
+                                text = instruction,
+                                style = MaterialTheme.typography.body2,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Start
+                            )
                         }
                     }
                 }
@@ -119,16 +107,26 @@ fun ShowWorkoutDetailScreen(workout: Workout, onEdit: () -> Unit, onDismiss: () 
 }
 
 @Composable
+fun SectionHeader(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.subtitle1,
+        color = MaterialTheme.colors.primary,
+        modifier = Modifier.padding(bottom = 4.dp),
+    )
+}
+
+@Composable
 fun DetailItem(label: String, value: String) {
-    Row(
-        modifier = Modifier
-            .padding(vertical = 4.dp)
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Row {
         Column {
-            Text(text = label, style = MaterialTheme.typography.body2, color = Color.Gray)
-            Text(text = value, style = MaterialTheme.typography.body1)
+            SectionHeader(title = label)
+            Text(
+                text = value,
+                style = MaterialTheme.typography.body1,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
