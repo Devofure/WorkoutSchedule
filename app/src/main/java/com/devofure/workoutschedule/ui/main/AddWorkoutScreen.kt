@@ -67,11 +67,10 @@ fun AddWorkoutScreen(
                         placeholder = { Text("Search Exercises") },
                         singleLine = true,
                         colors = TextFieldDefaults.textFieldColors(
-                            backgroundColor = MaterialTheme.colors.primary.copy(alpha = 0.1f),
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
+                            focusedIndicatorColor = Color.White,
+                            unfocusedIndicatorColor = Color.White,
                             textColor = Color.White,
-                            placeholderColor = Color.White.copy(alpha = 0.5f)
+                            placeholderColor = Color.White
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
