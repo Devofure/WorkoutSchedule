@@ -113,8 +113,8 @@ fun WorkoutItem(
                 Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)) {
                     workout.sets?.let {
                         Text(
-                            text = "${workout.sets} sets",
-                            style = MaterialTheme.typography.body2.copy(color = textColor.copy(alpha = textAlpha)),
+                            text = "${workout.sets} sets:",
+                            style = MaterialTheme.typography.subtitle1.copy(color = MaterialTheme.colors.primary),
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Start
                         )

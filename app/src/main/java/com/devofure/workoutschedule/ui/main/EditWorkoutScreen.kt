@@ -1,6 +1,7 @@
 package com.devofure.workoutschedule.ui.main
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,7 +11,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -68,72 +71,83 @@ fun EditWorkoutScreen(
             )
         },
         content = { paddingValues ->
-            Column(
+            Box(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .padding(16.dp)
                     .fillMaxSize()
             ) {
-                ValidatedTextField(
-                    value = duration,
-                    onValueChange = { duration = it },
-                    label = "Duration (mins)",
-                    error = durationError,
-                    keyboardType = KeyboardType.Number
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Sets: $sets", style = MaterialTheme.typography.h6)
-                    Spacer(modifier = Modifier.width(16.dp))
-                    IconButton(
-                        onClick = {
-                            if (sets > 0) {
-                                sets -= 1
-                                repsList = repsList.dropLast(1).toMutableList()
-                            }
-                        }
-                    ) {
-                        Icon(imageVector = Icons.Default.Remove, contentDescription = "Remove Set")
-                    }
-                    IconButton(
-                        onClick = {
-                            sets += 1
-                            repsList = repsList.toMutableList().apply { add("") }
-                        }
-                    ) {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Set")
-                    }
-                }
-                if (setsError != null) {
-                    Text(
-                        text = setsError ?: "",
-                        color = MaterialTheme.colors.error,
-                        style = MaterialTheme.typography.caption,
-                        modifier = Modifier.padding(start = 16.dp)
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp)
+                        .fillMaxWidth()
+                ) {
+                    ValidatedTextField(
+                        value = duration,
+                        onValueChange = { duration = it },
+                        label = "Duration (mins)",
+                        error = durationError,
+                        keyboardType = KeyboardType.Number
                     )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                Column {
-                    repsList.forEachIndexed { index, repValue ->
-                        ValidatedTextField(
-                            value = repValue,
-                            onValueChange = { newValue ->
-                                repsList = repsList.toMutableList().apply { this[index] = newValue }
-                            },
-                            label = "Reps for set ${index + 1}",
-                            error = if (repsError != null && index >= repsList.size) repsError else null,
-                            keyboardType = KeyboardType.Number
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Sets: $sets", style = MaterialTheme.typography.h6)
+                        Spacer(modifier = Modifier.width(16.dp))
+                        IconButton(
+                            onClick = {
+                                if (sets > 0) {
+                                    sets -= 1
+                                    repsList = repsList.dropLast(1).toMutableList()
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Remove,
+                                contentDescription = "Remove Set"
+                            )
+                        }
+                        IconButton(
+                            onClick = {
+                                sets += 1
+                                repsList = repsList.toMutableList().apply { add("") }
+                            }
+                        ) {
+                            Icon(imageVector = Icons.Default.Add, contentDescription = "Add Set")
+                        }
                     }
-                    if (repsError != null) {
+                    if (setsError != null) {
                         Text(
-                            text = repsError ?: "",
+                            text = setsError ?: "",
                             color = MaterialTheme.colors.error,
                             style = MaterialTheme.typography.caption,
                             modifier = Modifier.padding(start = 16.dp)
                         )
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Column {
+                        repsList.forEachIndexed { index, repValue ->
+                            ValidatedTextField(
+                                value = repValue,
+                                onValueChange = { newValue ->
+                                    repsList =
+                                        repsList.toMutableList().apply { this[index] = newValue }
+                                },
+                                label = "Reps for set ${index + 1}",
+                                error = if (repsError != null && index >= repsList.size) repsError else null,
+                                keyboardType = KeyboardType.Number
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                        if (repsError != null) {
+                            Text(
+                                text = repsError ?: "",
+                                color = MaterialTheme.colors.error,
+                                style = MaterialTheme.typography.caption,
+                                modifier = Modifier.padding(start = 16.dp)
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(80.dp)) // Add space to avoid the button covering content
                 }
                 Button(
                     onClick = {
@@ -156,7 +170,10 @@ fun EditWorkoutScreen(
                             onDismiss()
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp)
+                        .fillMaxWidth()
                 ) {
                     Text("Save")
                 }
