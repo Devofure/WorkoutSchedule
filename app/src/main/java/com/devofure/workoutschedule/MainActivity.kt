@@ -1,4 +1,3 @@
-// MainActivity.kt
 package com.devofure.workoutschedule
 
 import android.app.NotificationChannel
@@ -14,10 +13,10 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.devofure.workoutschedule.ui.main.WorkoutApp
 import com.devofure.workoutschedule.ui.main.WorkoutViewModel
 import com.devofure.workoutschedule.ui.settings.SettingsScreen
@@ -41,38 +40,40 @@ class MainActivity : ComponentActivity() {
         val settingsViewModel: SettingsViewModel = viewModel()
         val isFirstLaunch by workoutViewModel.isFirstLaunch.collectAsState()
         val currentTheme by settingsViewModel.theme.collectAsState()
-        var showSettings by remember { mutableStateOf(false) }
+        val navController = rememberNavController()
+        val systemUiController = rememberSystemUiController()
+        val useDarkIcons = currentTheme == ThemeType.LIGHT
 
         MyWorkoutsTheme(themeType = currentTheme) {
-            val systemUiController = rememberSystemUiController()
-            val useDarkIcons = currentTheme == ThemeType.LIGHT
-
-            if (isFirstLaunch) {
-                systemUiController.setSystemBarsColor(
-                    color = MaterialTheme.colors.background,
-                    darkIcons = useDarkIcons
-                )
-                AskUserToGenerateSampleSchedule(workoutViewModel)
-            } else {
-                if (showSettings) {
+            NavHost(navController = navController, startDestination = "main") {
+                composable("main") {
+                    if (isFirstLaunch) {
+                        systemUiController.setSystemBarsColor(
+                            color = MaterialTheme.colors.background,
+                            darkIcons = !MaterialTheme.colors.isLight
+                        )
+                        AskUserToGenerateSampleSchedule(workoutViewModel)
+                    } else {
+                        systemUiController.setSystemBarsColor(
+                            color = MaterialTheme.colors.primary,
+                            darkIcons = MaterialTheme.colors.isLight
+                        )
+                        WorkoutApp(
+                            workoutViewModel = workoutViewModel,
+                            onSettingsClick = { navController.navigate("settings") }
+                        )
+                    }
+                }
+                composable("settings") {
                     systemUiController.setSystemBarsColor(
                         color = MaterialTheme.colors.background,
-                        darkIcons = useDarkIcons
+                        darkIcons = !MaterialTheme.colors.isLight
                     )
                     SettingsScreen(
                         settingsViewModel = settingsViewModel,
-                        onBack = { showSettings = false },
+                        onBack = { navController.popBackStack() },
                         currentTheme = currentTheme,
                         onThemeChange = { settingsViewModel.setTheme(it) }
-                    )
-                } else {
-                    systemUiController.setSystemBarsColor(
-                        color = MaterialTheme.colors.primary,
-                        darkIcons = useDarkIcons
-                    )
-                    WorkoutApp(
-                        workoutViewModel = workoutViewModel,
-                        onSettingsClick = { showSettings = true }
                     )
                 }
             }

@@ -1,4 +1,3 @@
-// WorkoutApp.kt
 package com.devofure.workoutschedule.ui.main
 
 import androidx.compose.foundation.layout.Arrangement
