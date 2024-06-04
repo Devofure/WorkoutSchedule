@@ -1,7 +1,9 @@
-@file:OptIn(ExperimentalFoundationApi::class)
+@file:OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 
 package com.devofure.workoutschedule.ui.main
 
+import android.app.DatePickerDialog
+import android.widget.DatePicker
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -20,18 +22,23 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Checkbox
+import androidx.compose.material.BottomSheetScaffold
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -42,12 +49,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.devofure.workoutschedule.data.Workout
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
+import java.util.Calendar
 
 @Composable
 fun WorkoutApp(
@@ -58,7 +66,7 @@ fun WorkoutApp(
         listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
     val pagerState = rememberPagerState { daysOfWeek.size }
 
-    val scaffoldState = rememberScaffoldState()
+    val scaffoldState = rememberBottomSheetScaffoldState()
     val coroutineScope = rememberCoroutineScope()
 
     var selectedWorkout by remember { mutableStateOf<Workout?>(null) }
@@ -75,172 +83,211 @@ fun WorkoutApp(
         darkIcons = useDarkIcons
     )
 
-    when {
-        showAddWorkoutScreen -> {
-            AddWorkoutScreen(
-                workoutViewModel = workoutViewModel,
-                day = daysOfWeek[pagerState.currentPage],
-                onAddWorkout = { selectedExercises ->
-                    workoutViewModel.addWorkouts(
-                        daysOfWeek[pagerState.currentPage],
-                        selectedExercises
-                    )
-                    showAddWorkoutScreen = false
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    BottomSheetScaffold(
+        scaffoldState = scaffoldState,
+        sheetContent = {
+            BottomSheetContent(
+                onMarkAllAsDone = {
+                    val day = daysOfWeek[pagerState.currentPage]
+                    workoutViewModel.onAllWorkoutsChecked(day, true)
+                    coroutineScope.launch {
+                        scaffoldState.snackbarHostState.showSnackbar("All workouts completed!")
+                    }
                 },
-                onBack = { showAddWorkoutScreen = false }
-            )
-        }
-
-        showWorkoutDetailScreen && selectedWorkout != null -> {
-            ShowWorkoutDetailScreen(
-                workout = selectedWorkout!!,
-                onDismiss = { showWorkoutDetailScreen = false }
-            )
-        }
-
-        showEditWorkoutScreen && selectedWorkout != null -> {
-            EditWorkoutScreen(
-                workout = selectedWorkout!!,
-                onSave = { updatedWorkout ->
-                    workoutViewModel.updateWorkout(
-                        daysOfWeek[pagerState.currentPage],
-                        updatedWorkout
-                    )
-                    showEditWorkoutScreen = false
+                onLogDay = {
+                    showDatePicker = true
                 },
-                onDismiss = { showEditWorkoutScreen = false }
+                onAddExercise = {
+                    showAddWorkoutScreen = true
+                }
             )
-        }
-
-        else -> {
-            Scaffold(
-                scaffoldState = scaffoldState,
-                floatingActionButton = {
-                    FloatingActionButton(onClick = { showAddWorkoutScreen = true }) {
-                        Icon(Icons.Filled.Add, contentDescription = "Add Workout")
+        },
+        sheetPeekHeight = 0.dp,
+        floatingActionButton = {
+            val isExpanded = scaffoldState.bottomSheetState.isExpanded
+            FloatingActionButton(onClick = {
+                coroutineScope.launch {
+                    if (isExpanded) {
+                        scaffoldState.bottomSheetState.collapse()
+                    } else {
+                        scaffoldState.bottomSheetState.expand()
                     }
                 }
-            ) { paddingValues ->
+            }) {
+                Icon(
+                    imageVector = if (isExpanded) Icons.Filled.Close else Icons.Filled.MoreVert,
+                    contentDescription = if (isExpanded) "Close Options" else "More Options"
+                )
+            }
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+        ) {
+            TopAppBar(
+                title = { Text("Workout Schedule") },
+                backgroundColor = MaterialTheme.colors.primary,
+                actions = {
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(Icons.Filled.Settings, contentDescription = "Settings")
+                    }
+                }
+            )
+            PagerIndicator(
+                pagerState = pagerState,
+                pageCount = daysOfWeek.size,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(16.dp)
+            )
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.weight(1f)
+            ) { page ->
+                val workouts by workoutViewModel.workoutsForDay(daysOfWeek[page])
+                    .collectAsState()
                 Column(
                     modifier = Modifier
-                        .padding(paddingValues)
                         .fillMaxSize()
+                        .padding(horizontal = 16.dp)
                 ) {
-                    Column {
-                        TopAppBar(
-                            title = { Text("Workout Schedule") },
-                            backgroundColor = MaterialTheme.colors.primary,
-                            actions = {
-                                IconButton(onClick = onSettingsClick) {
-                                    Icon(Icons.Filled.Settings, contentDescription = "Settings")
-                                }
-                            }
-                        )
-                        PagerIndicator(
-                            pagerState = pagerState,
-                            pageCount = daysOfWeek.size,
-                            modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                                .padding(16.dp)
-                        )
-                        HorizontalPager(
-                            state = pagerState,
-                            modifier = Modifier.weight(1f)
-                        ) { page ->
-                            val workouts by workoutViewModel.workoutsForDay(daysOfWeek[page])
-                                .collectAsState()
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 16.dp)
-                            ) {
-                                Text(daysOfWeek[page], style = MaterialTheme.typography.h6)
+                    Text(
+                        text = daysOfWeek[page],
+                        style = MaterialTheme.typography.h6,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
 
-                                if (workouts.isEmpty()) {
-                                    Box(
-                                        modifier = Modifier.fillMaxSize(),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "Rest day",
-                                            style = MaterialTheme.typography.h4,
-                                            color = Color.Gray
+                    if (workouts.isEmpty()) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "Rest day",
+                                style = MaterialTheme.typography.h4,
+                                color = Color.Gray
+                            )
+                        }
+                    } else {
+                        WorkoutProgress(workouts)
+                        LazyColumn {
+                            items(workouts) { workout ->
+                                WorkoutItem(
+                                    workout = workout,
+                                    expanded = expandedWorkoutIds.contains(workout.id),
+                                    onExpandToggle = {
+                                        expandedWorkoutIds =
+                                            if (expandedWorkoutIds.contains(workout.id)) {
+                                                expandedWorkoutIds - workout.id
+                                            } else {
+                                                expandedWorkoutIds + workout.id
+                                            }
+                                    },
+                                    onWorkoutChecked = { workoutId, isChecked ->
+                                        workoutViewModel.onWorkoutChecked(
+                                            daysOfWeek[page],
+                                            workoutId,
+                                            isChecked
                                         )
-                                    }
-                                } else {
-                                    WorkoutProgress(workouts)
-                                    LazyColumn {
-                                        items(workouts) { workout ->
-                                            WorkoutItem(
-                                                workout = workout,
-                                                expanded = expandedWorkoutIds.contains(workout.id),
-                                                onExpandToggle = {
-                                                    expandedWorkoutIds =
-                                                        if (expandedWorkoutIds.contains(workout.id)) {
-                                                            expandedWorkoutIds - workout.id
-                                                        } else {
-                                                            expandedWorkoutIds + workout.id
-                                                        }
-                                                },
-                                                onWorkoutChecked = { workoutId, isChecked ->
-                                                    workoutViewModel.onWorkoutChecked(
-                                                        daysOfWeek[page],
-                                                        workoutId,
-                                                        isChecked
-                                                    )
-                                                },
-                                                onWorkoutRemove = {
-                                                    workoutViewModel.removeWorkout(
-                                                        daysOfWeek[page],
-                                                        workout
-                                                    )
-                                                },
-                                                onWorkoutDetail = {
-                                                    selectedWorkout = workout
-                                                    showWorkoutDetailScreen = true
-                                                },
-                                                onWorkoutEdit = {
-                                                    selectedWorkout = workout
-                                                    showEditWorkoutScreen = true
-                                                }
-                                            )
-                                        }
-                                    }
-                                    val allChecked = workouts.all { it.isDone }
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier
-                                            .padding(vertical = 16.dp)
-                                            .fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        Checkbox(
-                                            checked = allChecked,
-                                            onCheckedChange = { isChecked ->
-                                                workoutViewModel.onAllWorkoutsChecked(
-                                                    daysOfWeek[page],
-                                                    isChecked
-                                                )
-                                                if (isChecked) {
-                                                    coroutineScope.launch {
-                                                        scaffoldState.snackbarHostState.showSnackbar(
-                                                            "All workouts completed!"
-                                                        )
-                                                    }
-                                                }
-                                            },
-                                            modifier = Modifier.testTag("markAllAsDoneCheckbox")
+                                    },
+                                    onWorkoutRemove = {
+                                        workoutViewModel.removeWorkout(
+                                            daysOfWeek[page],
+                                            workout
                                         )
-                                        Spacer(modifier = Modifier.width(8.dp))
-                                        Text(text = "Mark all as done")
+                                    },
+                                    onWorkoutDetail = {
+                                        selectedWorkout = workout
+                                        showWorkoutDetailScreen = true
+                                    },
+                                    onWorkoutEdit = {
+                                        selectedWorkout = workout
+                                        showEditWorkoutScreen = true
                                     }
-                                }
+                                )
                             }
                         }
                     }
                 }
             }
         }
+    }
+
+    if (showDatePicker) {
+        ShowDatePickerDialog(onDateSelected = { date ->
+            // Handle the selected date here, e.g., log the day
+            showDatePicker = false
+        }, onDismissRequest = {
+            showDatePicker = false
+        })
+    }
+
+    if (showAddWorkoutScreen) {
+        AddWorkoutScreen(
+            workoutViewModel = workoutViewModel,
+            day = daysOfWeek[pagerState.currentPage],
+            onAddWorkout = { selectedExercises ->
+                workoutViewModel.addWorkouts(daysOfWeek[pagerState.currentPage], selectedExercises)
+                showAddWorkoutScreen = false
+            },
+            onBack = { showAddWorkoutScreen = false }
+        )
+    }
+}
+
+@Composable
+fun BottomSheetContent(
+    onMarkAllAsDone: () -> Unit,
+    onLogDay: () -> Unit,
+    onAddExercise: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        TextButton(onClick = onMarkAllAsDone) {
+            Icon(Icons.Filled.CheckCircle, contentDescription = "Mark all as done")
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Mark all as done")
+        }
+        TextButton(onClick = onLogDay) {
+            Icon(Icons.Filled.CalendarToday, contentDescription = "Log day")
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Log day")
+        }
+        TextButton(onClick = onAddExercise) {
+            Icon(Icons.Filled.FitnessCenter, contentDescription = "Add Exercise")
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Add Exercise")
+        }
+    }
+}
+
+@Composable
+fun ShowDatePickerDialog(
+    onDateSelected: (String) -> Unit,
+    onDismissRequest: () -> Unit
+) {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance()
+
+    DatePickerDialog(
+        context,
+        { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
+            val selectedDate = "$dayOfMonth/${month + 1}/$year"
+            onDateSelected(selectedDate)
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    ).apply {
+        setOnDismissListener { onDismissRequest() }
+        show()
     }
 }
 
