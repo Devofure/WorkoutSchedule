@@ -1,4 +1,4 @@
-package com.devofure.workoutschedule.ui.main
+package com.devofure.workoutschedule.ui.addexercise
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -45,6 +45,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.devofure.workoutschedule.data.Exercise
+import com.devofure.workoutschedule.ui.main.SharedViewModel
+import com.devofure.workoutschedule.ui.main.WorkoutViewModel
 
 @Composable
 fun AddExerciseScreen(

@@ -1,4 +1,4 @@
-package com.devofure.workoutschedule.ui.main
+package com.devofure.workoutschedule.ui.editworkout
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -38,6 +38,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.devofure.workoutschedule.ui.main.SharedViewModel
+import com.devofure.workoutschedule.ui.main.WorkoutViewModel
 
 @Composable
 fun EditWorkoutScreen(

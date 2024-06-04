@@ -110,26 +110,33 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun workoutsForDay(day: String): StateFlow<List<Workout>> {
+        val normalizedDay = normalizeDayKey(day)
         return workouts
-            .map { it[day] ?: emptyList() }
+            .map { it[normalizedDay] ?: emptyList() }
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     }
 
+    private fun normalizeDayKey(day: String): String {
+        return day.substringBefore(" (")
+    }
+
     fun onWorkoutChecked(day: String, workoutId: Int, isChecked: Boolean) {
+        val normalizedDay = normalizeDayKey(day)
         _workouts.value = _workouts.value.toMutableMap().apply {
-            val updatedWorkouts = this[day]?.map {
+            val updatedWorkouts = this[normalizedDay]?.map {
                 if (it.id == workoutId) it.copy(isDone = isChecked) else it
             }
             if (updatedWorkouts != null) {
-                this[day] = updatedWorkouts
+                this[normalizedDay] = updatedWorkouts
             }
         }
         saveUserSchedule(_workouts.value)
     }
 
     fun onAllWorkoutsChecked(day: String, isChecked: Boolean) {
+        val normalizedDay = normalizeDayKey(day)
         _workouts.value = _workouts.value.mapValues { entry ->
-            if (entry.key == day) {
+            if (normalizeDayKey(entry.key) == normalizedDay) {
                 entry.value.map { it.copy(isDone = isChecked) }
             } else entry.value
         }
@@ -137,8 +144,9 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     }
 
     fun addWorkouts(day: String, exercises: List<Exercise>) {
+        val normalizedDay = normalizeDayKey(day)
         _workouts.value = _workouts.value.toMutableMap().apply {
-            val existingWorkouts = this[day]?.toMutableList() ?: mutableListOf()
+            val existingWorkouts = this[normalizedDay]?.toMutableList() ?: mutableListOf()
             exercises.forEach { exercise ->
                 existingWorkouts.add(
                     Workout(
@@ -147,29 +155,31 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                     )
                 )
             }
-            this[day] = existingWorkouts
+            this[normalizedDay] = existingWorkouts
         }
         saveUserSchedule(_workouts.value)
     }
 
     fun removeWorkout(day: String, workout: Workout) {
+        val normalizedDay = normalizeDayKey(day)
         _workouts.value = _workouts.value.toMutableMap().apply {
-            val existingWorkouts = this[day]?.toMutableList()
+            val existingWorkouts = this[normalizedDay]?.toMutableList()
             existingWorkouts?.remove(workout)
             if (existingWorkouts != null) {
-                this[day] = existingWorkouts
+                this[normalizedDay] = existingWorkouts
             }
         }
         saveUserSchedule(_workouts.value)
     }
 
     fun updateWorkout(day: String, updatedWorkout: Workout) {
+        val normalizedDay = normalizeDayKey(day)
         _workouts.value = _workouts.value.toMutableMap().apply {
-            val updatedWorkouts = this[day]?.map {
+            val updatedWorkouts = this[normalizedDay]?.map {
                 if (it.id == updatedWorkout.id) updatedWorkout else it
             }
             if (updatedWorkouts != null) {
-                this[day] = updatedWorkouts
+                this[normalizedDay] = updatedWorkouts
             }
         }
         saveUserSchedule(_workouts.value)

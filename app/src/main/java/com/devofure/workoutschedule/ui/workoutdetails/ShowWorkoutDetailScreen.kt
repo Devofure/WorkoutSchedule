@@ -1,4 +1,4 @@
-package com.devofure.workoutschedule.ui.main
+package com.devofure.workoutschedule.ui.workoutdetails
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.devofure.workoutschedule.ui.main.SharedViewModel
 
 @Composable
 fun WorkoutDetailScreen(navController: NavController, sharedViewModel: SharedViewModel) {
