@@ -27,7 +27,6 @@ import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
@@ -43,14 +42,13 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.devofure.workoutschedule.data.Exercise
 
 @Composable
-fun AddWorkoutScreen(
-    workoutViewModel: WorkoutViewModel,
-    onAddWorkout: (List<Exercise>) -> Unit,
-    onBack: () -> Unit,
-    day: String
+fun AddExerciseScreen(
+    navController: NavHostController,
+    workoutViewModel: WorkoutViewModel
 ) {
     var selectedExercises by remember { mutableStateOf<List<Exercise>>(emptyList()) }
     var isSearchExpanded by remember { mutableStateOf(false) }
@@ -104,14 +102,11 @@ fun AddWorkoutScreen(
                             }
                         }
                     } else {
-                        Column {
-                            Text("Add Exercises", style = MaterialTheme.typography.h6)
-                            Text(day, style = MaterialTheme.typography.subtitle2)
-                        }
+                        Text("Add Exercises")
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -141,7 +136,10 @@ fun AddWorkoutScreen(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
-                    onClick = { onAddWorkout(selectedExercises) },
+                    onClick = {
+                        // Handle add workout action
+                        navController.popBackStack()
+                    },
                     colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary),
                     modifier = Modifier.fillMaxWidth()
                 ) {

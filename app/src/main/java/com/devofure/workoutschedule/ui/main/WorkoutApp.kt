@@ -56,6 +56,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.devofure.workoutschedule.data.Workout
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
@@ -64,6 +68,19 @@ import java.util.Calendar
 @Composable
 fun WorkoutApp(
     workoutViewModel: WorkoutViewModel = viewModel(),
+    onSettingsClick: () -> Unit
+) {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "main") {
+        composable("main") { MainScreen(navController, workoutViewModel, onSettingsClick) }
+        composable("add_exercise") { AddExerciseScreen(navController, workoutViewModel) }
+    }
+}
+
+@Composable
+fun MainScreen(
+    navController: NavHostController,
+    workoutViewModel: WorkoutViewModel,
     onSettingsClick: () -> Unit
 ) {
     val daysOfWeek =
@@ -75,7 +92,6 @@ fun WorkoutApp(
 
     var selectedWorkout by remember { mutableStateOf<Workout?>(null) }
     var showEditWorkoutScreen by remember { mutableStateOf(false) }
-    var showAddWorkoutScreen by remember { mutableStateOf(false) }
     var showWorkoutDetailScreen by remember { mutableStateOf(false) }
     var expandedWorkoutIds by remember { mutableStateOf(setOf<Int>()) }
 
@@ -104,7 +120,7 @@ fun WorkoutApp(
                     showDatePicker = true
                 },
                 onAddExercise = {
-                    showAddWorkoutScreen = true
+                    navController.navigate("add_exercise")
                 }
             )
         },
@@ -235,18 +251,6 @@ fun WorkoutApp(
         }, onDismissRequest = {
             showDatePicker = false
         })
-    }
-
-    if (showAddWorkoutScreen) {
-        AddWorkoutScreen(
-            workoutViewModel = workoutViewModel,
-            day = daysOfWeek[pagerState.currentPage],
-            onAddWorkout = { selectedExercises ->
-                workoutViewModel.addWorkouts(daysOfWeek[pagerState.currentPage], selectedExercises)
-                showAddWorkoutScreen = false
-            },
-            onBack = { showAddWorkoutScreen = false }
-        )
     }
 }
 
