@@ -4,6 +4,9 @@ package com.devofure.workoutschedule.ui.main
 
 import android.app.DatePickerDialog
 import android.widget.DatePicker
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -48,6 +51,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -116,9 +120,15 @@ fun WorkoutApp(
                     }
                 }
             }) {
+                val rotation by animateFloatAsState(
+                    targetValue = if (isExpanded) 45f else 0f,
+                    animationSpec = tween(durationMillis = 150),
+                    label = "",
+                )
                 Icon(
                     imageVector = if (isExpanded) Icons.Filled.Close else Icons.Filled.MoreVert,
-                    contentDescription = if (isExpanded) "Close Options" else "More Options"
+                    contentDescription = if (isExpanded) "Close Options" else "More Options",
+                    modifier = Modifier.rotate(rotation)
                 )
             }
         }
@@ -127,6 +137,7 @@ fun WorkoutApp(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
+                .animateContentSize()
         ) {
             TopAppBar(
                 title = { Text("Workout Schedule") },
