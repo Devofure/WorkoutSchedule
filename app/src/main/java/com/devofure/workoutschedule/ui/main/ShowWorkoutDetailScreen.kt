@@ -26,98 +26,82 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.devofure.workoutschedule.data.Workout
 
 @Composable
 fun WorkoutDetailScreen(navController: NavController, sharedViewModel: SharedViewModel) {
-    val workout by sharedViewModel.selectedWorkout.collectAsState()
-    workout?.let {
-        ShowWorkoutDetailScreen(it, onDismiss = {
-            sharedViewModel.clearSelectedWorkout()
-            navController.popBackStack()
-        })
-    }
-}
-
-@Composable
-fun ShowWorkoutDetailScreen(workout: Workout, onDismiss: () -> Unit) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(text = workout.exercise.name, style = MaterialTheme.typography.h6) },
-                navigationIcon = {
-                    IconButton(onClick = onDismiss) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                },
-            )
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .verticalScroll(rememberScrollState())
-                    .padding(16.dp)
-                    .fillMaxSize()
-            ) {
-                workout.repsList?.let {
-                    SectionHeader(title = "Sets & Reps")
-                    it.forEachIndexed { index, reps ->
+    val workoutState by sharedViewModel.selectedWorkout.collectAsState()
+    workoutState?.let { workout ->
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
                         Text(
-                            text = "Set ${index + 1}: $reps reps",
-                            style = MaterialTheme.typography.body1,
-                            modifier = Modifier.padding(horizontal = 8.dp)
+                            text = workout.exercise.name,
+                            style = MaterialTheme.typography.h6
                         )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            sharedViewModel.clearSelectedWorkout()
+                            navController.popBackStack()
+                        }) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
+                    },
+                )
+            },
+            content = { paddingValues ->
+                Column(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp)
+                        .fillMaxSize()
+                ) {
+                    workout.repsList?.let { repsList ->
+                        SectionHeader(title = "Sets & Reps")
+                        repsList.forEachIndexed { index, reps ->
+                            DetailText(text = "Set ${index + 1}: $reps reps")
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
                     }
-                    SectionSpacer()
-                }
 
-                workout.duration?.let {
-                    DetailItem(label = "Duration", value = "$it mins")
-                }
+                    workout.duration?.let { duration ->
+                        DetailItem(label = "Duration", value = "$duration mins")
+                    }
 
-                if (workout.exercise.equipment?.isNotEmpty() == true) {
-                    DetailItem(label = "Equipment", value = workout.exercise.equipment)
-                }
+                    workout.exercise.equipment?.takeIf { equipment -> equipment.isNotEmpty() }
+                        ?.let { equipment ->
+                            DetailItem(label = "Equipment", value = equipment)
+                        }
 
-                if (workout.exercise.primaryMuscles.isNotEmpty()) {
-                    DetailItem(
-                        label = "Primary Muscles",
-                        value = workout.exercise.primaryMuscles.joinToString(", ")
-                    )
-                }
-
-                if (workout.exercise.secondaryMuscles.isNotEmpty()) {
-                    DetailItem(
-                        label = "Secondary Muscles",
-                        value = workout.exercise.secondaryMuscles.joinToString(", ")
-                    )
-                }
-
-                if (workout.exercise.instructions.isNotEmpty()) {
-                    SectionHeader(title = "Instructions")
-                    workout.exercise.instructions.forEachIndexed { _, instruction ->
-                        Row(
-                            verticalAlignment = Alignment.Top,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        ) {
-                            Text(
-                                text = "\u2022", // Bullet point
-                                style = MaterialTheme.typography.body2.copy(color = Color.Gray),
-                                modifier = Modifier.padding(end = 4.dp, start = 8.dp)
-                            )
-                            Text(
-                                text = instruction,
-                                style = MaterialTheme.typography.body2,
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Start
+                    workout.exercise.primaryMuscles.takeIf { primaryMuscles -> primaryMuscles.isNotEmpty() }
+                        ?.let { primaryMuscles ->
+                            DetailItem(
+                                label = "Primary Muscles",
+                                value = primaryMuscles.joinToString(", ")
                             )
                         }
-                    }
+
+                    workout.exercise.secondaryMuscles.takeIf { secondaryMuscles -> secondaryMuscles.isNotEmpty() }
+                        ?.let { secondaryMuscles ->
+                            DetailItem(
+                                label = "Secondary Muscles",
+                                value = secondaryMuscles.joinToString(", ")
+                            )
+                        }
+
+                    workout.exercise.instructions.takeIf { instructions -> instructions.isNotEmpty() }
+                        ?.let { instructions ->
+                            SectionHeader(title = "Instructions")
+                            instructions.forEachIndexed { _, instruction ->
+                                InstructionItem(instruction)
+                            }
+                        }
                 }
             }
-        }
-    )
+        )
+    }
 }
 
 @Composable
@@ -132,20 +116,38 @@ fun SectionHeader(title: String) {
 
 @Composable
 fun DetailItem(label: String, value: String) {
-    Row {
-        Column {
-            SectionHeader(title = label)
-            Text(
-                text = value,
-                style = MaterialTheme.typography.body1,
-                modifier = Modifier.padding(horizontal = 8.dp)
-            )
-            SectionSpacer()
-        }
+    Column {
+        SectionHeader(title = label)
+        DetailText(text = value)
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }
 
 @Composable
-private fun SectionSpacer() {
-    Spacer(modifier = Modifier.height(12.dp))
+fun DetailText(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.body1,
+        modifier = Modifier.padding(horizontal = 8.dp)
+    )
+}
+
+@Composable
+fun InstructionItem(instruction: String) {
+    Row(
+        verticalAlignment = Alignment.Top,
+        modifier = Modifier.padding(bottom = 4.dp)
+    ) {
+        Text(
+            text = "\u2022", // Bullet point
+            style = MaterialTheme.typography.body2.copy(color = Color.Gray),
+            modifier = Modifier.padding(end = 4.dp, start = 8.dp)
+        )
+        Text(
+            text = instruction,
+            style = MaterialTheme.typography.body2,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Start
+        )
+    }
 }

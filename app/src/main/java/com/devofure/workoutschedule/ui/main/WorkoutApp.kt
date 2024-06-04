@@ -4,7 +4,6 @@ package com.devofure.workoutschedule.ui.main
 
 import android.app.DatePickerDialog
 import android.widget.DatePicker
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -164,7 +163,6 @@ fun MainScreen(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
-                .animateContentSize()
         ) {
             TopAppBar(
                 title = { Text("Workout Schedule") },
