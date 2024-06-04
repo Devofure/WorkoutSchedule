@@ -46,7 +46,7 @@ fun WorkoutItem(
     onWorkoutChecked: (Int, Boolean) -> Unit,
     onWorkoutRemove: () -> Unit,
     onWorkoutDetail: () -> Unit,
-    onWorkoutEdit: () -> Unit,
+    onWorkoutEdit: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
 

@@ -60,7 +60,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.devofure.workoutschedule.data.Workout
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -68,12 +67,28 @@ import java.util.Calendar
 @Composable
 fun WorkoutApp(
     workoutViewModel: WorkoutViewModel = viewModel(),
+    sharedViewModel: SharedViewModel = viewModel(),
     onSettingsClick: () -> Unit
 ) {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "main") {
-        composable("main") { MainScreen(navController, workoutViewModel, onSettingsClick) }
-        composable("add_exercise") { AddExerciseScreen(navController, workoutViewModel) }
+        composable("main") {
+            MainScreen(
+                navController,
+                workoutViewModel,
+                sharedViewModel,
+                onSettingsClick
+            )
+        }
+        composable("add_exercise/{day}") { backStackEntry ->
+            val day = backStackEntry.arguments?.getString("day") ?: return@composable
+            AddExerciseScreen(navController, sharedViewModel, workoutViewModel, day)
+        }
+        composable("workout_detail") { WorkoutDetailScreen(navController, sharedViewModel) }
+        composable("edit_workout/{day}") { backStackEntry ->
+            val day = backStackEntry.arguments?.getString("day") ?: return@composable
+            EditWorkoutScreen(navController, sharedViewModel, workoutViewModel, day)
+        }
     }
 }
 
@@ -81,6 +96,7 @@ fun WorkoutApp(
 fun MainScreen(
     navController: NavHostController,
     workoutViewModel: WorkoutViewModel,
+    sharedViewModel: SharedViewModel,
     onSettingsClick: () -> Unit
 ) {
     val daysOfWeek =
@@ -89,10 +105,6 @@ fun MainScreen(
 
     val scaffoldState = rememberBottomSheetScaffoldState()
     val coroutineScope = rememberCoroutineScope()
-
-    var selectedWorkout by remember { mutableStateOf<Workout?>(null) }
-    var showEditWorkoutScreen by remember { mutableStateOf(false) }
-    var showWorkoutDetailScreen by remember { mutableStateOf(false) }
     var expandedWorkoutIds by remember { mutableStateOf(setOf<Int>()) }
 
     val systemUiController = rememberSystemUiController()
@@ -116,11 +128,10 @@ fun MainScreen(
                         scaffoldState.snackbarHostState.showSnackbar("All workouts completed!")
                     }
                 },
-                onLogDay = {
-                    showDatePicker = true
-                },
+                onLogDay = { showDatePicker = true },
                 onAddExercise = {
-                    navController.navigate("add_exercise")
+                    val day = daysOfWeek[pagerState.currentPage]
+                    navController.navigate("add_exercise/$day")
                 }
             )
         },
@@ -228,12 +239,12 @@ fun MainScreen(
                                         )
                                     },
                                     onWorkoutDetail = {
-                                        selectedWorkout = workout
-                                        showWorkoutDetailScreen = true
+                                        sharedViewModel.selectWorkout(workout)
+                                        navController.navigate("workout_detail")
                                     },
                                     onWorkoutEdit = {
-                                        selectedWorkout = workout
-                                        showEditWorkoutScreen = true
+                                        sharedViewModel.selectWorkout(workout)
+                                        navController.navigate("edit_workout/${daysOfWeek[page]}")
                                     }
                                 )
                             }
@@ -243,14 +254,16 @@ fun MainScreen(
             }
         }
     }
-
     if (showDatePicker) {
-        ShowDatePickerDialog(onDateSelected = { date ->
-            // Handle the selected date here, e.g., log the day
-            showDatePicker = false
-        }, onDismissRequest = {
-            showDatePicker = false
-        })
+        ShowDatePickerDialog(
+            onDateSelected = { date ->
+                // Handle the selected date here, e.g., log the day
+                showDatePicker = false
+            },
+            onDismissRequest = {
+                showDatePicker = false
+            }
+        )
     }
 }
 

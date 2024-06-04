@@ -27,7 +27,9 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,152 +37,166 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.devofure.workoutschedule.data.Workout
+import androidx.navigation.NavHostController
 
 @Composable
 fun EditWorkoutScreen(
-    workout: Workout,
-    onSave: (Workout) -> Unit,
-    onDismiss: () -> Unit
+    navController: NavHostController,
+    sharedViewModel: SharedViewModel,
+    workoutViewModel: WorkoutViewModel,
+    day: String
 ) {
-    var sets by remember { mutableStateOf(workout.sets ?: 0) }
-    var repsList by remember {
-        mutableStateOf(workout.repsList?.map { it.toString() } ?: List(
-            workout.sets ?: 0
-        ) { "" })
-    }
-    var duration by remember { mutableStateOf(workout.duration?.toString() ?: "") }
-    var setsError by remember { mutableStateOf<String?>(null) }
-    var repsError by remember { mutableStateOf<String?>(null) }
-    var durationError by remember { mutableStateOf<String?>(null) }
+    val workout by sharedViewModel.selectedWorkout.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Edit Workout") },
-                navigationIcon = {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Close",
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .size(24.dp)
-                            .clickable(onClick = onDismiss)
-                    )
-                }
-            )
-        },
-        content = { paddingValues ->
-            Box(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .fillMaxSize()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(16.dp)
-                        .fillMaxWidth()
-                ) {
-                    ValidatedTextField(
-                        value = duration,
-                        onValueChange = { duration = it },
-                        label = "Duration (mins)",
-                        error = durationError,
-                        keyboardType = KeyboardType.Number
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Sets: $sets", style = MaterialTheme.typography.h6)
-                        Spacer(modifier = Modifier.width(16.dp))
-                        IconButton(
-                            onClick = {
-                                if (sets > 0) {
-                                    sets -= 1
-                                    repsList = repsList.dropLast(1).toMutableList()
+    workout?.let { workoutData ->
+        var sets by remember { mutableIntStateOf(workoutData.sets ?: 0) }
+        var repsList by remember {
+            mutableStateOf(workoutData.repsList?.map { it.toString() } ?: List(
+                workoutData.sets ?: 0
+            ) { "" })
+        }
+        var duration by remember { mutableStateOf(workoutData.duration?.toString() ?: "") }
+        var setsError by remember { mutableStateOf<String?>(null) }
+        var repsError by remember { mutableStateOf<String?>(null) }
+        var durationError by remember { mutableStateOf<String?>(null) }
+
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("Edit Workout") },
+                    navigationIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Close",
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .size(24.dp)
+                                .clickable {
+                                    sharedViewModel.clearSelectedWorkout()
+                                    navController.popBackStack()
                                 }
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Remove,
-                                contentDescription = "Remove Set"
-                            )
-                        }
-                        IconButton(
-                            onClick = {
-                                sets += 1
-                                repsList = repsList.toMutableList().apply { add("") }
-                            }
-                        ) {
-                            Icon(imageVector = Icons.Default.Add, contentDescription = "Add Set")
-                        }
-                    }
-                    if (setsError != null) {
-                        Text(
-                            text = setsError ?: "",
-                            color = MaterialTheme.colors.error,
-                            style = MaterialTheme.typography.caption,
-                            modifier = Modifier.padding(start = 16.dp)
                         )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Column {
-                        repsList.forEachIndexed { index, repValue ->
-                            ValidatedTextField(
-                                value = repValue,
-                                onValueChange = { newValue ->
-                                    repsList =
-                                        repsList.toMutableList().apply { this[index] = newValue }
-                                },
-                                label = "Reps for set ${index + 1}",
-                                error = if (repsError != null && index >= repsList.size) repsError else null,
-                                keyboardType = KeyboardType.Number
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
+                )
+            },
+            content = { paddingValues ->
+                Box(
+                    modifier = Modifier
+                        .padding(paddingValues)
+                        .fillMaxSize()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .verticalScroll(rememberScrollState())
+                            .padding(16.dp)
+                            .fillMaxWidth()
+                    ) {
+                        ValidatedTextField(
+                            value = duration,
+                            onValueChange = { duration = it },
+                            label = "Duration (mins)",
+                            error = durationError,
+                            keyboardType = KeyboardType.Number
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("Sets: $sets", style = MaterialTheme.typography.h6)
+                            Spacer(modifier = Modifier.width(16.dp))
+                            IconButton(
+                                onClick = {
+                                    if (sets > 0) {
+                                        sets -= 1
+                                        repsList = repsList.dropLast(1).toMutableList()
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Remove,
+                                    contentDescription = "Remove Set"
+                                )
+                            }
+                            IconButton(
+                                onClick = {
+                                    sets += 1
+                                    repsList = repsList.toMutableList().apply { add("") }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Add Set"
+                                )
+                            }
                         }
-                        if (repsError != null) {
+                        if (setsError != null) {
                             Text(
-                                text = repsError ?: "",
+                                text = setsError ?: "",
                                 color = MaterialTheme.colors.error,
                                 style = MaterialTheme.typography.caption,
                                 modifier = Modifier.padding(start = 16.dp)
                             )
                         }
-                    }
-                    Spacer(modifier = Modifier.height(80.dp)) // Add space to avoid the button covering content
-                }
-                Button(
-                    onClick = {
-                        val validationResult = validateWorkoutInput(
-                            sets.toString(),
-                            repsList.joinToString(", "),
-                            duration
-                        )
-                        setsError = validationResult.setsError
-                        repsError = validationResult.repsError
-                        durationError = validationResult.durationError
-
-                        if (validationResult.isValid) {
-                            val updatedWorkout = workout.copy(
-                                sets = sets,
-                                repsList = repsList.mapNotNull { it.trim().toIntOrNull() },
-                                duration = duration.toIntOrNull()
-                            )
-                            onSave(updatedWorkout)
-                            onDismiss()
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Column {
+                            repsList.forEachIndexed { index, repValue ->
+                                ValidatedTextField(
+                                    value = repValue,
+                                    onValueChange = { newValue ->
+                                        repsList =
+                                            repsList.toMutableList()
+                                                .apply { this[index] = newValue }
+                                    },
+                                    label = "Reps for set ${index + 1}",
+                                    error = if (repsError != null && index >= repsList.size) repsError else null,
+                                    keyboardType = KeyboardType.Number
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                            if (repsError != null) {
+                                Text(
+                                    text = repsError ?: "",
+                                    color = MaterialTheme.colors.error,
+                                    style = MaterialTheme.typography.caption,
+                                    modifier = Modifier.padding(start = 16.dp)
+                                )
+                            }
                         }
-                    },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp)
-                        .fillMaxWidth()
-                ) {
-                    Text("Save")
+                        Spacer(modifier = Modifier.height(80.dp)) // Add space to avoid the button covering content
+                    }
+                    Button(
+                        onClick = {
+                            val validationResult = validateWorkoutInput(
+                                sets.toString(),
+                                repsList.joinToString(", "),
+                                duration
+                            )
+                            setsError = validationResult.setsError
+                            repsError = validationResult.repsError
+                            durationError = validationResult.durationError
+
+                            if (validationResult.isValid) {
+                                val updatedWorkout = workoutData.copy(
+                                    sets = sets,
+                                    repsList = repsList.mapNotNull { it.trim().toIntOrNull() },
+                                    duration = duration.toIntOrNull()
+                                )
+                                workoutViewModel.updateWorkout(day, updatedWorkout)
+                                sharedViewModel.clearSelectedWorkout()
+                                navController.popBackStack()
+                            }
+                        },
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(16.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Text("Save")
+                    }
                 }
             }
-        }
-    )
+        )
+    }
 }
+
 
 @Composable
 fun ValidatedTextField(
@@ -239,8 +255,5 @@ fun validateWorkoutInput(sets: String, repsList: String, duration: String): Vali
 }
 
 data class ValidationResult(
-    val isValid: Boolean,
-    val setsError: String?,
-    val repsError: String?,
-    val durationError: String?
+    val isValid: Boolean, val setsError: String?, val repsError: String?, val durationError: String?
 )

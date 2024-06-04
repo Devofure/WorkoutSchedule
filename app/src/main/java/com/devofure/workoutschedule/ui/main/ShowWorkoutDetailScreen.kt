@@ -16,14 +16,28 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.devofure.workoutschedule.data.Workout
+
+@Composable
+fun WorkoutDetailScreen(navController: NavController, sharedViewModel: SharedViewModel) {
+    val workout by sharedViewModel.selectedWorkout.collectAsState()
+    workout?.let {
+        ShowWorkoutDetailScreen(it, onDismiss = {
+            sharedViewModel.clearSelectedWorkout()
+            navController.popBackStack()
+        })
+    }
+}
 
 @Composable
 fun ShowWorkoutDetailScreen(workout: Workout, onDismiss: () -> Unit) {
@@ -33,7 +47,7 @@ fun ShowWorkoutDetailScreen(workout: Workout, onDismiss: () -> Unit) {
                 title = { Text(text = workout.exercise.name, style = MaterialTheme.typography.h6) },
                 navigationIcon = {
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Filled.Close, contentDescription = "Close")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
             )

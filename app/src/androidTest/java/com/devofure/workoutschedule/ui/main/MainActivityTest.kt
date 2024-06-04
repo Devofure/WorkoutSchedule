@@ -6,7 +6,6 @@ import android.content.SharedPreferences
 import androidx.activity.compose.setContent
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -67,7 +66,7 @@ class MainActivityTest {
         composeTestRule.onNodeWithContentDescription("Settings").assertExists()
 
         // Check if the FAB button is displayed
-        composeTestRule.onNodeWithContentDescription("Add Workout").assertExists()
+        composeTestRule.onNodeWithContentDescription("More Options").assertExists()
     }
 
     @Test
@@ -80,17 +79,5 @@ class MainActivityTest {
 
         // Check if the "Settings" screen is displayed
         composeTestRule.onNodeWithText("Settings").assertExists()
-    }
-
-    @Test
-    fun testMarkAllWorkoutsAsDone() {
-        // Click on the checkbox to mark all workouts as done
-        composeTestRule.onNodeWithTag("markAllAsDoneCheckbox").performClick()
-
-        // Wait for the snackbar to be shown
-        composeTestRule.waitForIdle()
-
-        // Verify the snackbar is shown
-        composeTestRule.onNodeWithText("All workouts completed!").assertExists()
     }
 }

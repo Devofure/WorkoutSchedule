@@ -49,7 +49,9 @@ import com.devofure.workoutschedule.data.Exercise
 @Composable
 fun AddExerciseScreen(
     navController: NavHostController,
-    workoutViewModel: WorkoutViewModel
+    sharedViewModel: SharedViewModel,
+    workoutViewModel: WorkoutViewModel,
+    day: String,
 ) {
     var selectedExercises by remember { mutableStateOf<List<Exercise>>(emptyList()) }
     var isSearchExpanded by remember { mutableStateOf(false) }
@@ -138,7 +140,8 @@ fun AddExerciseScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = {
-                        // Handle add workout action
+                        workoutViewModel.addWorkouts(day, selectedExercises)
+                        sharedViewModel.clearSelectedWorkout()
                         navController.popBackStack()
                     },
                     colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary),
