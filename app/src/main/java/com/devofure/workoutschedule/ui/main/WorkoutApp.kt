@@ -137,7 +137,7 @@ fun MainScreen(
                 }
             }) {
                 val rotation by animateFloatAsState(
-                    targetValue = if (isExpanded) 45f else 0f,
+                    targetValue = if (isExpanded) 0f else 0f,
                     animationSpec = tween(durationMillis = 150),
                     label = "",
                 )
