@@ -13,7 +13,7 @@ import com.devofure.workoutschedule.R
 class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
         val notification = NotificationCompat.Builder(context, "workout_reminder_channel")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setSmallIcon(R.drawable.ic_launcher_background)
             .setContentTitle("Workout Reminder")
             .setContentText("It's time for your workout!")
             .setPriority(NotificationCompat.PRIORITY_HIGH)

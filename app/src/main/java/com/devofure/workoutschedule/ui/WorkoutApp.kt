@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 
-package com.devofure.workoutschedule.ui.main
+package com.devofure.workoutschedule.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.material.ExperimentalMaterialApi
@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.devofure.workoutschedule.ui.addexercise.AddExerciseScreen
 import com.devofure.workoutschedule.ui.editworkout.EditWorkoutScreen
+import com.devofure.workoutschedule.ui.main.MainScreen
 import com.devofure.workoutschedule.ui.workoutdetails.WorkoutDetailScreen
 
 @Composable

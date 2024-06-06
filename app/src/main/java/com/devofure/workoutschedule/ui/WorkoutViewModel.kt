@@ -1,4 +1,4 @@
-package com.devofure.workoutschedule.ui.main
+package com.devofure.workoutschedule.ui
 
 import android.app.Application
 import android.content.Context

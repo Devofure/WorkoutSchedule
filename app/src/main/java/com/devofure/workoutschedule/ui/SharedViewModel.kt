@@ -1,4 +1,4 @@
-package com.devofure.workoutschedule.ui.main
+package com.devofure.workoutschedule.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -44,6 +44,8 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.devofure.workoutschedule.ui.SharedViewModel
+import com.devofure.workoutschedule.ui.WorkoutViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 
@@ -56,8 +58,8 @@ fun MainScreen(
 ) {
     val initialDaysOfWeek =
         listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
-    var daysOfWeek by remember { mutableStateOf(initialDaysOfWeek.toMutableList()) }
-    var nicknames by remember { mutableStateOf(MutableList(initialDaysOfWeek.size) { "" }) }
+    val daysOfWeek by remember { mutableStateOf(initialDaysOfWeek.toMutableList()) }
+    val nicknames by remember { mutableStateOf(MutableList(initialDaysOfWeek.size) { "" }) }
     val pagerState = rememberPagerState { daysOfWeek.size }
 
     val scaffoldState = rememberBottomSheetScaffoldState()

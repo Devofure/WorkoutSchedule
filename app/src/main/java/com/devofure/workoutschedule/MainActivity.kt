@@ -18,8 +18,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.devofure.workoutschedule.ui.main.WorkoutApp
-import com.devofure.workoutschedule.ui.main.WorkoutViewModel
+import com.devofure.workoutschedule.ui.WorkoutApp
+import com.devofure.workoutschedule.ui.WorkoutViewModel
 import com.devofure.workoutschedule.ui.settings.SettingsScreen
 import com.devofure.workoutschedule.ui.settings.SettingsViewModel
 import com.devofure.workoutschedule.ui.settings.ThemeType

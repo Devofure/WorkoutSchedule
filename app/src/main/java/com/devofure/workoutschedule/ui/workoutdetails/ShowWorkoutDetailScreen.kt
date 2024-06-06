@@ -26,7 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.devofure.workoutschedule.ui.main.SharedViewModel
+import com.devofure.workoutschedule.ui.SharedViewModel
 
 @Composable
 fun WorkoutDetailScreen(navController: NavController, sharedViewModel: SharedViewModel) {

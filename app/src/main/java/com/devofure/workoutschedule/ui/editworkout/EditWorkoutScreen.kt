@@ -38,8 +38,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.devofure.workoutschedule.ui.main.SharedViewModel
-import com.devofure.workoutschedule.ui.main.WorkoutViewModel
+import com.devofure.workoutschedule.ui.SharedViewModel
+import com.devofure.workoutschedule.ui.WorkoutViewModel
 
 @Composable
 fun EditWorkoutScreen(
