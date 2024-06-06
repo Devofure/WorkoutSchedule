@@ -44,7 +44,8 @@ class MainActivityTest {
         composeTestRule.waitForIdle()
 
         // Interact with the AlertDialog to generate a sample schedule
-        composeTestRule.onNodeWithText("Generate Sample Schedule").assertExists()
+        composeTestRule.onNodeWithText("Generate Sample Schedule")
+            .assertExists("Generate Sample Schedule not found")
         composeTestRule.onNodeWithText("Yes").performClick()
 
         // Wait for the schedule to be generated

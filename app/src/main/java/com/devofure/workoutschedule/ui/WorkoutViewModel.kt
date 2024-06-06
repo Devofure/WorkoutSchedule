@@ -11,6 +11,7 @@ import com.devofure.workoutschedule.data.LogEntity
 import com.devofure.workoutschedule.data.Workout
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -57,6 +58,12 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 searchExercises(query)
             }
         }
+    }
+
+    fun getLogsForDate(date: Date): Flow<List<LogEntity>> {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val formattedDate = dateFormat.format(date)
+        return logDao.getLogsForDate(formattedDate)
     }
 
     fun logWorkout(workout: Workout, date: Date) {
