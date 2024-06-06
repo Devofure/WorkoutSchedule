@@ -65,7 +65,15 @@ fun EditWorkoutScreen(
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Edit Workout") },
+                    title = {
+                        Column {
+                            Text("Edit Workout")
+                            Text(
+                                workoutData.exercise.name,
+                                style = MaterialTheme.typography.subtitle2
+                            )
+                        }
+                    },
                     navigationIcon = {
                         Icon(
                             imageVector = Icons.Default.Close,
@@ -198,7 +206,6 @@ fun EditWorkoutScreen(
         )
     }
 }
-
 
 @Composable
 fun ValidatedTextField(

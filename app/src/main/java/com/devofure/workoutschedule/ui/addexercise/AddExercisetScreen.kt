@@ -107,7 +107,10 @@ fun AddExerciseScreen(
                             }
                         }
                     } else {
-                        Text("Add Exercises")
+                        Column {
+                            Text("Add Exercises")
+                            Text(day, style = MaterialTheme.typography.subtitle2)
+                        }
                     }
                 },
                 navigationIcon = {
