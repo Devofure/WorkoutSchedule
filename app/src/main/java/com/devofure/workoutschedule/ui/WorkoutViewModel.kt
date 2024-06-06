@@ -4,8 +4,10 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.devofure.workoutschedule.data.AppDatabase
 import com.devofure.workoutschedule.data.Exercise
 import com.devofure.workoutschedule.data.ExerciseRepository
+import com.devofure.workoutschedule.data.LogEntity
 import com.devofure.workoutschedule.data.Workout
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -15,6 +17,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val exerciseRepository = ExerciseRepository(application.applicationContext)
@@ -22,6 +27,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     private val workouts: StateFlow<Map<String, List<Workout>>> = _workouts
     private val sharedPreferences =
         application.applicationContext.getSharedPreferences("WorkoutApp", Context.MODE_PRIVATE)
+    private val logDao by lazy { AppDatabase.getDatabase(application).logDao() }
     private val gson = Gson()
 
     private val _isFirstLaunch = MutableStateFlow(true)
@@ -50,6 +56,18 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             searchQuery.collect { query ->
                 searchExercises(query)
             }
+        }
+    }
+
+    fun logWorkout(workout: Workout, date: Date) {
+        viewModelScope.launch {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val logEntity = LogEntity(
+                date = dateFormat.format(date),
+                workoutId = workout.id,
+                dayOfWeek = SimpleDateFormat("EEEE", Locale.getDefault()).format(date)
+            )
+            logDao.insertLog(logEntity)
         }
     }
 

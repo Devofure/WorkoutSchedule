@@ -1,14 +1,14 @@
 package com.devofure.workoutschedule.ui.main
 
 import android.app.DatePickerDialog
-import android.widget.DatePicker
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import java.util.Calendar
+import java.util.Date
 
 @Composable
 fun ShowDatePickerDialog(
-    onDateSelected: (String) -> Unit,
+    onDateSelected: (Date) -> Unit,
     onDismissRequest: () -> Unit
 ) {
     val context = LocalContext.current
@@ -16,8 +16,10 @@ fun ShowDatePickerDialog(
 
     DatePickerDialog(
         context,
-        { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
-            val selectedDate = "$dayOfMonth/${month + 1}/$year"
+        { _, year, month, dayOfMonth ->
+            val selectedDate = Calendar.getInstance().apply {
+                set(year, month, dayOfMonth)
+            }.time
             onDateSelected(selectedDate)
         },
         calendar.get(Calendar.YEAR),
