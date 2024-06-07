@@ -60,7 +60,7 @@ jobs:
       run: |
         boot_completed=""
         retries=0
-        timeout=600
+        timeout=1200  # Increase the timeout to 20 minutes
         while [[ -z "$boot_completed" && $retries -lt $timeout ]]; do
           echo "Waiting for emulator to boot..."
           boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
@@ -69,7 +69,7 @@ jobs:
         done
         if [[ -z "$boot_completed" ]]; then
           echo "Emulator failed to boot within $timeout seconds"
-          adb shell logcat -d
+          adb shell logcat -d > emulator_logcat.txt
           exit 1
         fi
         echo "Emulator booted successfully"
@@ -77,6 +77,13 @@ jobs:
 
     - name: Get emulator status
       run: adb shell getprop
+
+    - name: Upload emulator logcat
+      if: failure()
+      uses: actions/upload-artifact@v2
+      with:
+        name: emulator-logcat
+        path: emulator_logcat.txt
 
     - name: Run instrumented tests
       run: ./gradlew connectedAndroidTest
