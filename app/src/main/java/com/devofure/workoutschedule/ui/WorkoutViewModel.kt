@@ -36,6 +36,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
     private var nextWorkoutId = 1
 
+
     private val _filteredExercises = MutableStateFlow<List<Exercise>>(emptyList())
     val filteredExercises: StateFlow<List<Exercise>> = _filteredExercises
 
