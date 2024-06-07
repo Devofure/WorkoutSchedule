@@ -24,13 +24,14 @@ jobs:
         java-version: '17'
 
     - name: Set up Android SDK
-      uses: android-actions/setup-android@v2
-      with:
-        api-level: 29
-        build-tools: 29.0.3
-
-    - name: Install system image
-      run: sdkmanager "system-images;android-29;google_apis;x86_64"
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y wget unzip
+        wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip -O commandlinetools-linux.zip
+        unzip commandlinetools-linux.zip -d $ANDROID_HOME/cmdline-tools
+        mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
+        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-29" "build-tools;29.0.3" "system-images;android-29;google_apis;x86_64" "emulator"
 
     - name: Cache Gradle packages
       uses: actions/cache@v2
@@ -49,11 +50,11 @@ jobs:
       run: ./gradlew build
 
     - name: Create AVD
-      run: echo "no" | avdmanager create avd -n test -k "system-images;android-29;google_apis;x86_64" --device "Nexus 5"
+      run: echo "no" | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test -k "system-images;android-29;google_apis;x86_64" --device "Nexus 5"
 
     - name: Start AVD
       run: |
-        $ANDROID_HOME/emulator/emulator -avd test -no-window -no-audio -no-boot-anim -accel off -gpu off -verbose &
+        $ANDROID_HOME/emulator/emulator -avd test -no-window -no-audio -no-boot-anim -accel off -gpu swiftshader_indirect -verbose &
         adb wait-for-device
 
     - name: Wait for emulator to boot
