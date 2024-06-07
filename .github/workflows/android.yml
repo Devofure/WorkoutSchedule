@@ -13,6 +13,10 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        api-level: [28, 29, 30]
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
@@ -26,11 +30,11 @@ jobs:
     - name: Set up Android SDK
       uses: android-actions/setup-android@v2
       with:
-        api-level: 30
+        api-level: ${{ matrix.api-level }}
         build-tools: 30.0.3
 
     - name: Install system image
-      run: sdkmanager "system-images;android-30;google_apis;x86_64"
+      run: sdkmanager "system-images;android-${{ matrix.api-level }};google_apis;x86_64"
 
     - name: Cache Gradle packages
       uses: actions/cache@v2
@@ -49,7 +53,7 @@ jobs:
       run: ./gradlew build
 
     - name: Create AVD
-      run: echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" --device "pixel"
+      run: echo "no" | avdmanager create avd -n test -k "system-images;android-${{ matrix.api-level }};google_apis;x86_64" --device "pixel"
 
     - name: Start AVD
       run: |
