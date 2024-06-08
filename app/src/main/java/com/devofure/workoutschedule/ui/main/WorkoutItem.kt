@@ -120,14 +120,14 @@ fun WorkoutItem(
                 exit = fadeOut() + shrinkVertically()
             ) {
                 Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)) {
-                    workout.sets?.let {
+                    workout.repsList?.let { repsList ->
                         Text(
-                            text = "${workout.sets} sets:",
+                            text = "${repsList.size} sets:",
                             style = MaterialTheme.typography.subtitle1.copy(color = MaterialTheme.colors.primary),
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Start
                         )
-                        workout.repsList?.forEachIndexed { index, reps ->
+                        repsList.forEachIndexed { index, reps ->
                             Text(
                                 text = "Set ${index + 1}: $reps reps",
                                 style = MaterialTheme.typography.body2.copy(

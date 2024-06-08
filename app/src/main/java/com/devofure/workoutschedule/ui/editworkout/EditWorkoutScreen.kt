@@ -51,10 +51,10 @@ fun EditWorkoutScreen(
     val workout by sharedViewModel.selectedWorkout.collectAsState()
 
     workout?.let { workoutData ->
-        var sets by remember { mutableIntStateOf(workoutData.sets ?: 0) }
+        var sets by remember { mutableIntStateOf(workoutData.repsList?.size ?: 0) }
         var repsList by remember {
             mutableStateOf(workoutData.repsList?.map { it.toString() } ?: List(
-                workoutData.sets ?: 0
+                workoutData.repsList?.size ?: 0
             ) { "" })
         }
         var duration by remember { mutableStateOf(workoutData.duration?.toString() ?: "") }
@@ -185,7 +185,6 @@ fun EditWorkoutScreen(
 
                             if (validationResult.isValid) {
                                 val updatedWorkout = workoutData.copy(
-                                    sets = sets,
                                     repsList = repsList.mapNotNull { it.trim().toIntOrNull() },
                                     duration = duration.toIntOrNull()
                                 )

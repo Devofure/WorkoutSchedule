@@ -271,7 +271,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         return Workout(
             id = log.id,
             exercise = exercise,
-            sets = log.repsList?.size,
             repsList = log.repsList,
         )
     }
