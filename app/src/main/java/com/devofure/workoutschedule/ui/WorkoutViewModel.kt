@@ -98,13 +98,55 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
     private fun loadWorkoutsFromExercises(): Map<String, List<Workout>> {
         val sampleExercises = mapOf(
-            "Monday" to listOf("3/4 Sit-Up", "90/90 Hamstring"),
-            "Tuesday" to listOf("Ab Crunch Machine", "Ab Roller"),
-            "Wednesday" to listOf("Adductor", "Adductor/Groin"),
-            "Thursday" to listOf("Advanced Kettlebell Windmill", "Air Bike"),
-            "Friday" to listOf("All Fours Quad Stretch", "Alternate Hammer Curl"),
-            "Saturday" to listOf("Alternate Heel Touchers", "Alternate Incline Dumbbell Curl"),
-            "Sunday" to listOf("Alternate Leg Diagonal Bound", "Alternating Cable Shoulder Press")
+            "Monday" to listOf(
+                "Dumbbell Bench Press",
+                "Close-Grip Push-Up off of a Dumbbell",
+                "Dumbbell Flyes",
+                "Cable Chest Press",
+                "Triceps Pushdown - Rope Attachment"
+            ),
+            "Tuesday" to listOf(
+                "Bent Over Barbell Row",
+                "One-Arm Dumbbell Row",
+                "Alternating Kettlebell Row",
+                "Hammer Curls",
+                "Dumbbell Bicep Curl"
+            ),
+            "Wednesday" to listOf(
+                "Barbell Squat",
+                "Dumbbell Lunges",
+                "Goblet Squat",
+                "Hamstring Stretch",
+                "Calf Raises - With Bands"
+            ),
+            "Thursday" to listOf(
+                "Arnold Dumbbell Press",
+                "Dumbbell Shoulder Press",
+                "Side Lateral Raise",
+                "3/4 Sit-Up",
+                "Cable Russian Twists"
+            ),
+            "Friday" to listOf(
+                "Deadlift",
+                "Kettlebell Dead Clean",
+                "Bear Crawl Sled Drags",
+                "Child's Pose",
+                "Dynamic Chest Stretch"
+            ),
+            "Saturday" to listOf(
+                "Mountain Climbers",
+                "Air Bike",
+                "Plank",
+                "Russian Twist",
+                "Flutter Kicks"
+            ),
+            "Sunday" to listOf(
+                "Cat Stretch",
+                "Quad Stretch",
+                "Hamstring Stretch",
+                "Butterfly",
+                "Child's Pose"
+            )
         )
 
         val workoutsByDay = sampleExercises.mapValues { (day, exercises) ->
