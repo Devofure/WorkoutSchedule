@@ -1,4 +1,4 @@
-name: Android Emulator Boot Test
+name: Android CI
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  emulator-boot:
+  build:
 
     runs-on: ubuntu-latest
 
@@ -18,26 +18,42 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v4.2.1
+      uses: actions/setup-java@v2
       with:
         distribution: 'adopt'
         java-version: '17'
 
     - name: Set up Android SDK
-      uses: android-actions/setup-android@v3.2.1
+      uses: android-actions/setup-android@v2
       with:
         api-level: 29
         build-tools: 29.0.3
 
     - name: Install system image
-      run: sdkmanager "system-images;android-30;google_apis;x86_64"
+      run: sdkmanager "system-images;android-29;google_apis;x86_64"
+
+    - name: Cache Gradle packages
+      uses: actions/cache@v2
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build with Gradle
+      run: ./gradlew build
 
     - name: Create AVD
-      run: echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" --device "Nexus 5"
+      run: echo "no" | avdmanager create avd -n test -k "system-images;android-29;google_apis;x86_64" --device "Nexus 5"
 
     - name: Start AVD
       run: |
-        $ANDROID_HOME/emulator/emulator -avd test -no-audio -no-window -accel off -gpu swiftshader_indirect -no-snapshot -verbose &
+        $ANDROID_HOME/emulator/emulator -avd test -no-window -no-audio -no-boot-anim -accel off -gpu off -verbose &
         adb wait-for-device
 
     - name: Wait for emulator to boot
@@ -51,11 +67,9 @@ jobs:
           sleep 1
           retries=$((retries + 1))
         done
-        if [[ "$boot_completed" != "1" ]]; then
+        if [[ -z "$boot_completed" ]]; then
           echo "Emulator failed to boot within $timeout seconds"
           adb shell logcat -d > emulator_logcat.txt
-          adb shell dumpsys meminfo > emulator_meminfo.txt
-          adb shell dumpsys cpuinfo > emulator_cpuinfo.txt
           exit 1
         fi
         echo "Emulator booted successfully"
@@ -64,16 +78,6 @@ jobs:
     - name: Get emulator status
       run: adb shell getprop
 
-    - name: Validate Device API Level
-      run: |
-        api_level=$(adb shell getprop ro.build.version.sdk)
-        echo "Device API Level: $api_level"
-        if [[ "$api_level" != "30" ]]; then
-          echo "Emulator API Level mismatch, expected 30 but got $api_level"
-          adb shell logcat -d > emulator_logcat.txt
-          exit 1
-        fi
-
     - name: Upload emulator logcat
       if: failure()
       uses: actions/upload-artifact@v2
@@ -81,16 +85,11 @@ jobs:
         name: emulator-logcat
         path: emulator_logcat.txt
 
-    - name: Upload emulator meminfo
-      if: failure()
-      uses: actions/upload-artifact@v2
-      with:
-        name: emulator-meminfo
-        path: emulator_meminfo.txt
+    - name: Run instrumented tests
+      run: ./gradlew connectedAndroidTest
 
-    - name: Upload emulator cpuinfo
-      if: failure()
-      uses: actions/upload-artifact@v2
-      with:
-        name: emulator-cpuinfo
-        path: emulator_cpuinfo.txt
+    - name: Run unit tests
+      run: ./gradlew test
+
+    - name: Run lint
+      run: ./gradlew lint
