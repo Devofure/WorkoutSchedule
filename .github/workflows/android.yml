@@ -10,6 +10,7 @@ on:
 
 jobs:
   build:
+
     runs-on: ubuntu-latest
 
     steps:
@@ -23,18 +24,13 @@ jobs:
         java-version: '17'
 
     - name: Set up Android SDK
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y wget unzip
-        wget https://dl.google.com/android/repository/commandlinetools-linux-7583922_latest.zip -O commandlinetools-linux.zip
-        mkdir -p $ANDROID_HOME/cmdline-tools
-        unzip -q commandlinetools-linux.zip -d $ANDROID_HOME/cmdline-tools
-        mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
-        $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platform-tools" "platforms;android-29" "build-tools;29.0.3" "system-images;android-29;google_apis;x86_64" "emulator"
+      uses: android-actions/setup-android@v2
+      with:
+        api-level: 30
+        build-tools: 30.0.3
 
-    - name: Update PATH
-      run: echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
+    - name: Install system image
+      run: sdkmanager "system-images;android-30;google_apis;x86_64"
 
     - name: Cache Gradle packages
       uses: actions/cache@v2
@@ -53,11 +49,11 @@ jobs:
       run: ./gradlew build
 
     - name: Create AVD
-      run: echo "no" | $ANDROID_HOME/cmdline-tools/latest/bin/avdmanager create avd -n test -k "system-images;android-29;google_apis;x86_64" --device "Nexus 5"
+      run: echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" --device "Nexus 5"
 
     - name: Start AVD
       run: |
-        $ANDROID_HOME/emulator/emulator -avd test -no-window -no-audio -no-boot-anim -accel off -gpu swiftshader_indirect -verbose &
+        $ANDROID_HOME/emulator/emulator -avd test -no-audio -no-window -gpu swiftshader_indirect -no-snapshot -verbose &
         adb wait-for-device
 
     - name: Wait for emulator to boot
@@ -82,6 +78,16 @@ jobs:
     - name: Get emulator status
       run: adb shell getprop
 
+    - name: Validate Device API Level
+      run: |
+        api_level=$(adb shell getprop ro.build.version.sdk)
+        echo "Device API Level: $api_level"
+        if [[ "$api_level" != "30" ]]; then
+          echo "Emulator API Level mismatch, expected 30 but got $api_level"
+          adb shell logcat -d > emulator_logcat.txt
+          exit 1
+        fi
+
     - name: Upload emulator logcat
       if: failure()
       uses: actions/upload-artifact@v2
@@ -90,7 +96,7 @@ jobs:
         path: emulator_logcat.txt
 
     - name: Run instrumented tests
-      run: ./gradlew connectedAndroidTest
+      run: ./gradlew connectedAndroidTest --info
 
     - name: Run unit tests
       run: ./gradlew test
