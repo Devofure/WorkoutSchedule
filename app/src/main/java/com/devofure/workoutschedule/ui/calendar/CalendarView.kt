@@ -1,6 +1,6 @@
 package com.devofure.workoutschedule.ui.calendar
 
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,7 +39,7 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-fun CalendarView(selectedDate: Date, logs: List<LogEntity>, onDateSelected: (Date) -> Unit) {
+fun CalendarView(selectedDate: Date, logs: List<LogEntity>, isMonthView: Boolean, onDateSelected: (Date) -> Unit) {
     val calendar = Calendar.getInstance().apply { time = selectedDate }
     val year = calendar.get(Calendar.YEAR)
     val month = calendar.get(Calendar.MONTH)
@@ -49,51 +49,32 @@ fun CalendarView(selectedDate: Date, logs: List<LogEntity>, onDateSelected: (Dat
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        MonthNavigation(calendar, onDateSelected)
+        MonthNavigation(calendar, onDateSelected, isMonthView)
         Spacer(modifier = Modifier.height(8.dp))
         WeekDayHeaders()
-        CalendarGrid(
-            totalCells,
-            firstDayOfMonth,
-            daysInMonth,
-            calendar,
-            selectedDate,
-            logs,
-            dateFormat,
-            onDateSelected
-        )
+        CalendarGrid(totalCells, firstDayOfMonth, daysInMonth, calendar, selectedDate, logs, dateFormat, onDateSelected)
     }
 }
 
 @Composable
-fun WeekView(selectedDate: Date, logs: List<LogEntity>, onDateSelected: (Date) -> Unit) {
+fun WeekView(selectedDate: Date, logs: List<LogEntity>, isMonthView: Boolean, onDateSelected: (Date) -> Unit) {
     val calendar = Calendar.getInstance().apply { time = selectedDate }
     val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
-    calendar.add(Calendar.DAY_OF_MONTH, -(dayOfWeek - 1))
+    calendar.add(Calendar.DAY_OF_MONTH, - (dayOfWeek - 1))
 
     val daysInWeek = 7
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        MonthNavigation(calendar, onDateSelected)
+        MonthNavigation(calendar, onDateSelected, isMonthView)
         Spacer(modifier = Modifier.height(8.dp))
         WeekDayHeaders()
-        CalendarGrid(
-            daysInWeek,
-            0,
-            daysInWeek,
-            calendar,
-            selectedDate,
-            logs,
-            dateFormat,
-            onDateSelected,
-            isWeekView = true
-        )
+        CalendarGrid(daysInWeek, 0, daysInWeek, calendar, selectedDate, logs, dateFormat, onDateSelected, isWeekView = true)
     }
 }
 
 @Composable
-fun MonthNavigation(calendar: Calendar, onDateSelected: (Date) -> Unit) {
+fun MonthNavigation(calendar: Calendar, onDateSelected: (Date) -> Unit, isMonthView: Boolean) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -101,11 +82,13 @@ fun MonthNavigation(calendar: Calendar, onDateSelected: (Date) -> Unit) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = {
-            calendar.add(Calendar.MONTH, -1)
-            onDateSelected(calendar.time)
-        }) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous month")
+        if (isMonthView) {
+            IconButton(onClick = {
+                calendar.add(Calendar.MONTH, -1)
+                onDateSelected(calendar.time)
+            }) {
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous month")
+            }
         }
         Text(
             text = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(calendar.time),
@@ -113,11 +96,13 @@ fun MonthNavigation(calendar: Calendar, onDateSelected: (Date) -> Unit) {
             textAlign = TextAlign.Center,
             modifier = Modifier.weight(1f)
         )
-        IconButton(onClick = {
-            calendar.add(Calendar.MONTH, 1)
-            onDateSelected(calendar.time)
-        }) {
-            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next month")
+        if (isMonthView) {
+            IconButton(onClick = {
+                calendar.add(Calendar.MONTH, 1)
+                onDateSelected(calendar.time)
+            }) {
+                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next month")
+            }
         }
     }
 }
@@ -167,17 +152,11 @@ fun CalendarGrid(
                     val logExists = logs.any { log ->
                         val logDate = dateFormat.parse(log.date)
                         val logCalendar = Calendar.getInstance().apply { time = logDate!! }
-                        logCalendar.get(Calendar.DAY_OF_MONTH) == day &&
+                        logCalendar.get(Calendar.DAY_OF_MONTH) == dayOfMonth &&
                                 logCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH) &&
                                 logCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)
                     }
-                    DayCell(
-                        dayOfMonth,
-                        selectedDate,
-                        logExists,
-                        onDateSelected,
-                        Modifier.weight(1f)
-                    )
+                    DayCell(dayOfMonth, selectedDate, logExists, onDateSelected, Modifier.weight(1f))
                     if (isWeekView) {
                         calendar.add(Calendar.DAY_OF_MONTH, 1)
                     }
@@ -204,10 +183,8 @@ fun DayCell(
 ) {
     val calendar = Calendar.getInstance()
     val isSelectedDay = isSameDay(calendar.apply { time = selectedDate }, day)
-    val backgroundColor = if (isSelectedDay) MaterialTheme.colors.primary else Color.Transparent
-    val textColor = if (isSelectedDay) Color.White else Color.Black
-
-    val alpha by animateFloatAsState(if (logExists) 1f else 0f, label = "")
+    val backgroundColor by animateColorAsState(if (isSelectedDay) MaterialTheme.colors.primary else Color.Transparent)
+    val textColor by animateColorAsState(if (isSelectedDay) Color.White else Color.Black)
 
     Box(
         modifier = modifier
@@ -237,7 +214,7 @@ fun DayCell(
                     .align(Alignment.BottomCenter)
                     .size(8.dp)
                     .background(
-                        MaterialTheme.colors.secondary.copy(alpha = alpha),
+                        MaterialTheme.colors.secondary,
                         shape = CircleShape
                     )
             )

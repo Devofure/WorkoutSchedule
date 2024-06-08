@@ -1,5 +1,6 @@
 package com.devofure.workoutschedule.ui.calendar
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -64,13 +65,15 @@ fun CalendarScreen(navController: NavHostController, workoutViewModel: WorkoutVi
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                if (isMonthView) {
-                    CalendarView(selectedDate, logs) { date ->
-                        selectedDate = date
-                    }
-                } else {
-                    WeekView(selectedDate, logs) { date ->
-                        selectedDate = date
+                Crossfade(targetState = isMonthView, label = "calender_expand") { monthView ->
+                    if (monthView) {
+                        CalendarView(selectedDate, logs, isMonthView) { date ->
+                            selectedDate = date
+                        }
+                    } else {
+                        WeekView(selectedDate, logs, isMonthView) { date ->
+                            selectedDate = date
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
