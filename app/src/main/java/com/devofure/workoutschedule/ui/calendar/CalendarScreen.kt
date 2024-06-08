@@ -18,6 +18,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Today
 import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material.icons.filled.ViewWeek
 import androidx.compose.runtime.Composable
@@ -51,6 +52,9 @@ fun CalendarScreen(navController: NavHostController, workoutViewModel: WorkoutVi
                     }
                 },
                 actions = {
+                    IconButton(onClick = { selectedDate = Date() }) {
+                        Icon(Icons.Filled.Today, contentDescription = "Today")
+                    }
                     IconButton(onClick = { isMonthView = !isMonthView }) {
                         Icon(
                             imageVector = if (isMonthView) Icons.Filled.ViewWeek else Icons.Filled.ViewModule,
