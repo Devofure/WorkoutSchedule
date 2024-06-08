@@ -83,7 +83,7 @@ fun CalendarScreen(
                             selectedDate = date
                         }
                     } else {
-                        WeekView(selectedDate, logs, isMonthView, firstDayOfWeek) { date ->
+                        WeekView(selectedDate, logs, firstDayOfWeek) { date ->
                             selectedDate = date
                         }
                     }

@@ -77,20 +77,17 @@ fun CalendarView(
 fun WeekView(
     selectedDate: Date,
     logs: List<LogEntity>,
-    isMonthView: Boolean,
     firstDayOfWeek: FirstDayOfWeek,
     onDateSelected: (Date) -> Unit
 ) {
     val calendar = Calendar.getInstance().apply { time = selectedDate }
-    val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
-    val offset = if (firstDayOfWeek == FirstDayOfWeek.SUNDAY) dayOfWeek - 1 else dayOfWeek - 2
-    calendar.add(Calendar.DAY_OF_MONTH, -offset)
+    calendar.time = getWeekStartDate(selectedDate, firstDayOfWeek)
 
     val daysInWeek = 7
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        MonthNavigation(calendar, onDateSelected, isMonthView)
+        WeekNavigation(calendar, onDateSelected)
         Spacer(modifier = Modifier.height(8.dp))
         WeekDayHeaders(firstDayOfWeek)
         CalendarGrid(
@@ -105,14 +102,6 @@ fun WeekView(
             onDateSelected,
             isWeekView = true
         )
-        if (isMonthView) {
-            IconButton(onClick = {
-                calendar.add(Calendar.MONTH, 1)
-                onDateSelected(calendar.time)
-            }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next month")
-            }
-        }
     }
 }
 
@@ -146,6 +135,36 @@ fun MonthNavigation(calendar: Calendar, onDateSelected: (Date) -> Unit, isMonthV
             }) {
                 Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next month")
             }
+        }
+    }
+}
+
+@Composable
+fun WeekNavigation(calendar: Calendar, onDateSelected: (Date) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = {
+            calendar.add(Calendar.WEEK_OF_YEAR, -1)
+            onDateSelected(calendar.time)
+        }) {
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous week")
+        }
+        Text(
+            text = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(calendar.time),
+            style = MaterialTheme.typography.h6,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f)
+        )
+        IconButton(onClick = {
+            calendar.add(Calendar.WEEK_OF_YEAR, 1)
+            onDateSelected(calendar.time)
+        }) {
+            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next week")
         }
     }
 }
@@ -282,4 +301,16 @@ fun DayCell(
 
 private fun isSameDay(calendar: Calendar, day: Int): Boolean {
     return calendar.get(Calendar.DAY_OF_MONTH) == day
+}
+
+private fun getWeekStartDate(date: Date, firstDayOfWeek: FirstDayOfWeek): Date {
+    val calendar = Calendar.getInstance().apply { time = date }
+    val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+    val offset = if (firstDayOfWeek == FirstDayOfWeek.SUNDAY) {
+        dayOfWeek - Calendar.SUNDAY
+    } else {
+        if (dayOfWeek == Calendar.SUNDAY) 6 else dayOfWeek - Calendar.MONDAY
+    }
+    calendar.add(Calendar.DAY_OF_MONTH, -offset)
+    return calendar.time
 }
