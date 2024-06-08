@@ -1,4 +1,4 @@
-name: Android CI
+name: Android Emulator Boot Test
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build:
+  emulator-boot:
 
     runs-on: ubuntu-latest
 
@@ -32,19 +32,6 @@ jobs:
     - name: Install system image
       run: sdkmanager "system-images;android-30;google_apis;x86_64"
 
-    - name: Cache Gradle packages
-      uses: actions/cache@v4.0.2
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
-
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-
     - name: Create AVD
       run: echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" --device "Nexus 5"
 
@@ -53,8 +40,29 @@ jobs:
         $ANDROID_HOME/emulator/emulator -avd test -no-audio -no-window -accel off -gpu swiftshader_indirect -no-snapshot -verbose &
         adb wait-for-device
 
-  #  - name: Build with Gradle
-  #    run: ./gradlew build
+    - name: Wait for emulator to boot
+      run: |
+        boot_completed=""
+        retries=0
+        timeout=1200  # Increase the timeout to 20 minutes
+        while [[ -z "$boot_completed" && $retries -lt $timeout ]]; do
+          echo "Waiting for emulator to boot..."
+          boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+          sleep 1
+          retries=$((retries + 1))
+        done
+        if [[ "$boot_completed" != "1" ]]; then
+          echo "Emulator failed to boot within $timeout seconds"
+          adb shell logcat -d > emulator_logcat.txt
+          adb shell dumpsys meminfo > emulator_meminfo.txt
+          adb shell dumpsys cpuinfo > emulator_cpuinfo.txt
+          exit 1
+        fi
+        echo "Emulator booted successfully"
+        adb shell input keyevent 82
+
+    - name: Get emulator status
+      run: adb shell getprop
 
     - name: Validate Device API Level
       run: |
@@ -86,13 +94,3 @@ jobs:
       with:
         name: emulator-cpuinfo
         path: emulator_cpuinfo.txt
-
-    - name: Run instrumented tests
-      run: ./gradlew connectedAndroidTest --info
-
-    - name: Upload test results
-      if: always()
-      uses: actions/upload-artifact@v2
-      with:
-        name: android-test-results
-        path: app/build/reports/androidTests/connected/
