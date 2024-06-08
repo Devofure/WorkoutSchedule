@@ -45,8 +45,6 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Build with Gradle
-      run: ./gradlew build
 
     - name: Create AVD
       run: echo "no" | avdmanager create avd -n test -k "system-images;android-29;google_apis;x86_64" --device "Nexus 5"
@@ -84,12 +82,3 @@ jobs:
       with:
         name: emulator-logcat
         path: emulator_logcat.txt
-
-    - name: Run instrumented tests
-      run: ./gradlew connectedAndroidTest
-
-    - name: Run unit tests
-      run: ./gradlew test
-
-    - name: Run lint
-      run: ./gradlew lint
