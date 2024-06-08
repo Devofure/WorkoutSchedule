@@ -36,6 +36,14 @@ jobs:
             ~/.android/adb*
           key: avd-${{ matrix.api-level }}
 
+      - name: Install Android SDK
+        run: |
+          sudo chown $USER:$USER /usr/local/lib/android/sdk -R
+          yes | sdkmanager --licenses > /dev/null
+          sdkmanager --install 'build-tools;34.0.0' platform-tools 'platforms;android-${{ matrix.api-level }}' > /dev/null
+          sdkmanager --install emulator --channel=0 > /dev/null
+          sdkmanager --install 'system-images;android-${{ matrix.api-level }};default;x86' --channel=0 > /dev/null
+
       - name: Create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@v2
