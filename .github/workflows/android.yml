@@ -45,9 +45,6 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Build with Gradle
-      run: ./gradlew build
-
     - name: Create AVD
       run: echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64" --device "Nexus 5"
 
@@ -56,27 +53,8 @@ jobs:
         $ANDROID_HOME/emulator/emulator -avd test -no-audio -no-window -accel off -gpu swiftshader_indirect -no-snapshot -verbose &
         adb wait-for-device
 
-    - name: Wait for emulator to boot
-      run: |
-        boot_completed=""
-        retries=0
-        timeout=1200  # Increase the timeout to 20 minutes
-        while [[ -z "$boot_completed" && $retries -lt $timeout ]]; do
-          echo "Waiting for emulator to boot..."
-          boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
-          sleep 1
-          retries=$((retries + 1))
-        done
-        if [[ -z "$boot_completed" ]]; then
-          echo "Emulator failed to boot within $timeout seconds"
-          adb shell logcat -d > emulator_logcat.txt
-          exit 1
-        fi
-        echo "Emulator booted successfully"
-        adb shell input keyevent 82
-
-    - name: Get emulator status
-      run: adb shell getprop
+    - name: Build with Gradle
+      run: ./gradlew build
 
     - name: Validate Device API Level
       run: |
@@ -94,6 +72,20 @@ jobs:
       with:
         name: emulator-logcat
         path: emulator_logcat.txt
+
+    - name: Upload emulator meminfo
+      if: failure()
+      uses: actions/upload-artifact@v2
+      with:
+        name: emulator-meminfo
+        path: emulator_meminfo.txt
+
+    - name: Upload emulator cpuinfo
+      if: failure()
+      uses: actions/upload-artifact@v2
+      with:
+        name: emulator-cpuinfo
+        path: emulator_cpuinfo.txt
 
     - name: Run instrumented tests
       run: ./gradlew connectedAndroidTest --info
