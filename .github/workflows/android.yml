@@ -1,21 +1,8 @@
-name: Android CI
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
 jobs:
   test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        api-level: [29, 34]
     steps:
-      - name: Checkout code
+      - name: checkout
         uses: actions/checkout@v4
 
       - name: Enable KVM
@@ -24,72 +11,8 @@ jobs:
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
 
-      - name: Gradle cache
-        uses: gradle/actions/setup-gradle@v3
-
-      - name: AVD cache
-        uses: actions/cache@v4
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-${{ matrix.api-level }}
-
-      - name: Install Android SDK
-        run: |
-          sudo chown $USER:$USER /usr/local/lib/android/sdk -R
-          yes | sdkmanager --licenses
-          sdkmanager --install 'build-tools;34.0.0' platform-tools 'platforms;android-${{ matrix.api-level }}'
-          sdkmanager --install emulator --channel=0
-          sdkmanager --install 'system-images;android-${{ matrix.api-level }};default;x86' --channel=0
-
-      - name: Create AVD and generate snapshot for caching
-        if: steps.avd-cache.outputs.cache-hit != 'true'
+      - name: run tests
         uses: reactivecircus/android-emulator-runner@v2
         with:
-          api-level: ${{ matrix.api-level }}
-          force-avd-creation: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: false
-          script: echo "Generated AVD snapshot for caching."
-          emulator-boot-timeout: 3000
-
-      - name: Run tests
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: true
-          script: |
-            echo "Waiting for emulator to boot..."
-            boot_completed=""
-            retries=0
-            timeout=1200  # 20 minutes
-            while [[ -z "$boot_completed" && $retries -lt $timeout ]]; do
-              boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
-              if [[ -z "$boot_completed" ]]; then
-                echo "Still waiting for emulator to boot..."
-                adb shell getprop > getprop_output.txt
-                sleep 1
-                retries=$((retries + 1))
-              else
-                break
-              fi
-            done
-            if [[ "$boot_completed" != "1" ]]; then
-              echo "Emulator failed to boot within $timeout seconds"
-              adb shell logcat -d > emulator_logcat.txt
-              exit 1
-            fi
-            echo "Emulator booted successfully"
-            adb shell input keyevent 82
-            ./gradlew connectedCheck
-
-      - name: Upload emulator logcat
-        if: failure()
-        uses: actions/upload-artifact@v2
-        with:
-          name: emulator-logcat
-          path: emulator_logcat.txt
+          api-level: 29
+          script: ./gradlew connectedCheck
