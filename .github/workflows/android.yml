@@ -53,4 +53,34 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          script: ./gradlew connectedCheck
+          script: |
+            echo "Waiting for emulator to boot..."
+            boot_completed=""
+            retries=0
+            timeout=1200  # 20 minutes
+            while [[ -z "$boot_completed" && $retries -lt $timeout ]]; do
+              boot_completed=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')
+              if [[ -z "$boot_completed" ]]; then
+                echo "Still waiting for emulator to boot..."
+                adb shell getprop > getprop_output.txt
+                sleep 1
+                retries=$((retries + 1))
+              else
+                break
+              fi
+            done
+            if [[ "$boot_completed" != "1" ]]; then
+              echo "Emulator failed to boot within $timeout seconds"
+              adb shell logcat -d > emulator_logcat.txt
+              exit 1
+            fi
+            echo "Emulator booted successfully"
+            adb shell input keyevent 82
+            ./gradlew connectedCheck
+
+      - name: Upload emulator logcat
+        if: failure()
+        uses: actions/upload-artifact@v2
+        with:
+          name: emulator-logcat
+          path: emulator_logcat.txt
