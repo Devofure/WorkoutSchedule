@@ -15,6 +15,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ViewModule
+import androidx.compose.material.icons.filled.ViewWeek
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,6 +34,7 @@ import java.util.Date
 @Composable
 fun CalendarScreen(navController: NavHostController, workoutViewModel: WorkoutViewModel) {
     var selectedDate by remember { mutableStateOf(Date()) }
+    var isMonthView by remember { mutableStateOf(true) }
     val logs by workoutViewModel.getLogsForDate(selectedDate).collectAsState(initial = emptyList())
 
     Scaffold(
@@ -43,6 +46,14 @@ fun CalendarScreen(navController: NavHostController, workoutViewModel: WorkoutVi
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
+                },
+                actions = {
+                    IconButton(onClick = { isMonthView = !isMonthView }) {
+                        Icon(
+                            imageVector = if (isMonthView) Icons.Filled.ViewWeek else Icons.Filled.ViewModule,
+                            contentDescription = "Toggle View"
+                        )
+                    }
                 }
             )
         },
@@ -53,8 +64,14 @@ fun CalendarScreen(navController: NavHostController, workoutViewModel: WorkoutVi
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                CalendarView(selectedDate, logs) { date ->
-                    selectedDate = date
+                if (isMonthView) {
+                    CalendarView(selectedDate, logs) { date ->
+                        selectedDate = date
+                    }
+                } else {
+                    WeekView(selectedDate, logs) { date ->
+                        selectedDate = date
+                    }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 if (logs.isEmpty()) {

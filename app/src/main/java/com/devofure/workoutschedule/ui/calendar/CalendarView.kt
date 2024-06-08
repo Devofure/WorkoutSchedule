@@ -52,7 +52,43 @@ fun CalendarView(selectedDate: Date, logs: List<LogEntity>, onDateSelected: (Dat
         MonthNavigation(calendar, onDateSelected)
         Spacer(modifier = Modifier.height(8.dp))
         WeekDayHeaders()
-        CalendarGrid(totalCells, firstDayOfMonth, daysInMonth, calendar, logs, dateFormat, onDateSelected)
+        CalendarGrid(
+            totalCells,
+            firstDayOfMonth,
+            daysInMonth,
+            calendar,
+            selectedDate,
+            logs,
+            dateFormat,
+            onDateSelected
+        )
+    }
+}
+
+@Composable
+fun WeekView(selectedDate: Date, logs: List<LogEntity>, onDateSelected: (Date) -> Unit) {
+    val calendar = Calendar.getInstance().apply { time = selectedDate }
+    val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+    calendar.add(Calendar.DAY_OF_MONTH, -(dayOfWeek - 1))
+
+    val daysInWeek = 7
+    val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        MonthNavigation(calendar, onDateSelected)
+        Spacer(modifier = Modifier.height(8.dp))
+        WeekDayHeaders()
+        CalendarGrid(
+            daysInWeek,
+            0,
+            daysInWeek,
+            calendar,
+            selectedDate,
+            logs,
+            dateFormat,
+            onDateSelected,
+            isWeekView = true
+        )
     }
 }
 
@@ -109,9 +145,11 @@ fun CalendarGrid(
     firstDayOfMonth: Int,
     daysInMonth: Int,
     calendar: Calendar,
+    selectedDate: Date,
     logs: List<LogEntity>,
     dateFormat: SimpleDateFormat,
-    onDateSelected: (Date) -> Unit
+    onDateSelected: (Date) -> Unit,
+    isWeekView: Boolean = false
 ) {
     for (i in 0 until totalCells step 7) {
         Row(
@@ -119,8 +157,13 @@ fun CalendarGrid(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             for (j in i until i + 7) {
-                val day = j - firstDayOfMonth + 1
-                if (j >= firstDayOfMonth && day <= daysInMonth) {
+                val day = if (isWeekView) {
+                    calendar.get(Calendar.DAY_OF_MONTH) + (j - i)
+                } else {
+                    j - firstDayOfMonth + 1
+                }
+                val dayOfMonth = if (isWeekView) calendar.get(Calendar.DAY_OF_MONTH) else day
+                if ((j >= firstDayOfMonth && day <= daysInMonth) || isWeekView) {
                     val logExists = logs.any { log ->
                         val logDate = dateFormat.parse(log.date)
                         val logCalendar = Calendar.getInstance().apply { time = logDate!! }
@@ -128,7 +171,16 @@ fun CalendarGrid(
                                 logCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH) &&
                                 logCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)
                     }
-                    DayCell(day, calendar, logExists, onDateSelected, Modifier.weight(1f))
+                    DayCell(
+                        dayOfMonth,
+                        selectedDate,
+                        logExists,
+                        onDateSelected,
+                        Modifier.weight(1f)
+                    )
+                    if (isWeekView) {
+                        calendar.add(Calendar.DAY_OF_MONTH, 1)
+                    }
                 } else {
                     Spacer(
                         modifier = Modifier
@@ -145,12 +197,13 @@ fun CalendarGrid(
 @Composable
 fun DayCell(
     day: Int,
-    calendar: Calendar,
+    selectedDate: Date,
     logExists: Boolean,
     onDateSelected: (Date) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isSelectedDay = isSameDay(calendar, day)
+    val calendar = Calendar.getInstance()
+    val isSelectedDay = isSameDay(calendar.apply { time = selectedDate }, day)
     val backgroundColor = if (isSelectedDay) MaterialTheme.colors.primary else Color.Transparent
     val textColor = if (isSelectedDay) Color.White else Color.Black
 
