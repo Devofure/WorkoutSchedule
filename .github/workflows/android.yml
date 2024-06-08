@@ -45,7 +45,6 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-
     - name: Create AVD
       run: echo "no" | avdmanager create avd -n test -k "system-images;android-29;google_apis;x86_64" --device "Nexus 5"
 
@@ -65,16 +64,29 @@ jobs:
           sleep 1
           retries=$((retries + 1))
         done
-        if [[ -z "$boot_completed" ]]; then
+        if [[ "$boot_completed" != "1" ]]; then
           echo "Emulator failed to boot within $timeout seconds"
           adb shell logcat -d > emulator_logcat.txt
+          adb shell dumpsys meminfo > emulator_meminfo.txt
+          adb shell dumpsys cpuinfo > emulator_cpuinfo.txt
           exit 1
         fi
         echo "Emulator booted successfully"
+        sleep 10  # Added delay to ensure system stability before sending input
         adb shell input keyevent 82
 
     - name: Get emulator status
       run: adb shell getprop
+
+    - name: Validate Device API Level
+      run: |
+        api_level=$(adb shell getprop ro.build.version.sdk)
+        echo "Device API Level: $api_level"
+        if [[ "$api_level" != "29" ]]; then
+          echo "Emulator API Level mismatch, expected 29 but got $api_level"
+          adb shell logcat -d > emulator_logcat.txt
+          exit 1
+        fi
 
     - name: Upload emulator logcat
       if: failure()
@@ -82,3 +94,17 @@ jobs:
       with:
         name: emulator-logcat
         path: emulator_logcat.txt
+
+    - name: Upload emulator meminfo
+      if: failure()
+      uses: actions/upload-artifact@v2
+      with:
+        name: emulator-meminfo
+        path: emulator_meminfo.txt
+
+    - name: Upload emulator cpuinfo
+      if: failure()
+      uses: actions/upload-artifact@v2
+      with:
+        name: emulator-cpuinfo
+        path: emulator_cpuinfo.txt
