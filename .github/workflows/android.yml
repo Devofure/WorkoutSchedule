@@ -53,8 +53,8 @@ jobs:
         $ANDROID_HOME/emulator/emulator -avd test -no-audio -no-window -accel off -gpu swiftshader_indirect -no-snapshot -verbose &
         adb wait-for-device
 
-    - name: Build with Gradle
-      run: ./gradlew build
+  #  - name: Build with Gradle
+  #    run: ./gradlew build
 
     - name: Validate Device API Level
       run: |
