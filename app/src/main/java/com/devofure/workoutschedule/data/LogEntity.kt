@@ -8,5 +8,8 @@ data class LogEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val date: String,
     val workoutId: Int,
-    val dayOfWeek: String
+    val exerciseName: String,
+    val dayOfWeek: String,
+    val repsList: List<Int>? = null,
+    val duration: Int? = null,
 )

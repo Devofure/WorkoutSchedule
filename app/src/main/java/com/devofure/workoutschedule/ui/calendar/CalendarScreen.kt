@@ -12,9 +12,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.devofure.workoutschedule.data.LogEntity
 import com.devofure.workoutschedule.ui.WorkoutViewModel
+import com.devofure.workoutschedule.ui.main.WorkoutItem
 import com.devofure.workoutschedule.ui.main.getDaysInMonth
 import com.devofure.workoutschedule.ui.main.getFirstDayOfMonth
 import java.text.SimpleDateFormat
@@ -69,16 +70,30 @@ fun CalendarScreen(navController: NavHostController, workoutViewModel: WorkoutVi
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                CalendarView(selectedDate) { date ->
+                CalendarView(selectedDate, logs) { date ->
                     selectedDate = date
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 if (logs.isEmpty()) {
-                    Text("No logs for this day", style = MaterialTheme.typography.h6)
+                    Text(
+                        "No logs for this day",
+                        style = MaterialTheme.typography.h6,
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
                 } else {
                     LazyColumn {
                         items(logs) { log ->
-                            LogItem(log)
+                            val workout = workoutViewModel.getWorkoutByName(log)
+                            workout?.let {
+                                WorkoutItem(
+                                    workout = workout,
+                                    expanded = false,
+                                    onClick = {},
+                                    onWorkoutRemove = {},
+                                    onWorkoutDetail = {},
+                                    onWorkoutEdit = {}
+                                )
+                            }
                         }
                     }
                 }
@@ -87,8 +102,9 @@ fun CalendarScreen(navController: NavHostController, workoutViewModel: WorkoutVi
     )
 }
 
+
 @Composable
-fun CalendarView(selectedDate: Date, onDateSelected: (Date) -> Unit) {
+fun CalendarView(selectedDate: Date, logs: List<LogEntity>, onDateSelected: (Date) -> Unit) {
     val calendar = Calendar.getInstance()
     calendar.time = selectedDate
     val year = calendar.get(Calendar.YEAR)
@@ -98,10 +114,13 @@ fun CalendarView(selectedDate: Date, onDateSelected: (Date) -> Unit) {
     val firstDayOfMonth = getFirstDayOfMonth(year, month)
     val totalCells = daysInMonth + firstDayOfMonth
 
+    val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = {
                 calendar.add(Calendar.MONTH, -1)
@@ -109,7 +128,10 @@ fun CalendarView(selectedDate: Date, onDateSelected: (Date) -> Unit) {
             }) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous month")
             }
-            Text(text = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(calendar.time))
+            Text(
+                text = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(calendar.time),
+                style = MaterialTheme.typography.h6
+            )
             IconButton(onClick = {
                 calendar.add(Calendar.MONTH, 1)
                 onDateSelected(calendar.time)
@@ -117,6 +139,8 @@ fun CalendarView(selectedDate: Date, onDateSelected: (Date) -> Unit) {
                 Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next month")
             }
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -126,7 +150,8 @@ fun CalendarView(selectedDate: Date, onDateSelected: (Date) -> Unit) {
                 Text(
                     text = day,
                     modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.body2
                 )
             }
         }
@@ -139,6 +164,14 @@ fun CalendarView(selectedDate: Date, onDateSelected: (Date) -> Unit) {
                 for (j in i until i + 7) {
                     val day = j - firstDayOfMonth + 1
                     if (j >= firstDayOfMonth && day <= daysInMonth) {
+                        val logExists = logs.any { log ->
+                            val logDate = dateFormat.parse(log.date)
+                            val logCalendar = Calendar.getInstance()
+                            logCalendar.time = logDate!!
+                            logCalendar.get(Calendar.DAY_OF_MONTH) == day &&
+                                    logCalendar.get(Calendar.MONTH) == month &&
+                                    logCalendar.get(Calendar.YEAR) == year
+                        }
                         Box(
                             modifier = Modifier
                                 .weight(1f)
@@ -159,8 +192,20 @@ fun CalendarView(selectedDate: Date, onDateSelected: (Date) -> Unit) {
                         ) {
                             Text(
                                 text = day.toString(),
-                                color = if (isSameDay(calendar, day)) Color.White else Color.Black
+                                color = if (isSameDay(calendar, day)) Color.White else Color.Black,
+                                style = MaterialTheme.typography.body1
                             )
+                            if (logExists) {
+                                Box(
+                                    modifier = Modifier
+                                        .align(Alignment.BottomCenter)
+                                        .size(8.dp)
+                                        .background(
+                                            MaterialTheme.colors.secondary,
+                                            MaterialTheme.shapes.small
+                                        )
+                                )
+                            }
                         }
                     } else {
                         Spacer(
@@ -172,22 +217,6 @@ fun CalendarView(selectedDate: Date, onDateSelected: (Date) -> Unit) {
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun LogItem(log: LogEntity) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        elevation = 4.dp
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text("Workout ID: ${log.workoutId}")
-            Text("Date: ${log.date}")
-            Text("Day of Week: ${log.dayOfWeek}")
         }
     }
 }

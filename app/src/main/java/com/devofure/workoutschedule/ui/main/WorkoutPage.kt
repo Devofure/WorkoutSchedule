@@ -60,7 +60,7 @@ fun WorkoutPage(
                     WorkoutItem(
                         workout = workout,
                         expanded = expandedWorkoutIds.contains(workout.id),
-                        onExpandToggle = {
+                        onClick = {
                             onExpandToggle(workout.id)
                         },
                         onWorkoutChecked = onWorkoutChecked,

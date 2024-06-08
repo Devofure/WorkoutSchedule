@@ -42,22 +42,21 @@ import com.devofure.workoutschedule.data.Workout
 fun WorkoutItem(
     workout: Workout,
     expanded: Boolean,
-    onExpandToggle: () -> Unit,
-    onWorkoutChecked: (Int, Boolean) -> Unit,
+    onClick: () -> Unit,
     onWorkoutRemove: () -> Unit,
     onWorkoutDetail: () -> Unit,
-    onWorkoutEdit: () -> Unit
+    onWorkoutEdit: () -> Unit,
+    onWorkoutChecked: ((Int, Boolean) -> Unit)? = null,
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
     val textAlpha = if (workout.isDone) 0.5f else 1f
     val textColor = if (workout.isDone) Color.Gray else MaterialTheme.typography.body2.color
-
     Card(
         modifier = Modifier
             .padding(vertical = 8.dp)
             .fillMaxWidth()
-            .clickable { onExpandToggle() },
+            .clickable { onClick() },
         elevation = 4.dp
     ) {
         Column {
@@ -67,10 +66,11 @@ fun WorkoutItem(
                     .padding(16.dp)
                     .fillMaxWidth()
             ) {
-                Checkbox(
-                    checked = workout.isDone,
-                    onCheckedChange = { isChecked -> onWorkoutChecked(workout.id, isChecked) }
-                )
+                if (onWorkoutChecked != null)
+                    Checkbox(
+                        checked = workout.isDone,
+                        onCheckedChange = { isChecked -> onWorkoutChecked(workout.id, isChecked) }
+                    )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(
                     modifier = Modifier.weight(1f),

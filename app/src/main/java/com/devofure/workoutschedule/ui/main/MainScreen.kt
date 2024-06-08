@@ -197,7 +197,7 @@ fun MainScreen(
                                 WorkoutItem(
                                     workout = workout,
                                     expanded = expandedWorkoutIds.contains(workout.id),
-                                    onExpandToggle = {
+                                    onClick = {
                                         expandedWorkoutIds =
                                             if (expandedWorkoutIds.contains(workout.id)) {
                                                 expandedWorkoutIds - workout.id

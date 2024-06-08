@@ -73,7 +73,10 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             val logEntity = LogEntity(
                 date = dateFormat.format(date),
                 workoutId = workout.id,
-                dayOfWeek = SimpleDateFormat("EEEE", Locale.getDefault()).format(date)
+                exerciseName = workout.exercise.name,
+                dayOfWeek = SimpleDateFormat("EEEE", Locale.getDefault()).format(date),
+                repsList = workout.repsList,
+                duration = workout.duration,
             )
             logDao.insertLog(logEntity)
         }
@@ -257,9 +260,19 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         return nextWorkoutId++
     }
 
-    private suspend fun searchExercises(query: String) {
+    private fun searchExercises(query: String) {
         _isLoading.value = true
         _filteredExercises.value = exerciseRepository.searchExercises(query)
         _isLoading.value = false
+    }
+
+    fun getWorkoutByName(log: LogEntity): Workout? {
+        val exercise = exerciseRepository.getExerciseByName(log.exerciseName) ?: return null
+        return Workout(
+            id = log.id,
+            exercise = exercise,
+            sets = log.repsList?.size,
+            repsList = log.repsList,
+        )
     }
 }
