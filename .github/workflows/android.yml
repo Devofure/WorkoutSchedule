@@ -72,8 +72,12 @@ jobs:
           exit 1
         fi
         echo "Emulator booted successfully"
-        sleep 10  # Added delay to ensure system stability before sending input
-        adb shell input keyevent 82
+        adb shell input keyevent 82 || {
+          adb shell logcat -d > input_keyevent_logcat.txt
+          adb shell dumpsys meminfo > input_keyevent_meminfo.txt
+          adb shell dumpsys cpuinfo > input_keyevent_cpuinfo.txt
+          exit 1
+        }
 
     - name: Get emulator status
       run: adb shell getprop
@@ -108,3 +112,24 @@ jobs:
       with:
         name: emulator-cpuinfo
         path: emulator_cpuinfo.txt
+
+    - name: Upload input keyevent logcat
+      if: failure()
+      uses: actions/upload-artifact@v2
+      with:
+        name: input-keyevent-logcat
+        path: input_keyevent_logcat.txt
+
+    - name: Upload input keyevent meminfo
+      if: failure()
+      uses: actions/upload-artifact@v2
+      with:
+        name: input-keyevent-meminfo
+        path: input_keyevent_meminfo.txt
+
+    - name: Upload input keyevent cpuinfo
+      if: failure()
+      uses: actions/upload-artifact@v2
+      with:
+        name: input-keyevent-cpuinfo
+        path: input_keyevent_cpuinfo.txt
