@@ -1,9 +1,11 @@
 package com.devofure.workoutschedule.ui.calendar
 
 import androidx.compose.animation.Crossfade
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -65,7 +67,7 @@ fun CalendarScreen(navController: NavHostController, workoutViewModel: WorkoutVi
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
-                Crossfade(targetState = isMonthView, label = "calender_expand") { monthView ->
+                Crossfade(targetState = isMonthView, label = "calendar_expand") { monthView ->
                     if (monthView) {
                         CalendarView(selectedDate, logs, isMonthView) { date ->
                             selectedDate = date
@@ -78,11 +80,19 @@ fun CalendarScreen(navController: NavHostController, workoutViewModel: WorkoutVi
                 }
                 Spacer(modifier = Modifier.height(16.dp))
                 if (logs.isEmpty()) {
-                    Text(
-                        "No logs for this day",
-                        style = MaterialTheme.typography.h6,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            "No logs for this day",
+                            style = MaterialTheme.typography.h6,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                    }
                 } else {
                     LazyColumn {
                         items(logs) { log ->
