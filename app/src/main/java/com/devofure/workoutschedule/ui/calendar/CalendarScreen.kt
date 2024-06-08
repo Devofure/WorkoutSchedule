@@ -33,13 +33,19 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.devofure.workoutschedule.ui.WorkoutViewModel
 import com.devofure.workoutschedule.ui.main.WorkoutItem
+import com.devofure.workoutschedule.ui.settings.SettingsViewModel
 import java.util.Date
 
 @Composable
-fun CalendarScreen(navController: NavHostController, workoutViewModel: WorkoutViewModel) {
+fun CalendarScreen(
+    navController: NavHostController,
+    workoutViewModel: WorkoutViewModel,
+    settingsViewModel: SettingsViewModel
+) {
     var selectedDate by remember { mutableStateOf(Date()) }
     var isMonthView by remember { mutableStateOf(true) }
     val logs by workoutViewModel.getLogsForDate(selectedDate).collectAsState(initial = emptyList())
+    val firstDayOfWeek by settingsViewModel.firstDayOfWeek.collectAsState()
 
     Scaffold(
         topBar = {
@@ -73,11 +79,11 @@ fun CalendarScreen(navController: NavHostController, workoutViewModel: WorkoutVi
             ) {
                 Crossfade(targetState = isMonthView, label = "calendar_expand") { monthView ->
                     if (monthView) {
-                        CalendarView(selectedDate, logs, isMonthView) { date ->
+                        CalendarView(selectedDate, logs, isMonthView, firstDayOfWeek) { date ->
                             selectedDate = date
                         }
                     } else {
-                        WeekView(selectedDate, logs, isMonthView) { date ->
+                        WeekView(selectedDate, logs, isMonthView, firstDayOfWeek) { date ->
                             selectedDate = date
                         }
                     }

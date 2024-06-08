@@ -60,6 +60,7 @@ class MainActivity : ComponentActivity() {
                         )
                         WorkoutApp(
                             workoutViewModel = workoutViewModel,
+                            settingsViewModel = settingsViewModel,
                             onSettingsClick = { navController.navigate("settings") }
                         )
                     }

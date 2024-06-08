@@ -33,13 +33,20 @@ import androidx.compose.ui.unit.dp
 import com.devofure.workoutschedule.data.LogEntity
 import com.devofure.workoutschedule.ui.main.getDaysInMonth
 import com.devofure.workoutschedule.ui.main.getFirstDayOfMonth
+import com.devofure.workoutschedule.ui.settings.FirstDayOfWeek
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
 @Composable
-fun CalendarView(selectedDate: Date, logs: List<LogEntity>, isMonthView: Boolean, onDateSelected: (Date) -> Unit) {
+fun CalendarView(
+    selectedDate: Date,
+    logs: List<LogEntity>,
+    isMonthView: Boolean,
+    firstDayOfWeek: FirstDayOfWeek,
+    onDateSelected: (Date) -> Unit
+) {
     val calendar = Calendar.getInstance().apply { time = selectedDate }
     val year = calendar.get(Calendar.YEAR)
     val month = calendar.get(Calendar.MONTH)
@@ -51,16 +58,33 @@ fun CalendarView(selectedDate: Date, logs: List<LogEntity>, isMonthView: Boolean
     Column(modifier = Modifier.fillMaxWidth()) {
         MonthNavigation(calendar, onDateSelected, isMonthView)
         Spacer(modifier = Modifier.height(8.dp))
-        WeekDayHeaders()
-        CalendarGrid(totalCells, firstDayOfMonth, daysInMonth, calendar, selectedDate, logs, dateFormat, onDateSelected)
+        WeekDayHeaders(firstDayOfWeek)
+        CalendarGrid(
+            totalCells,
+            firstDayOfMonth,
+            daysInMonth,
+            calendar,
+            selectedDate,
+            logs,
+            dateFormat,
+            firstDayOfWeek,
+            onDateSelected
+        )
     }
 }
 
 @Composable
-fun WeekView(selectedDate: Date, logs: List<LogEntity>, isMonthView: Boolean, onDateSelected: (Date) -> Unit) {
+fun WeekView(
+    selectedDate: Date,
+    logs: List<LogEntity>,
+    isMonthView: Boolean,
+    firstDayOfWeek: FirstDayOfWeek,
+    onDateSelected: (Date) -> Unit
+) {
     val calendar = Calendar.getInstance().apply { time = selectedDate }
     val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
-    calendar.add(Calendar.DAY_OF_MONTH, -(dayOfWeek - 1))
+    val offset = if (firstDayOfWeek == FirstDayOfWeek.SUNDAY) dayOfWeek - 1 else dayOfWeek - 2
+    calendar.add(Calendar.DAY_OF_MONTH, -offset)
 
     val daysInWeek = 7
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
@@ -68,8 +92,27 @@ fun WeekView(selectedDate: Date, logs: List<LogEntity>, isMonthView: Boolean, on
     Column(modifier = Modifier.fillMaxWidth()) {
         MonthNavigation(calendar, onDateSelected, isMonthView)
         Spacer(modifier = Modifier.height(8.dp))
-        WeekDayHeaders()
-        CalendarGrid(daysInWeek, 0, daysInWeek, calendar, selectedDate, logs, dateFormat, onDateSelected, isWeekView = true)
+        WeekDayHeaders(firstDayOfWeek)
+        CalendarGrid(
+            daysInWeek,
+            0,
+            daysInWeek,
+            calendar,
+            selectedDate,
+            logs,
+            dateFormat,
+            firstDayOfWeek,
+            onDateSelected,
+            isWeekView = true
+        )
+        if (isMonthView) {
+            IconButton(onClick = {
+                calendar.add(Calendar.MONTH, 1)
+                onDateSelected(calendar.time)
+            }) {
+                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next month")
+            }
+        }
     }
 }
 
@@ -108,12 +151,18 @@ fun MonthNavigation(calendar: Calendar, onDateSelected: (Date) -> Unit, isMonthV
 }
 
 @Composable
-fun WeekDayHeaders() {
+fun WeekDayHeaders(firstDayOfWeek: FirstDayOfWeek) {
+    val days = if (firstDayOfWeek == FirstDayOfWeek.SUNDAY) {
+        listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+    } else {
+        listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat").forEach { day ->
+        days.forEach { day ->
             Text(
                 text = day,
                 modifier = Modifier.weight(1f),
@@ -133,10 +182,13 @@ fun CalendarGrid(
     selectedDate: Date,
     logs: List<LogEntity>,
     dateFormat: SimpleDateFormat,
+    firstDayOfWeek: FirstDayOfWeek,
     onDateSelected: (Date) -> Unit,
     isWeekView: Boolean = false
 ) {
-    for (i in 0 until totalCells step 7) {
+    val startIndex = if (firstDayOfWeek == FirstDayOfWeek.SUNDAY) 0 else 1
+
+    for (i in startIndex until totalCells step 7) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -156,7 +208,13 @@ fun CalendarGrid(
                                 logCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH) &&
                                 logCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)
                     }
-                    DayCell(dayOfMonth, selectedDate, logExists, onDateSelected, Modifier.weight(1f))
+                    DayCell(
+                        dayOfMonth,
+                        selectedDate,
+                        logExists,
+                        onDateSelected,
+                        Modifier.weight(1f)
+                    )
                     if (isWeekView) {
                         calendar.add(Calendar.DAY_OF_MONTH, 1)
                     }

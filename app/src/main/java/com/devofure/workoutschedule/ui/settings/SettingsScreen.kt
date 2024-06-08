@@ -35,7 +35,9 @@ fun SettingsScreen(
     var showReminderSetup by remember { mutableStateOf(false) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
+    var showFirstDayDialog by remember { mutableStateOf(false) }
     val reminderTime by settingsViewModel.reminderTime.collectAsState()
+    val firstDayOfWeek by settingsViewModel.firstDayOfWeek.collectAsState()
 
     // Define a common background color for both the TopAppBar and the content
     val backgroundColor = MaterialTheme.colors.background
@@ -75,6 +77,11 @@ fun SettingsScreen(
                     secondaryText = { Text("Switch between light and dark modes") },
                     modifier = Modifier.clickable { showThemeDialog = true }
                 )
+                ListItem(
+                    text = { Text("First Day of the Week") },
+                    secondaryText = { Text("Choose the first day of the week") },
+                    modifier = Modifier.clickable { showFirstDayDialog = true }
+                )
 
                 if (showReminderSetup) {
                     ReminderSetupDialog(
@@ -103,6 +110,17 @@ fun SettingsScreen(
                         onDismiss = { showThemeDialog = false },
                         onThemeChange = { newTheme ->
                             onThemeChange(newTheme)
+                        }
+                    )
+                }
+
+                if (showFirstDayDialog) {
+                    FirstDayOfWeekDialog(
+                        currentFirstDay = firstDayOfWeek,
+                        onDismiss = { showFirstDayDialog = false },
+                        onFirstDayChange = { newFirstDay ->
+                            settingsViewModel.setFirstDayOfWeek(newFirstDay)
+                            showFirstDayDialog = false
                         }
                     )
                 }

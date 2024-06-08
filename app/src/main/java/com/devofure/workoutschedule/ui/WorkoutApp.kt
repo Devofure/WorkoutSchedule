@@ -9,11 +9,13 @@ import com.devofure.workoutschedule.ui.addexercise.AddExerciseScreen
 import com.devofure.workoutschedule.ui.calendar.CalendarScreen
 import com.devofure.workoutschedule.ui.editworkout.EditWorkoutScreen
 import com.devofure.workoutschedule.ui.main.MainScreen
+import com.devofure.workoutschedule.ui.settings.SettingsViewModel
 import com.devofure.workoutschedule.ui.workoutdetails.WorkoutDetailScreen
 
 @Composable
 fun WorkoutApp(
     workoutViewModel: WorkoutViewModel = viewModel(),
+    settingsViewModel: SettingsViewModel = viewModel(),
     sharedViewModel: SharedViewModel = viewModel(),
     onSettingsClick: () -> Unit
 ) {
@@ -33,7 +35,7 @@ fun WorkoutApp(
             AddExerciseScreen(navController, sharedViewModel, workoutViewModel, dayFullName)
         }
         composable("calendar") {
-            CalendarScreen(navController = navController, workoutViewModel = workoutViewModel)
+            CalendarScreen(navController = navController, workoutViewModel = workoutViewModel, settingsViewModel = settingsViewModel)
         }
         composable("workout_detail") { WorkoutDetailScreen(navController, sharedViewModel) }
         composable("edit_workout/{dayFullName}") { backStackEntry ->

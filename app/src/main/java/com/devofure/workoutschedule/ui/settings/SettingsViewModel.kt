@@ -40,9 +40,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val _theme = MutableStateFlow(ThemeType.SYSTEM)
     val theme: StateFlow<ThemeType> = _theme
 
-    private val _reminderTime =
-        MutableStateFlow(ReminderTime(0, 0))
+    private val _reminderTime = MutableStateFlow(ReminderTime(0, 0))
     val reminderTime: StateFlow<ReminderTime> = _reminderTime
+
+    private val _firstDayOfWeek = MutableStateFlow(FirstDayOfWeek.MONDAY)
+    val firstDayOfWeek: StateFlow<FirstDayOfWeek> = _firstDayOfWeek
 
     init {
         val savedHour = sharedPreferences.getInt("reminderHour", 0)
@@ -51,6 +53,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
 
         val savedTheme = sharedPreferences.getString("theme", ThemeType.SYSTEM.name)
         _theme.value = ThemeType.valueOf(savedTheme!!)
+
+        val savedFirstDay = sharedPreferences.getString("firstDayOfWeek", FirstDayOfWeek.MONDAY.name)
+        _firstDayOfWeek.value = FirstDayOfWeek.valueOf(savedFirstDay!!)
     }
 
     fun setReminder(reminderTime: ReminderTime) {
@@ -102,4 +107,13 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         _theme.value = themeType
         sharedPreferences.edit().putString("theme", themeType.name).apply()
     }
+
+    fun setFirstDayOfWeek(firstDay: FirstDayOfWeek) {
+        _firstDayOfWeek.value = firstDay
+        sharedPreferences.edit().putString("firstDayOfWeek", firstDay.name).apply()
+    }
+}
+
+enum class FirstDayOfWeek {
+    SUNDAY, MONDAY
 }
