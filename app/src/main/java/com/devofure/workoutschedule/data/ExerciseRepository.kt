@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.update
 import java.io.IOException
 
 data class Exercise(
-    val id: Int,
     val name: String,
     val force: String,
     val level: String,
@@ -19,7 +18,7 @@ data class Exercise(
     val primaryMuscles: List<String>,
     val secondaryMuscles: List<String>,
     val instructions: List<String>,
-    val category: String
+    val category: String,
 )
 
 class ExerciseRepository(private val context: Context) {

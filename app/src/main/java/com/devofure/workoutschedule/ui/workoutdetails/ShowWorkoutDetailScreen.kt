@@ -1,5 +1,7 @@
 package com.devofure.workoutschedule.ui.workoutdetails
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -23,6 +26,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -111,7 +117,7 @@ fun SectionHeader(title: String) {
         text = title,
         style = MaterialTheme.typography.subtitle1,
         color = MaterialTheme.colors.primary,
-        modifier = Modifier.padding(bottom = 2.dp),
+        modifier = Modifier.padding(bottom = 8.dp),
     )
 }
 
@@ -151,4 +157,29 @@ fun InstructionItem(instruction: String) {
             textAlign = TextAlign.Start
         )
     }
+}
+
+@Composable
+fun DetailLink(text: String, url: String) {
+    val context = LocalContext.current
+    val annotatedString = buildAnnotatedString {
+        append(text)
+        addStyle(
+            style = SpanStyle(color = MaterialTheme.colors.primary),
+            start = 0,
+            end = text.length
+        )
+        addStringAnnotation(tag = "URL", annotation = url, start = 0, end = text.length)
+    }
+    ClickableText(
+        text = annotatedString,
+        onClick = { offset ->
+            annotatedString.getStringAnnotations(tag = "URL", start = offset, end = offset)
+                .firstOrNull()?.let {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.item))
+                    context.startActivity(intent)
+                }
+        },
+        modifier = Modifier.padding(horizontal = 8.dp)
+    )
 }
