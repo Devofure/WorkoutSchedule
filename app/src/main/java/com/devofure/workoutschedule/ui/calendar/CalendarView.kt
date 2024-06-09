@@ -52,8 +52,12 @@ fun CalendarView(
     val month = calendar.get(Calendar.MONTH)
     val daysInMonth = getDaysInMonth(year, month)
     val firstDayOfMonth = getFirstDayOfMonth(year, month)
-    val totalCells =
-        if (isMonthView) (firstDayOfMonth + daysInMonth + (7 - (firstDayOfMonth + daysInMonth) % 7)) else 7
+
+    // Calculate the number of weeks to display
+    val totalDays = firstDayOfMonth + daysInMonth
+    val totalWeeks = (totalDays + (7 - totalDays % 7)) / 7
+    val totalCells = if (isMonthView) totalWeeks * 7 else 7
+
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
 
     Column(
@@ -140,7 +144,7 @@ fun CalendarGrid(
         calendar.time = getWeekStartDate(selectedDate, firstDayOfWeek)
     }
     val dayOfWeekOffset = calculateDayOfWeekOffset(firstDayOfMonth, firstDayOfWeek)
-    val weeksToShow = if (isWeekView) 1 else totalCells / 7 + 1
+    val weeksToShow = totalCells / 7
 
     for (week in 0 until weeksToShow) {
         Row(
