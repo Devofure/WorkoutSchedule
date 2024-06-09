@@ -6,36 +6,35 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun EditNicknameDialog(
     editedNickname: String,
-    onValueChange: (String) -> Unit,
+    onNicknameChange: (String) -> Unit,
     onSave: () -> Unit,
-    onCancel: () -> Unit
+    onDismiss: () -> Unit
 ) {
     AlertDialog(
-        onDismissRequest = { onCancel() },
+        onDismissRequest = onDismiss,
         title = { Text("Edit Nickname") },
         text = {
             TextField(
                 value = editedNickname,
-                onValueChange = onValueChange,
+                onValueChange = onNicknameChange,
                 label = { Text("Nickname") },
                 colors = TextFieldDefaults.textFieldColors(
-                    backgroundColor = androidx.compose.ui.graphics.Color.Transparent
+                    backgroundColor = Color.Transparent
                 )
             )
         },
         confirmButton = {
-            TextButton(
-                onClick = { onSave() }
-            ) {
+            TextButton(onClick = onSave) {
                 Text("Save")
             }
         },
         dismissButton = {
-            TextButton(onClick = { onCancel() }) {
+            TextButton(onClick = onDismiss) {
                 Text("Cancel")
             }
         }

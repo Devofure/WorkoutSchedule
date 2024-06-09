@@ -10,44 +10,45 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
-fun LogDateConfirmationDialog(
-    selectedDate: Date,
+fun DateConfirmationDialog(
+    selectedDate: LocalDate,
     onConfirm: () -> Unit,
-    onPickAnotherDate: () -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onPickAnotherDate: () -> Unit
 ) {
     AlertDialog(
-        onDismissRequest = { onDismiss() },
+        onDismissRequest = onDismiss,
         title = { Text("Confirm Log Date") },
         text = {
             Column {
                 Text(
                     "Do you want to log the workout for ${
-                        SimpleDateFormat("EEEE, MMMM d", Locale.getDefault()).format(selectedDate)
+                        selectedDate.format(
+                            DateTimeFormatter.ofPattern(
+                                "EEEE, MMMM d",
+                                Locale.getDefault()
+                            )
+                        )
                     }?"
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                Button(
-                    onClick = { onPickAnotherDate() }
-                ) {
+                Button(onClick = onPickAnotherDate) {
                     Text("Pick another date")
                 }
             }
         },
         confirmButton = {
-            TextButton(
-                onClick = { onConfirm() }
-            ) {
+            TextButton(onClick = onConfirm) {
                 Text("Confirm")
             }
         },
         dismissButton = {
-            TextButton(onClick = { onDismiss() }) {
+            TextButton(onClick = onDismiss) {
                 Text("Cancel")
             }
         }

@@ -1,8 +1,3 @@
-@file:OptIn(
-    ExperimentalFoundationApi::class, ExperimentalMaterialApi::class,
-    ExperimentalMaterialApi::class
-)
-
 package com.devofure.workoutschedule.ui.main
 
 import androidx.compose.animation.core.animateFloatAsState
@@ -11,25 +6,18 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.AlertDialog
 import androidx.compose.material.BottomSheetScaffold
-import androidx.compose.material.Button
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
@@ -38,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -55,9 +44,8 @@ import com.devofure.workoutschedule.ui.getFullDayName
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.util.Locale
 
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun MainScreen(
     navController: NavHostController,
@@ -67,8 +55,8 @@ fun MainScreen(
 ) {
     val initialDaysOfWeek =
         listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
-    val daysOfWeek by remember { mutableStateOf(initialDaysOfWeek.toMutableList()) }
-    val nicknames by remember { mutableStateOf(MutableList(initialDaysOfWeek.size) { "" }) }
+    val daysOfWeek = remember { mutableStateListOf(*initialDaysOfWeek.toTypedArray()) }
+    val nicknames = remember { mutableStateListOf(*Array(initialDaysOfWeek.size) { "" }) }
     val pagerState = rememberPagerState { daysOfWeek.size }
 
     val scaffoldState = rememberBottomSheetScaffoldState()
@@ -246,52 +234,19 @@ fun MainScreen(
     }
 
     if (showDateConfirmationDialog) {
-        AlertDialog(
-            onDismissRequest = { showDateConfirmationDialog = false },
-            title = { Text("Confirm Log Date") },
-            text = {
-                Column {
-                    Text(
-                        "Do you want to log the workout for ${
-                            selectedDate.format(
-                                DateTimeFormatter.ofPattern(
-                                    "EEEE, MMMM d",
-                                    Locale.getDefault()
-                                )
-                            )
-                        }?"
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = {
-                            showDatePicker = true
-                        }
-                    ) {
-                        Text("Pick another date")
-                    }
+        DateConfirmationDialog(
+            selectedDate = selectedDate,
+            onConfirm = {
+                selectedWorkouts.forEach { workout ->
+                    workoutViewModel.logWorkout(workout, selectedDate)
+                }
+                showDateConfirmationDialog = false
+                coroutineScope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar("Workout logged!")
                 }
             },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        // Log the workout
-                        selectedWorkouts.forEach { workout ->
-                            workoutViewModel.logWorkout(workout, selectedDate)
-                        }
-                        showDateConfirmationDialog = false
-                        coroutineScope.launch {
-                            scaffoldState.snackbarHostState.showSnackbar("Workout logged!")
-                        }
-                    }
-                ) {
-                    Text("Confirm")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDateConfirmationDialog = false }) {
-                    Text("Cancel")
-                }
-            }
+            onDismiss = { showDateConfirmationDialog = false },
+            onPickAnotherDate = { showDatePicker = true }
         )
     }
 
@@ -309,34 +264,14 @@ fun MainScreen(
     }
 
     if (showEditNicknameDialog) {
-        AlertDialog(
-            onDismissRequest = { showEditNicknameDialog = false },
-            title = { Text("Edit Nickname") },
-            text = {
-                TextField(
-                    value = editedNickname,
-                    onValueChange = { editedNickname = it },
-                    label = { Text("Nickname") },
-                    colors = TextFieldDefaults.textFieldColors(
-                        backgroundColor = Color.Transparent
-                    )
-                )
+        EditNicknameDialog(
+            editedNickname = editedNickname,
+            onNicknameChange = { editedNickname = it },
+            onSave = {
+                nicknames[pagerState.currentPage] = editedNickname
+                showEditNicknameDialog = false
             },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        nicknames[pagerState.currentPage] = editedNickname
-                        showEditNicknameDialog = false
-                    }
-                ) {
-                    Text("Save")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showEditNicknameDialog = false }) {
-                    Text("Cancel")
-                }
-            }
+            onDismiss = { showEditNicknameDialog = false }
         )
     }
 }
