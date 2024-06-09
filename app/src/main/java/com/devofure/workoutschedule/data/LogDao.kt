@@ -13,4 +13,7 @@ interface LogDao {
 
     @Query("SELECT * FROM logged_workouts WHERE date = :date")
     fun getLogsForDate(date: String): Flow<List<LogEntity>>
+
+    @Query("SELECT DISTINCT strftime('%Y-%m-%d', date) FROM logged_workouts WHERE strftime('%Y-%m', date) = :yearMonth")
+    fun getLogDatesForMonth(yearMonth: String): Flow<List<String>>
 }

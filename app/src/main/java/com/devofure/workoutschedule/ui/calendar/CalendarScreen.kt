@@ -41,6 +41,9 @@ fun CalendarScreen(
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var isMonthView by remember { mutableStateOf(true) }
     val logs by workoutViewModel.getLogsForDate(selectedDate).collectAsState(initial = emptyList())
+    val logDatesForMonth by workoutViewModel.getLogDatesForMonth(selectedDate.year, selectedDate.monthValue)
+        .collectAsState(initial = emptyList())
+
     val firstDayOfWeek by settingsViewModel.firstDayOfWeek.collectAsState()
 
     Scaffold(
@@ -73,7 +76,7 @@ fun CalendarScreen(
                     .fillMaxSize()
                     .fillMaxWidth()
             ) {
-                CalendarView(selectedDate, logs, isMonthView, firstDayOfWeek) { date ->
+                CalendarView(selectedDate, logDatesForMonth, isMonthView, firstDayOfWeek) { date ->
                     selectedDate = date
                 }
                 if (logs.isEmpty()) {

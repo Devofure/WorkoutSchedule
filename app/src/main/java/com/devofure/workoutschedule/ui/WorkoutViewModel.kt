@@ -69,6 +69,13 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         return logDao.getLogsForDate(formattedDate)
     }
 
+    fun getLogDatesForMonth(year: Int, month: Int): Flow<List<LocalDate>> {
+        val yearMonth = String.format("%04d-%02d", year, month)
+        return logDao.getLogDatesForMonth(yearMonth).map { dates ->
+            dates.map { LocalDate.parse(it, DateTimeFormatter.ofPattern("yyyy-MM-dd")) }
+        }
+    }
+
     fun logWorkout(workout: Workout, date: Date) {
         viewModelScope.launch {
             val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())

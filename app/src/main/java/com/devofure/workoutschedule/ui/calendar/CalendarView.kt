@@ -24,13 +24,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.devofure.workoutschedule.data.LogEntity
 import com.devofure.workoutschedule.ui.calculateDayOfWeekOffset
 import com.devofure.workoutschedule.ui.getFirstDayOfMonthWeekIndex
 import com.devofure.workoutschedule.ui.getTotalCells
@@ -44,7 +42,7 @@ import java.util.Locale
 @Composable
 fun CalendarView(
     selectedDate: LocalDate,
-    logs: List<LogEntity>,
+    logDates: List<LocalDate>,
     isMonthView: Boolean,
     firstDayOfWeek: FirstDayOfWeek,
     onDateSelected: (LocalDate) -> Unit
@@ -52,7 +50,6 @@ fun CalendarView(
     val firstDayOfMonth = getFirstDayOfMonthWeekIndex(selectedDate)
     val totalCells =
         getTotalCells(firstDayOfMonth, firstDayOfWeek, selectedDate.lengthOfMonth(), isMonthView)
-    val dateFormat = remember { DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.getDefault()) }
 
     Column(
         modifier = Modifier
@@ -65,8 +62,7 @@ fun CalendarView(
             totalCells = totalCells,
             firstDayOfMonth = firstDayOfMonth,
             selectedDate = selectedDate,
-            logs = logs,
-            dateFormat = dateFormat,
+            logDates = logDates,
             firstDayOfWeek = firstDayOfWeek,
             onDateSelected = onDateSelected,
             isWeekView = !isMonthView
@@ -132,18 +128,13 @@ fun CalendarGrid(
     totalCells: Int,
     firstDayOfMonth: Int,
     selectedDate: LocalDate,
-    logs: List<LogEntity>,
-    dateFormat: DateTimeFormatter,
+    logDates: List<LocalDate>,
     firstDayOfWeek: FirstDayOfWeek,
     onDateSelected: (LocalDate) -> Unit,
     isWeekView: Boolean = false
 ) {
     val dayOfWeekOffset = calculateDayOfWeekOffset(firstDayOfMonth, firstDayOfWeek)
     val weeksToShow = totalCells / 7
-
-    val logDates = logs.mapNotNull {
-        LocalDate.parse(it.date, dateFormat)
-    }.toSet()
 
     var calendarDate = if (isWeekView) getWeekStartDate(
         selectedDate,
@@ -167,7 +158,7 @@ fun CalendarGrid(
 
                 if (day != null) {
                     val isSelectedDay = isSameDay(calendarDate, selectedDate, day)
-                    val logExists = logDates.contains(calendarDate)
+                    val logExists = logDates.contains(calendarDate.withDayOfMonth(day))
                     DayCell(
                         day = day,
                         isSelectedDay = isSelectedDay,
