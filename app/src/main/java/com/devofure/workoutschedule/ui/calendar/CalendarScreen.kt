@@ -73,6 +73,7 @@ fun CalendarScreen(
                     .padding(paddingValues)
                     .fillMaxSize()
                     .padding(16.dp)
+                    .fillMaxWidth()
             ) {
                 CalendarView(selectedDate, logs, isMonthView, firstDayOfWeek) { date ->
                     selectedDate = date
