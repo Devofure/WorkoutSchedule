@@ -8,6 +8,7 @@ import java.util.GregorianCalendar
 
 class MainUtilsTest {
 
+    // Tests for getFullDayName
     @Test
     fun testGetFullDayName_withNickname() {
         val day = "Monday"
@@ -26,6 +27,7 @@ class MainUtilsTest {
         assertEquals(expected, result)
     }
 
+    // Tests for getDaysInMonth
     @Test
     fun testGetDaysInMonth_january() {
         val year = 2024
@@ -53,6 +55,7 @@ class MainUtilsTest {
         assertEquals(expected, result)
     }
 
+    // Tests for getWeekStartDate
     @Test
     fun testGetWeekStartDate_sundayFirstDay() {
         val date = GregorianCalendar(2024, Calendar.JUNE, 12).time
@@ -68,11 +71,13 @@ class MainUtilsTest {
         val result = getWeekStartDate(date, FirstDayOfWeek.MONDAY)
         assertEquals(expected, result)
     }
+
+    // Tests for getFirstDayOfMonth
     @Test
     fun testGetFirstDayOfMonth_january2024() {
         val year = 2024
         val month = Calendar.JANUARY
-        val expected = 0 // Monday
+        val expected = 1 // Monday
         val result = getFirstDayOfMonth(year, month)
         assertEquals(expected, result)
     }
@@ -81,29 +86,72 @@ class MainUtilsTest {
     fun testGetFirstDayOfMonth_february2024() {
         val year = 2024
         val month = Calendar.FEBRUARY
-        val expected = 3 // Thursday
+        val expected = 4 // Thursday
         val result = getFirstDayOfMonth(year, month)
         assertEquals(expected, result)
     }
 
     @Test
+    fun testGetFirstDayOfMonth_march2024() {
+        val year = 2024
+        val month = Calendar.MARCH
+        val expected = 5 // Friday
+        val result = getFirstDayOfMonth(year, month)
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun testGetFirstDayOfMonth_april2024() {
+        val year = 2024
+        val month = Calendar.APRIL
+        val expected = 1 // Monday
+        val result = getFirstDayOfMonth(year, month)
+        assertEquals(expected, result)
+    }
+
+    // Tests for getTotalWeeks
+    @Test
+    fun testGetTotalWeeks_january2024() {
+        val isMonthView = true
+        val firstDayOfMonth = 1 // Monday
+        val daysInMonth = 31
+        val firstDayOfWeek = FirstDayOfWeek.MONDAY
+        val expected = 5
+        val result = getTotalWeeks(isMonthView, firstDayOfMonth, daysInMonth, firstDayOfWeek)
+        assertEquals(expected, result)
+    }
+
+    @Test
+    fun testGetTotalWeeks_february2024() {
+        val isMonthView = true
+        val firstDayOfMonth = 4 // Thursday
+        val daysInMonth = 29
+        val firstDayOfWeek = FirstDayOfWeek.MONDAY
+        val expected = 5
+        val result = getTotalWeeks(isMonthView, firstDayOfMonth, daysInMonth, firstDayOfWeek)
+        assertEquals(expected, result)
+    }
+
+    // Tests for calculateDayOfWeekOffset
+    @Test
     fun testCalculateDayOfWeekOffset_sundayFirstDay() {
-        val firstDayOfMonth = 3 // Thursday
+        val firstDayOfMonth = 4 // Thursday
         val firstDayOfWeek = FirstDayOfWeek.SUNDAY
-        val expected = 3
+        val expected = 4
         val result = calculateDayOfWeekOffset(firstDayOfMonth, firstDayOfWeek)
         assertEquals(expected, result)
     }
 
     @Test
     fun testCalculateDayOfWeekOffset_mondayFirstDay() {
-        val firstDayOfMonth = 3 // Thursday
+        val firstDayOfMonth = 4 // Thursday
         val firstDayOfWeek = FirstDayOfWeek.MONDAY
-        val expected = 2
+        val expected = 3
         val result = calculateDayOfWeekOffset(firstDayOfMonth, firstDayOfWeek)
         assertEquals(expected, result)
     }
 
+    // Tests for isSameDay
     @Test
     fun testIsSameDay_sameDay() {
         val logCalendar = Calendar.getInstance().apply {
@@ -112,8 +160,7 @@ class MainUtilsTest {
         val calendar = Calendar.getInstance().apply {
             set(2024, Calendar.JUNE, 9)
         }
-        val day = 9
-        val result = isSameDay(logCalendar, calendar, day)
+        val result = isSameDay(logCalendar, calendar, logCalendar.get(Calendar.DAY_OF_MONTH))
         assertEquals(true, result)
     }
 
@@ -125,8 +172,7 @@ class MainUtilsTest {
         val calendar = Calendar.getInstance().apply {
             set(2024, Calendar.JUNE, 10)
         }
-        val day = 9
-        val result = isSameDay(logCalendar, calendar, day)
+        val result = isSameDay(logCalendar, calendar, logCalendar.get(Calendar.DAY_OF_MONTH))
         assertEquals(false, result)
     }
 }
