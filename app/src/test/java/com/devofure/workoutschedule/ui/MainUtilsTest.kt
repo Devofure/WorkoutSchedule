@@ -157,10 +157,8 @@ class MainUtilsTest {
         val logCalendar = Calendar.getInstance().apply {
             set(2024, Calendar.JUNE, 9)
         }
-        val calendar = Calendar.getInstance().apply {
-            set(2024, Calendar.JUNE, 9)
-        }
-        val result = isSameDay(logCalendar, calendar, logCalendar.get(Calendar.DAY_OF_MONTH))
+        val date = logCalendar.time
+        val result = isSameDay(logCalendar, date, logCalendar.get(Calendar.DAY_OF_MONTH))
         assertEquals(true, result)
     }
 
@@ -172,7 +170,8 @@ class MainUtilsTest {
         val calendar = Calendar.getInstance().apply {
             set(2024, Calendar.JUNE, 10)
         }
-        val result = isSameDay(logCalendar, calendar, 10)
+        val date = calendar.time
+        val result = isSameDay(logCalendar, date, logCalendar.get(Calendar.DAY_OF_MONTH))
         assertEquals(false, result)
     }
 

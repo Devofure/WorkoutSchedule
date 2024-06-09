@@ -55,8 +55,9 @@ fun calculateDayOfWeekOffset(firstDayOfMonth: Int, firstDayOfWeek: FirstDayOfWee
     }
 }
 
-fun isSameDay(logCalendar: Calendar, calendar: Calendar, day: Int): Boolean {
-    return logCalendar.get(Calendar.DAY_OF_MONTH) == day &&
-            logCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH) &&
-            logCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)
+fun isSameDay(calendar: Calendar, date: Date, day: Int): Boolean {
+    val testCalendar = Calendar.getInstance().apply { time = date }
+    return calendar.get(Calendar.YEAR) == testCalendar.get(Calendar.YEAR) &&
+            calendar.get(Calendar.MONTH) == testCalendar.get(Calendar.MONTH) &&
+            day == testCalendar.get(Calendar.DAY_OF_MONTH)
 }

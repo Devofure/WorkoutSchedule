@@ -131,7 +131,6 @@ fun MonthNavigation(selectedDate: Date, isMonthView: Boolean, onDateSelected: (D
         }
     }
 }
-
 @Composable
 fun CalendarGrid(
     totalCells: Int,
@@ -151,6 +150,10 @@ fun CalendarGrid(
     val dayOfWeekOffset = calculateDayOfWeekOffset(firstDayOfMonth, firstDayOfWeek)
     val weeksToShow = totalCells / 7
 
+    val logDates = logs.mapNotNull {
+        dateFormat.parse(it.date)?.time
+    }.toSet()
+
     for (week in 0 until weeksToShow) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -165,19 +168,17 @@ fun CalendarGrid(
                     if (calculatedDay in 1..daysInMonth) calculatedDay else null
                 }
 
-                println("Week: $week, DayOffset: $dayOffset, CellIndex: $cellIndex, CalculatedDay: $day") // Debugging
-
                 if (day != null) {
-                    val logExists = logs.any { log ->
-                        val logDate = dateFormat.parse(log.date)
-                        val logCalendar = Calendar.getInstance().apply { time = logDate!! }
-                        isSameDay(logCalendar, calendar, day)
-                    }
+                    val isSelectedDay = isSameDay(calendar, selectedDate, day)
+                    val logExists = logDates.contains(calendar.timeInMillis)
                     DayCell(
                         day = day,
-                        selectedDate = selectedDate,
+                        isSelectedDay = isSelectedDay,
                         logExists = logExists,
-                        onDateSelected = onDateSelected,
+                        onDateSelected = {
+                            calendar.set(Calendar.DAY_OF_MONTH, day)
+                            onDateSelected(calendar.time)
+                        },
                         modifier = Modifier.weight(1f)
                     )
                     if (isWeekView) {
@@ -200,16 +201,11 @@ fun CalendarGrid(
 @Composable
 fun DayCell(
     day: Int,
-    selectedDate: Date,
+    isSelectedDay: Boolean,
     logExists: Boolean,
-    onDateSelected: (Date) -> Unit,
+    onDateSelected: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val calendar = Calendar.getInstance()
-    calendar.time = selectedDate
-    val isSelectedDay = calendar.get(Calendar.DAY_OF_MONTH) == day &&
-            calendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH) &&
-            calendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)
     val backgroundColor by animateColorAsState(
         if (isSelectedDay) MaterialTheme.colors.primary else Color.Transparent,
         label = "backgroundColor"
@@ -223,10 +219,7 @@ fun DayCell(
         modifier = modifier
             .aspectRatio(1f)
             .padding(4.dp)
-            .clickable {
-                calendar.set(Calendar.DAY_OF_MONTH, day)
-                onDateSelected(calendar.time)
-            },
+            .clickable { onDateSelected() },
         contentAlignment = Alignment.Center
     ) {
         Box(
@@ -254,7 +247,6 @@ fun DayCell(
         }
     }
 }
-
 
 @Composable
 fun WeekDayHeaders(firstDayOfWeek: FirstDayOfWeek) {
