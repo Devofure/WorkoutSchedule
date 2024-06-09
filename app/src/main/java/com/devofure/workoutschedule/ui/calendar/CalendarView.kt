@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -52,120 +51,130 @@ fun CalendarView(
     val month = calendar.get(Calendar.MONTH)
     val daysInMonth = getDaysInMonth(year, month)
     val firstDayOfMonth = getFirstDayOfMonth(year, month)
-    val totalCells = daysInMonth + firstDayOfMonth
+    val totalCells = if (isMonthView) (firstDayOfMonth + daysInMonth + (7 - (firstDayOfMonth + daysInMonth) % 7)) else 7
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        MonthNavigation(calendar, onDateSelected, isMonthView)
-        Spacer(modifier = Modifier.height(8.dp))
+        MonthNavigation(selectedDate, isMonthView, onDateSelected)
         WeekDayHeaders(firstDayOfWeek)
         CalendarGrid(
-            totalCells,
-            firstDayOfMonth,
-            daysInMonth,
-            calendar,
-            selectedDate,
-            logs,
-            dateFormat,
-            firstDayOfWeek,
-            onDateSelected
+            totalCells = totalCells,
+            firstDayOfMonth = firstDayOfMonth,
+            daysInMonth = daysInMonth,
+            calendar = calendar,
+            selectedDate = selectedDate,
+            logs = logs,
+            dateFormat = dateFormat,
+            firstDayOfWeek = firstDayOfWeek,
+            onDateSelected = onDateSelected,
+            isWeekView = !isMonthView
         )
     }
 }
 
 @Composable
-fun WeekView(
+fun MonthNavigation(selectedDate: Date, isMonthView: Boolean, onDateSelected: (Date) -> Unit) {
+    val calendar = Calendar.getInstance().apply { time = selectedDate }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = {
+            if (isMonthView) {
+                calendar.add(Calendar.MONTH, -1)
+            } else {
+                calendar.add(Calendar.WEEK_OF_YEAR, -1)
+            }
+            onDateSelected(calendar.time)
+        }) {
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = if (isMonthView) "Previous month" else "Previous week"
+            )
+        }
+        Text(
+            text = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(calendar.time),
+            style = MaterialTheme.typography.h6,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f)
+        )
+        IconButton(onClick = {
+            if (isMonthView) {
+                calendar.add(Calendar.MONTH, 1)
+            } else {
+                calendar.add(Calendar.WEEK_OF_YEAR, 1)
+            }
+            onDateSelected(calendar.time)
+        }) {
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = if (isMonthView) "Next month" else "Next week"
+            )
+        }
+    }
+}
+
+@Composable
+fun CalendarGrid(
+    totalCells: Int,
+    firstDayOfMonth: Int,
+    daysInMonth: Int,
+    calendar: Calendar,
     selectedDate: Date,
     logs: List<LogEntity>,
+    dateFormat: SimpleDateFormat,
     firstDayOfWeek: FirstDayOfWeek,
-    onDateSelected: (Date) -> Unit
+    onDateSelected: (Date) -> Unit,
+    isWeekView: Boolean = false
 ) {
-    val calendar = Calendar.getInstance().apply { time = selectedDate }
-    calendar.time = getWeekStartDate(selectedDate, firstDayOfWeek)
-
-    val daysInWeek = 7
-    val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
-
-    Column(modifier = Modifier.fillMaxWidth()) {
-        WeekNavigation(calendar, onDateSelected)
-        Spacer(modifier = Modifier.height(8.dp))
-        WeekDayHeaders(firstDayOfWeek)
-        CalendarGrid(
-            daysInWeek,
-            0,
-            daysInWeek,
-            calendar,
-            selectedDate,
-            logs,
-            dateFormat,
-            firstDayOfWeek,
-            onDateSelected,
-            isWeekView = true
-        )
+    if (isWeekView) {
+        calendar.time = getWeekStartDate(selectedDate, firstDayOfWeek)
     }
-}
 
-@Composable
-fun MonthNavigation(calendar: Calendar, onDateSelected: (Date) -> Unit, isMonthView: Boolean) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        if (isMonthView) {
-            IconButton(onClick = {
-                calendar.add(Calendar.MONTH, -1)
-                onDateSelected(calendar.time)
-            }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous month")
+    for (week in 0 until totalCells / 7) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            for (dayOffset in 0 until 7) {
+                val day = if (isWeekView) {
+                    calendar.get(Calendar.DAY_OF_MONTH)
+                } else {
+                    week * 7 + dayOffset - firstDayOfMonth + 1
+                }
+
+                if ((day in 1..daysInMonth) || isWeekView) {
+                    val logExists = logs.any { log ->
+                        val logDate = dateFormat.parse(log.date)
+                        val logCalendar = Calendar.getInstance().apply { time = logDate!! }
+                        logCalendar.get(Calendar.DAY_OF_MONTH) == day &&
+                                logCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH) &&
+                                logCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)
+                    }
+                    DayCell(
+                        day = day,
+                        selectedDate = selectedDate,
+                        logExists = logExists,
+                        onDateSelected = onDateSelected,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (isWeekView) {
+                        calendar.add(Calendar.DAY_OF_MONTH, 1)
+                    }
+                } else {
+                    Spacer(
+                        modifier = Modifier
+                            .weight(1f)
+                            .aspectRatio(1f)
+                            .padding(4.dp)
+                    )
+                }
             }
         }
-        Text(
-            text = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(calendar.time),
-            style = MaterialTheme.typography.h6,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.weight(1f)
-        )
-        if (isMonthView) {
-            IconButton(onClick = {
-                calendar.add(Calendar.MONTH, 1)
-                onDateSelected(calendar.time)
-            }) {
-                Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next month")
-            }
-        }
-    }
-}
-
-@Composable
-fun WeekNavigation(calendar: Calendar, onDateSelected: (Date) -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        IconButton(onClick = {
-            calendar.add(Calendar.WEEK_OF_YEAR, -1)
-            onDateSelected(calendar.time)
-        }) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Previous week")
-        }
-        Text(
-            text = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(calendar.time),
-            style = MaterialTheme.typography.h6,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.weight(1f)
-        )
-        IconButton(onClick = {
-            calendar.add(Calendar.WEEK_OF_YEAR, 1)
-            onDateSelected(calendar.time)
-        }) {
-            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next week")
-        }
+        if (isWeekView) break
     }
 }
 
@@ -188,64 +197,6 @@ fun WeekDayHeaders(firstDayOfWeek: FirstDayOfWeek) {
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.body2
             )
-        }
-    }
-}
-
-@Composable
-fun CalendarGrid(
-    totalCells: Int,
-    firstDayOfMonth: Int,
-    daysInMonth: Int,
-    calendar: Calendar,
-    selectedDate: Date,
-    logs: List<LogEntity>,
-    dateFormat: SimpleDateFormat,
-    firstDayOfWeek: FirstDayOfWeek,
-    onDateSelected: (Date) -> Unit,
-    isWeekView: Boolean = false
-) {
-    val startIndex = if (firstDayOfWeek == FirstDayOfWeek.SUNDAY) 0 else 1
-
-    for (i in startIndex until totalCells step 7) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            for (j in i until i + 7) {
-                val day = if (isWeekView) {
-                    calendar.get(Calendar.DAY_OF_MONTH) + (j - i)
-                } else {
-                    j - firstDayOfMonth + 1
-                }
-                val dayOfMonth = if (isWeekView) calendar.get(Calendar.DAY_OF_MONTH) else day
-                if ((j >= firstDayOfMonth && day <= daysInMonth) || isWeekView) {
-                    val logExists = logs.any { log ->
-                        val logDate = dateFormat.parse(log.date)
-                        val logCalendar = Calendar.getInstance().apply { time = logDate!! }
-                        logCalendar.get(Calendar.DAY_OF_MONTH) == dayOfMonth &&
-                                logCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH) &&
-                                logCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)
-                    }
-                    DayCell(
-                        dayOfMonth,
-                        selectedDate,
-                        logExists,
-                        onDateSelected,
-                        Modifier.weight(1f)
-                    )
-                    if (isWeekView) {
-                        calendar.add(Calendar.DAY_OF_MONTH, 1)
-                    }
-                } else {
-                    Spacer(
-                        modifier = Modifier
-                            .weight(1f)
-                            .aspectRatio(1f)
-                            .padding(4.dp)
-                    )
-                }
-            }
         }
     }
 }
