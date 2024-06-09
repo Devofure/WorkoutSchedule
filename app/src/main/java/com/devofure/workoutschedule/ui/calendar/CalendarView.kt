@@ -31,8 +31,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.devofure.workoutschedule.data.LogEntity
-import com.devofure.workoutschedule.ui.main.getDaysInMonth
-import com.devofure.workoutschedule.ui.main.getFirstDayOfMonth
+import com.devofure.workoutschedule.ui.calculateDayOfWeekOffset
+import com.devofure.workoutschedule.ui.getDaysInMonth
+import com.devofure.workoutschedule.ui.getFirstDayOfMonth
+import com.devofure.workoutschedule.ui.getWeekStartDate
+import com.devofure.workoutschedule.ui.isSameDay
 import com.devofure.workoutschedule.ui.settings.FirstDayOfWeek
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -54,8 +57,9 @@ fun CalendarView(
     val firstDayOfMonth = getFirstDayOfMonth(year, month)
 
     // Calculate the number of weeks to display
-    val totalDays = firstDayOfMonth + daysInMonth
-    val totalWeeks = (totalDays + (7 - totalDays % 7)) / 7
+    val dayOfWeekOffset = calculateDayOfWeekOffset(firstDayOfMonth, firstDayOfWeek)
+    val totalDays = dayOfWeekOffset + daysInMonth
+    val totalWeeks = if (totalDays % 7 == 0) totalDays / 7 else (totalDays / 7) + 1
     val totalCells = if (isMonthView) totalWeeks * 7 else 7
 
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
@@ -81,6 +85,7 @@ fun CalendarView(
         )
     }
 }
+
 
 @Composable
 fun MonthNavigation(selectedDate: Date, isMonthView: Boolean, onDateSelected: (Date) -> Unit) {
@@ -152,13 +157,15 @@ fun CalendarGrid(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             for (dayOffset in 0 until 7) {
+                val cellIndex = week * 7 + dayOffset
                 val day = if (isWeekView) {
                     calendar.get(Calendar.DAY_OF_MONTH)
                 } else {
-                    val cellIndex = week * 7 + dayOffset
                     val calculatedDay = cellIndex - dayOfWeekOffset + 1
                     if (calculatedDay in 1..daysInMonth) calculatedDay else null
                 }
+
+                println("Week: $week, DayOffset: $dayOffset, CellIndex: $cellIndex, CalculatedDay: $day") // Debugging
 
                 if (day != null) {
                     val logExists = logs.any { log ->
@@ -188,22 +195,6 @@ fun CalendarGrid(
         }
         if (isWeekView) break // Stop after showing one week
     }
-}
-
-// Helper function to calculate the day of the week offset
-private fun calculateDayOfWeekOffset(firstDayOfMonth: Int, firstDayOfWeek: FirstDayOfWeek): Int {
-    return if (firstDayOfWeek == FirstDayOfWeek.SUNDAY) {
-        firstDayOfMonth
-    } else {
-        (firstDayOfMonth - 1 + 7) % 7 // Adjust for Monday as the first day of the week
-    }
-}
-
-// Helper function to check if the provided day is the same as the selected day
-private fun isSameDay(logCalendar: Calendar, calendar: Calendar, day: Int): Boolean {
-    return logCalendar.get(Calendar.DAY_OF_MONTH) == day &&
-            logCalendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH) &&
-            logCalendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)
 }
 
 @Composable
@@ -264,17 +255,6 @@ fun DayCell(
     }
 }
 
-private fun getWeekStartDate(date: Date, firstDayOfWeek: FirstDayOfWeek): Date {
-    val calendar = Calendar.getInstance().apply { time = date }
-    val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
-    val offset = if (firstDayOfWeek == FirstDayOfWeek.SUNDAY) {
-        dayOfWeek - Calendar.SUNDAY
-    } else {
-        if (dayOfWeek == Calendar.SUNDAY) 6 else dayOfWeek - Calendar.MONDAY
-    }
-    calendar.add(Calendar.DAY_OF_MONTH, -offset)
-    return calendar.time
-}
 
 @Composable
 fun WeekDayHeaders(firstDayOfWeek: FirstDayOfWeek) {

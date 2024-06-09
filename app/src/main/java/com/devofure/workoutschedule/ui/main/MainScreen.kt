@@ -48,6 +48,7 @@ import androidx.navigation.NavHostController
 import com.devofure.workoutschedule.data.Workout
 import com.devofure.workoutschedule.ui.SharedViewModel
 import com.devofure.workoutschedule.ui.WorkoutViewModel
+import com.devofure.workoutschedule.ui.getFullDayName
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
