@@ -41,7 +41,12 @@ fun CalendarScreen(
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var isMonthView by remember { mutableStateOf(true) }
     val logs by workoutViewModel.getLogsForDate(selectedDate).collectAsState(initial = emptyList())
-    val logDatesForMonth by workoutViewModel.getLogDatesForMonth(selectedDate.year, selectedDate.monthValue)
+    val currentYearMonth =
+        remember { mutableStateOf(Pair(selectedDate.year, selectedDate.monthValue)) }
+    val logDatesForMonth by workoutViewModel.getLogDatesForMonth(
+        currentYearMonth.value.first,
+        currentYearMonth.value.second
+    )
         .collectAsState(initial = emptyList())
 
     val firstDayOfWeek by settingsViewModel.firstDayOfWeek.collectAsState()
@@ -49,7 +54,7 @@ fun CalendarScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Calendar") },
+                title = { Text("Log Calendar") },
                 backgroundColor = MaterialTheme.colors.primary,
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
@@ -57,10 +62,15 @@ fun CalendarScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { selectedDate = LocalDate.now() }) {
+                    IconButton(onClick = {
+                        selectedDate = LocalDate.now()
+                        currentYearMonth.value = Pair(selectedDate.year, selectedDate.monthValue)
+                    }) {
                         Icon(Icons.Filled.Today, contentDescription = "Today")
                     }
-                    IconButton(onClick = { isMonthView = !isMonthView }) {
+                    IconButton(onClick = {
+                        isMonthView = !isMonthView
+                    }) {
                         Icon(
                             imageVector = if (isMonthView) Icons.Filled.ViewWeek else Icons.Filled.ViewModule,
                             contentDescription = "Toggle View"
@@ -78,6 +88,7 @@ fun CalendarScreen(
             ) {
                 CalendarView(selectedDate, logDatesForMonth, isMonthView, firstDayOfWeek) { date ->
                     selectedDate = date
+                    currentYearMonth.value = Pair(date.year, date.monthValue)
                 }
                 if (logs.isEmpty()) {
                     Column(

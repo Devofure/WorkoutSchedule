@@ -15,7 +15,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -69,10 +71,19 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         return logDao.getLogsForDate(formattedDate)
     }
 
+    private var cachedLogDatesForMonth = mutableMapOf<String, List<LocalDate>>()
+
     fun getLogDatesForMonth(year: Int, month: Int): Flow<List<LocalDate>> {
         val yearMonth = String.format("%04d-%02d", year, month)
-        return logDao.getLogDatesForMonth(yearMonth).map { dates ->
-            dates.map { LocalDate.parse(it, DateTimeFormatter.ofPattern("yyyy-MM-dd")) }
+        val cachedDates = cachedLogDatesForMonth[yearMonth]
+        return if (cachedDates != null) {
+            flowOf(cachedDates)
+        } else {
+            logDao.getLogDatesForMonth(yearMonth).map { dates ->
+                dates.map { LocalDate.parse(it, DateTimeFormatter.ofPattern("yyyy-MM-dd")) }
+            }.onEach { dates ->
+                cachedLogDatesForMonth[yearMonth] = dates
+            }
         }
     }
 
