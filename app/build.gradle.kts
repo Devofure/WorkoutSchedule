@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
     id("com.google.devtools.ksp")
+    alias(libs.plugins.firebase.crashlytics)
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -21,7 +23,7 @@ android {
         javaCompileOptions {
             annotationProcessorOptions {
                 arguments(
-                    mapOf("room.schemaLocation" to "$projectDir/schemas".toString())
+                    mapOf("room.schemaLocation" to "$projectDir/schemas")
                 )
             }
         }
@@ -55,6 +57,7 @@ composeCompiler {
 }
 
 dependencies {
+    implementation (platform(libs.firebase.bom))
     implementation(libs.accompanist.systemuicontroller)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
@@ -71,13 +74,14 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.firebase.analytics.ktx)
+    implementation(libs.firebase.crashlytics.ktx)
     implementation(libs.gson)
     implementation(libs.material)
     implementation(libs.room.ktx)
     implementation(libs.room.runtime)
     implementation(libs.timber)
     ksp(libs.room.compiler)
-
     // Testing dependencies
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.compose.ui.test.manifest)
