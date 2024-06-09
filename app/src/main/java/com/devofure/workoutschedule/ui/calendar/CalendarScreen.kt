@@ -26,8 +26,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.devofure.workoutschedule.ui.WorkoutViewModel
 import com.devofure.workoutschedule.ui.main.WorkoutItem
 import com.devofure.workoutschedule.ui.settings.SettingsViewModel
 import java.time.LocalDate
@@ -35,19 +35,18 @@ import java.time.LocalDate
 @Composable
 fun CalendarScreen(
     navController: NavHostController,
-    workoutViewModel: WorkoutViewModel,
+    calendarViewModel: CalendarViewModel = viewModel(),
     settingsViewModel: SettingsViewModel
 ) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var isMonthView by remember { mutableStateOf(true) }
-    val logs by workoutViewModel.getLogsForDate(selectedDate).collectAsState(initial = emptyList())
+    val logs by calendarViewModel.getLogsForDate(selectedDate).collectAsState(initial = emptyList())
     val currentYearMonth =
         remember { mutableStateOf(Pair(selectedDate.year, selectedDate.monthValue)) }
-    val logDatesForMonth by workoutViewModel.getLogDatesForMonth(
+    val logDatesForMonth by calendarViewModel.getLogDatesForMonth(
         currentYearMonth.value.first,
         currentYearMonth.value.second
-    )
-        .collectAsState(initial = emptyList())
+    ).collectAsState(initial = emptyList())
 
     val firstDayOfWeek by settingsViewModel.firstDayOfWeek.collectAsState()
 
@@ -68,9 +67,7 @@ fun CalendarScreen(
                     }) {
                         Icon(Icons.Filled.Today, contentDescription = "Today")
                     }
-                    IconButton(onClick = {
-                        isMonthView = !isMonthView
-                    }) {
+                    IconButton(onClick = { isMonthView = !isMonthView }) {
                         Icon(
                             imageVector = if (isMonthView) Icons.Filled.ViewWeek else Icons.Filled.ViewModule,
                             contentDescription = "Toggle View"
@@ -107,7 +104,7 @@ fun CalendarScreen(
                 } else {
                     LazyColumn {
                         items(logs) { log ->
-                            val workout = workoutViewModel.getWorkoutByName(log)
+                            val workout = calendarViewModel.getWorkoutByName(log)
                             workout?.let {
                                 WorkoutItem(
                                     workout = workout,

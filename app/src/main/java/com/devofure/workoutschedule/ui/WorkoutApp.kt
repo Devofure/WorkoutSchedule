@@ -7,6 +7,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.devofure.workoutschedule.ui.addexercise.AddExerciseScreen
 import com.devofure.workoutschedule.ui.calendar.CalendarScreen
+import com.devofure.workoutschedule.ui.calendar.CalendarViewModel
 import com.devofure.workoutschedule.ui.editworkout.EditWorkoutScreen
 import com.devofure.workoutschedule.ui.main.MainScreen
 import com.devofure.workoutschedule.ui.settings.SettingsViewModel
@@ -17,6 +18,7 @@ fun WorkoutApp(
     workoutViewModel: WorkoutViewModel = viewModel(),
     settingsViewModel: SettingsViewModel = viewModel(),
     sharedViewModel: SharedViewModel = viewModel(),
+    calendarViewModel: CalendarViewModel = viewModel(),
     onSettingsClick: () -> Unit
 ) {
     val navController = rememberNavController()
@@ -35,7 +37,11 @@ fun WorkoutApp(
             AddExerciseScreen(navController, sharedViewModel, workoutViewModel, dayFullName)
         }
         composable("calendar") {
-            CalendarScreen(navController = navController, workoutViewModel = workoutViewModel, settingsViewModel = settingsViewModel)
+            CalendarScreen(
+                navController = navController,
+                calendarViewModel = calendarViewModel,
+                settingsViewModel = settingsViewModel
+            )
         }
         composable("workout_detail") { WorkoutDetailScreen(navController, sharedViewModel) }
         composable("edit_workout/{dayFullName}") { backStackEntry ->

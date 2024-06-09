@@ -11,19 +11,14 @@ import com.devofure.workoutschedule.data.LogEntity
 import com.devofure.workoutschedule.data.Workout
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import java.util.Date
 import java.util.Locale
 
 class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
@@ -39,7 +34,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     val isFirstLaunch: StateFlow<Boolean> = _isFirstLaunch
 
     private var nextWorkoutId = 1
-
 
     private val _filteredExercises = MutableStateFlow<List<Exercise>>(emptyList())
     val filteredExercises: StateFlow<List<Exercise>> = _filteredExercises
@@ -65,42 +59,21 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun getLogsForDate(date: LocalDate): Flow<List<LogEntity>> {
-        val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-        val formattedDate = date.format(dateFormat)
-        return logDao.getLogsForDate(formattedDate)
-    }
-
-    private var cachedLogDatesForMonth = mutableMapOf<String, List<LocalDate>>()
-
-    fun getLogDatesForMonth(year: Int, month: Int): Flow<List<LocalDate>> {
-        val yearMonth = String.format("%04d-%02d", year, month)
-        val cachedDates = cachedLogDatesForMonth[yearMonth]
-        return if (cachedDates != null) {
-            flowOf(cachedDates)
-        } else {
-            logDao.getLogDatesForMonth(yearMonth).map { dates ->
-                dates.map { LocalDate.parse(it, DateTimeFormatter.ofPattern("yyyy-MM-dd")) }
-            }.onEach { dates ->
-                cachedLogDatesForMonth[yearMonth] = dates
-            }
-        }
-    }
-
-    fun logWorkout(workout: Workout, date: Date) {
+    fun logWorkout(workout: Workout, date: LocalDate) {
         viewModelScope.launch {
-            val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
             val logEntity = LogEntity(
-                date = dateFormat.format(date),
+                date = date.format(dateFormat),
                 workoutId = workout.id,
                 exerciseName = workout.exercise.name,
-                dayOfWeek = SimpleDateFormat("EEEE", Locale.getDefault()).format(date),
+                dayOfWeek = date.format(DateTimeFormatter.ofPattern("EEEE", Locale.getDefault())),
                 repsList = workout.repsList,
                 duration = workout.duration,
             )
             logDao.insertLog(logEntity)
         }
     }
+
 
     fun generateSampleSchedule() {
         viewModelScope.launch {
@@ -284,14 +257,5 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         _isLoading.value = true
         _filteredExercises.value = exerciseRepository.searchExercises(query)
         _isLoading.value = false
-    }
-
-    fun getWorkoutByName(log: LogEntity): Workout? {
-        val exercise = exerciseRepository.getExerciseByName(log.exerciseName) ?: return null
-        return Workout(
-            id = log.id,
-            exercise = exercise,
-            repsList = log.repsList,
-        )
     }
 }

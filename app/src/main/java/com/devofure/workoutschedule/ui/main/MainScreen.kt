@@ -1,4 +1,7 @@
-@file:OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
+@file:OptIn(
+    ExperimentalFoundationApi::class, ExperimentalMaterialApi::class,
+    ExperimentalMaterialApi::class
+)
 
 package com.devofure.workoutschedule.ui.main
 
@@ -51,11 +54,10 @@ import com.devofure.workoutschedule.ui.WorkoutViewModel
 import com.devofure.workoutschedule.ui.getFullDayName
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(
     navController: NavHostController,
@@ -76,7 +78,7 @@ fun MainScreen(
     var editedNickname by remember { mutableStateOf("") }
     var showEditNicknameDialog by remember { mutableStateOf(false) }
     var showDateConfirmationDialog by remember { mutableStateOf(false) }
-    var selectedDate by remember { mutableStateOf(Date()) }
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var selectedWorkouts by remember { mutableStateOf<List<Workout>>(emptyList()) }
 
     val systemUiController = rememberSystemUiController()
@@ -251,10 +253,12 @@ fun MainScreen(
                 Column {
                     Text(
                         "Do you want to log the workout for ${
-                            SimpleDateFormat(
-                                "EEEE, MMMM d",
-                                Locale.getDefault()
-                            ).format(selectedDate)
+                            selectedDate.format(
+                                DateTimeFormatter.ofPattern(
+                                    "EEEE, MMMM d",
+                                    Locale.getDefault()
+                                )
+                            )
                         }?"
                     )
                     Spacer(modifier = Modifier.height(8.dp))
