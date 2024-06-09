@@ -2,8 +2,6 @@ package com.devofure.workoutschedule.ui.calendar
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -61,7 +59,7 @@ fun CalendarView(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .animateContentSize(animationSpec = tween(300, easing = FastOutSlowInEasing))
+            .animateContentSize()
     ) {
         MonthNavigation(selectedDate, isMonthView, onDateSelected)
         WeekDayHeaders(firstDayOfWeek)
@@ -217,8 +215,14 @@ fun DayCell(
     val isSelectedDay = calendar.get(Calendar.DAY_OF_MONTH) == day &&
             calendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH) &&
             calendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)
-    val backgroundColor by animateColorAsState(if (isSelectedDay) MaterialTheme.colors.primary else Color.Transparent)
-    val textColor by animateColorAsState(if (isSelectedDay) Color.White else Color.Black)
+    val backgroundColor by animateColorAsState(
+        if (isSelectedDay) MaterialTheme.colors.primary else Color.Transparent,
+        label = "backgroundColor"
+    )
+    val textColor by animateColorAsState(
+        if (isSelectedDay) Color.White else Color.Black,
+        label = "textColor"
+    )
 
     Box(
         modifier = modifier
