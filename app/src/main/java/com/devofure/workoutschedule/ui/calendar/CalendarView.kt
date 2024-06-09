@@ -134,7 +134,13 @@ fun CalendarGrid(
         calendar.time = getWeekStartDate(selectedDate, firstDayOfWeek)
     }
 
-    for (week in 0 until totalCells / 7) {
+    val dayOfWeekOffset = if (firstDayOfWeek == FirstDayOfWeek.SUNDAY) {
+        firstDayOfMonth
+    } else {
+        (firstDayOfMonth - 1 + 7) % 7 // Adjust for Monday as the first day of the week
+    }
+
+    for (week in 0 until totalCells / 7 + 1) { // Ensure enough rows for the entire month
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
@@ -143,10 +149,12 @@ fun CalendarGrid(
                 val day = if (isWeekView) {
                     calendar.get(Calendar.DAY_OF_MONTH)
                 } else {
-                    week * 7 + dayOffset - firstDayOfMonth + 1
+                    val cellIndex = week * 7 + dayOffset
+                    val calculatedDay = cellIndex - dayOfWeekOffset + 1
+                    if (calculatedDay in 1..daysInMonth) calculatedDay else null
                 }
 
-                if ((day in 1..daysInMonth) || isWeekView) {
+                if (day != null && (day in 1..daysInMonth || isWeekView)) {
                     val logExists = logs.any { log ->
                         val logDate = dateFormat.parse(log.date)
                         val logCalendar = Calendar.getInstance().apply { time = logDate!! }
@@ -174,30 +182,7 @@ fun CalendarGrid(
                 }
             }
         }
-        if (isWeekView) break
-    }
-}
-
-@Composable
-fun WeekDayHeaders(firstDayOfWeek: FirstDayOfWeek) {
-    val days = if (firstDayOfWeek == FirstDayOfWeek.SUNDAY) {
-        listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
-    } else {
-        listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-    }
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        days.forEach { day ->
-            Text(
-                text = day,
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.body2
-            )
-        }
+        if (isWeekView) break // Stop after showing one week
     }
 }
 
@@ -210,7 +195,10 @@ fun DayCell(
     modifier: Modifier = Modifier
 ) {
     val calendar = Calendar.getInstance()
-    val isSelectedDay = isSameDay(calendar.apply { time = selectedDate }, day)
+    calendar.time = selectedDate
+    val isSelectedDay = calendar.get(Calendar.DAY_OF_MONTH) == day &&
+            calendar.get(Calendar.MONTH) == calendar.get(Calendar.MONTH) &&
+            calendar.get(Calendar.YEAR) == calendar.get(Calendar.YEAR)
     val backgroundColor by animateColorAsState(if (isSelectedDay) MaterialTheme.colors.primary else Color.Transparent)
     val textColor by animateColorAsState(if (isSelectedDay) Color.White else Color.Black)
 
@@ -250,10 +238,6 @@ fun DayCell(
     }
 }
 
-private fun isSameDay(calendar: Calendar, day: Int): Boolean {
-    return calendar.get(Calendar.DAY_OF_MONTH) == day
-}
-
 private fun getWeekStartDate(date: Date, firstDayOfWeek: FirstDayOfWeek): Date {
     val calendar = Calendar.getInstance().apply { time = date }
     val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
@@ -264,4 +248,27 @@ private fun getWeekStartDate(date: Date, firstDayOfWeek: FirstDayOfWeek): Date {
     }
     calendar.add(Calendar.DAY_OF_MONTH, -offset)
     return calendar.time
+}
+
+@Composable
+fun WeekDayHeaders(firstDayOfWeek: FirstDayOfWeek) {
+    val days = if (firstDayOfWeek == FirstDayOfWeek.SUNDAY) {
+        listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+    } else {
+        listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        days.forEach { day ->
+            Text(
+                text = day,
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.body2
+            )
+        }
+    }
 }
