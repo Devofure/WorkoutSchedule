@@ -32,37 +32,27 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.devofure.workoutschedule.data.LogEntity
 import com.devofure.workoutschedule.ui.calculateDayOfWeekOffset
-import com.devofure.workoutschedule.ui.getDaysInMonth
-import com.devofure.workoutschedule.ui.getFirstDayOfMonth
+import com.devofure.workoutschedule.ui.getFirstDayOfMonthWeekIndex
+import com.devofure.workoutschedule.ui.getTotalCells
 import com.devofure.workoutschedule.ui.getWeekStartDate
 import com.devofure.workoutschedule.ui.isSameDay
 import com.devofure.workoutschedule.ui.settings.FirstDayOfWeek
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 @Composable
 fun CalendarView(
-    selectedDate: Date,
+    selectedDate: LocalDate,
     logs: List<LogEntity>,
     isMonthView: Boolean,
     firstDayOfWeek: FirstDayOfWeek,
-    onDateSelected: (Date) -> Unit
+    onDateSelected: (LocalDate) -> Unit
 ) {
-    val calendar = Calendar.getInstance().apply { time = selectedDate }
-    val year = calendar.get(Calendar.YEAR)
-    val month = calendar.get(Calendar.MONTH)
-    val daysInMonth = getDaysInMonth(year, month)
-    val firstDayOfMonth = getFirstDayOfMonth(year, month)
-
-    // Calculate the number of weeks to display
-    val dayOfWeekOffset = calculateDayOfWeekOffset(firstDayOfMonth, firstDayOfWeek)
-    val totalDays = dayOfWeekOffset + daysInMonth
-    val totalWeeks = if (totalDays % 7 == 0) totalDays / 7 else (totalDays / 7) + 1
-    val totalCells = if (isMonthView) totalWeeks * 7 else 7
-
-    val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()) }
+    val firstDayOfMonth = getFirstDayOfMonthWeekIndex(selectedDate)
+    val totalCells =
+        getTotalCells(firstDayOfMonth, firstDayOfWeek, selectedDate.lengthOfMonth(), isMonthView)
+    val dateFormat = remember { DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.getDefault()) }
 
     Column(
         modifier = Modifier
@@ -74,8 +64,6 @@ fun CalendarView(
         CalendarGrid(
             totalCells = totalCells,
             firstDayOfMonth = firstDayOfMonth,
-            daysInMonth = daysInMonth,
-            calendar = calendar,
             selectedDate = selectedDate,
             logs = logs,
             dateFormat = dateFormat,
@@ -86,10 +74,12 @@ fun CalendarView(
     }
 }
 
-
 @Composable
-fun MonthNavigation(selectedDate: Date, isMonthView: Boolean, onDateSelected: (Date) -> Unit) {
-    val calendar = Calendar.getInstance().apply { time = selectedDate }
+fun MonthNavigation(
+    selectedDate: LocalDate,
+    isMonthView: Boolean,
+    onDateSelected: (LocalDate) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -98,12 +88,12 @@ fun MonthNavigation(selectedDate: Date, isMonthView: Boolean, onDateSelected: (D
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = {
-            if (isMonthView) {
-                calendar.add(Calendar.MONTH, -1)
+            val newDate = if (isMonthView) {
+                selectedDate.minusMonths(1)
             } else {
-                calendar.add(Calendar.WEEK_OF_YEAR, -1)
+                selectedDate.minusWeeks(1)
             }
-            onDateSelected(calendar.time)
+            onDateSelected(newDate)
         }) {
             Icon(
                 Icons.AutoMirrored.Filled.ArrowBack,
@@ -111,18 +101,23 @@ fun MonthNavigation(selectedDate: Date, isMonthView: Boolean, onDateSelected: (D
             )
         }
         Text(
-            text = SimpleDateFormat("MMMM yyyy", Locale.getDefault()).format(calendar.time),
+            text = selectedDate.format(
+                DateTimeFormatter.ofPattern(
+                    "MMMM yyyy",
+                    Locale.getDefault()
+                )
+            ),
             style = MaterialTheme.typography.h6,
             textAlign = TextAlign.Center,
             modifier = Modifier.weight(1f)
         )
         IconButton(onClick = {
-            if (isMonthView) {
-                calendar.add(Calendar.MONTH, 1)
+            val newDate = if (isMonthView) {
+                selectedDate.plusMonths(1)
             } else {
-                calendar.add(Calendar.WEEK_OF_YEAR, 1)
+                selectedDate.plusWeeks(1)
             }
-            onDateSelected(calendar.time)
+            onDateSelected(newDate)
         }) {
             Icon(
                 Icons.AutoMirrored.Filled.ArrowForward,
@@ -131,29 +126,31 @@ fun MonthNavigation(selectedDate: Date, isMonthView: Boolean, onDateSelected: (D
         }
     }
 }
+
 @Composable
 fun CalendarGrid(
     totalCells: Int,
     firstDayOfMonth: Int,
-    daysInMonth: Int,
-    calendar: Calendar,
-    selectedDate: Date,
+    selectedDate: LocalDate,
     logs: List<LogEntity>,
-    dateFormat: SimpleDateFormat,
+    dateFormat: DateTimeFormatter,
     firstDayOfWeek: FirstDayOfWeek,
-    onDateSelected: (Date) -> Unit,
+    onDateSelected: (LocalDate) -> Unit,
     isWeekView: Boolean = false
 ) {
-    if (isWeekView) {
-        calendar.time = getWeekStartDate(selectedDate, firstDayOfWeek)
-    }
     val dayOfWeekOffset = calculateDayOfWeekOffset(firstDayOfMonth, firstDayOfWeek)
     val weeksToShow = totalCells / 7
 
     val logDates = logs.mapNotNull {
-        dateFormat.parse(it.date)?.time
+        LocalDate.parse(it.date, dateFormat)
     }.toSet()
 
+    var calendarDate = if (isWeekView) getWeekStartDate(
+        selectedDate,
+        firstDayOfWeek
+    ) else selectedDate.withDayOfMonth(1)
+
+    val daysInMonth = calendarDate.lengthOfMonth()
     for (week in 0 until weeksToShow) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -162,27 +159,27 @@ fun CalendarGrid(
             for (dayOffset in 0 until 7) {
                 val cellIndex = week * 7 + dayOffset
                 val day = if (isWeekView) {
-                    calendar.get(Calendar.DAY_OF_MONTH)
+                    calendarDate.dayOfMonth
                 } else {
                     val calculatedDay = cellIndex - dayOfWeekOffset + 1
                     if (calculatedDay in 1..daysInMonth) calculatedDay else null
                 }
 
                 if (day != null) {
-                    val isSelectedDay = isSameDay(calendar, selectedDate, day)
-                    val logExists = logDates.contains(calendar.timeInMillis)
+                    val isSelectedDay = isSameDay(calendarDate, selectedDate, day)
+                    val logExists = logDates.contains(calendarDate)
                     DayCell(
                         day = day,
                         isSelectedDay = isSelectedDay,
                         logExists = logExists,
                         onDateSelected = {
-                            calendar.set(Calendar.DAY_OF_MONTH, day)
-                            onDateSelected(calendar.time)
+                            calendarDate = calendarDate.withDayOfMonth(day)
+                            onDateSelected(calendarDate)
                         },
                         modifier = Modifier.weight(1f)
                     )
                     if (isWeekView) {
-                        calendar.add(Calendar.DAY_OF_MONTH, 1)
+                        calendarDate = calendarDate.plusDays(1)
                     }
                 } else {
                     Spacer(

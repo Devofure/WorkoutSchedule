@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 
@@ -61,9 +63,9 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun getLogsForDate(date: Date): Flow<List<LogEntity>> {
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-        val formattedDate = dateFormat.format(date)
+    fun getLogsForDate(date: LocalDate): Flow<List<LogEntity>> {
+        val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val formattedDate = date.format(dateFormat)
         return logDao.getLogsForDate(formattedDate)
     }
 
@@ -152,7 +154,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             )
         )
 
-        val workoutsByDay = sampleExercises.mapValues { (day, exercises) ->
+        val workoutsByDay = sampleExercises.mapValues { (_, exercises) ->
             exercises.mapNotNull { exerciseName ->
                 exerciseRepository.getExerciseByName(exerciseName)?.let { exercise ->
                     Workout(id = getNextWorkoutId(), exercise = exercise)

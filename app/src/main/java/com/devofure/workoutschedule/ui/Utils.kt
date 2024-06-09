@@ -1,63 +1,41 @@
 package com.devofure.workoutschedule.ui
 
 import com.devofure.workoutschedule.ui.settings.FirstDayOfWeek
-import java.util.Calendar
-import java.util.Date
+import java.time.LocalDate
 
-fun getFullDayName(day: String, nickname: String): String {
-    return if (nickname.isEmpty()) day else "$day ($nickname)"
-}
+fun getFullDayName(day: String, nickname: String): String =
+    if (nickname.isEmpty()) day else "$day ($nickname)"
 
-fun getDaysInMonth(year: Int, month: Int): Int {
-    return Calendar.getInstance().apply {
-        set(year, month, 1)
-    }.getActualMaximum(Calendar.DAY_OF_MONTH)
-}
-
-fun getWeekStartDate(date: Date, firstDayOfWeek: FirstDayOfWeek): Date {
-    val calendar = Calendar.getInstance().apply { time = date }
-    val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+fun getWeekStartDate(date: LocalDate, firstDayOfWeek: FirstDayOfWeek): LocalDate {
+    val dayOfWeek = date.dayOfWeek.value
     val offset = if (firstDayOfWeek == FirstDayOfWeek.SUNDAY) {
-        dayOfWeek - Calendar.SUNDAY
+        dayOfWeek % 7 // Sunday as 0
     } else {
-        if (dayOfWeek == Calendar.SUNDAY) 6 else dayOfWeek - Calendar.MONDAY
+        if (dayOfWeek == 7) 6 else dayOfWeek - 1 // Monday as 0
     }
-    calendar.add(Calendar.DAY_OF_MONTH, -offset)
-    return calendar.time
+    return date.minusDays(offset.toLong())
 }
 
-fun getFirstDayOfMonth(year: Int, month: Int): Int {
-    val calendar = Calendar.getInstance().apply {
-        set(year, month, 1)
-    }
-    val firstDay = calendar.get(Calendar.DAY_OF_WEEK)
-    return firstDay - 1 // Calendar.SUNDAY is 1, so subtract 1 to make it 0-based
-}
+fun getFirstDayOfMonthWeekIndex(date: LocalDate): Int =
+    date.withDayOfMonth(1).dayOfWeek.value % 7
 
-fun getTotalWeeks(
-    isMonthView: Boolean,
+fun calculateDayOfWeekOffset(firstDayOfMonth: Int, firstDayOfWeek: FirstDayOfWeek): Int =
+    if (firstDayOfWeek == FirstDayOfWeek.SUNDAY) firstDayOfMonth
+    else (firstDayOfMonth + 6) % 7 // Adjust for Monday as the first day of the week
+
+fun isSameDay(calendarMonth: LocalDate, selectedDate: LocalDate, day: Int): Boolean =
+    calendarMonth.withDayOfMonth(day) == selectedDate
+
+fun getTotalCells(
     firstDayOfMonth: Int,
+    firstDayOfWeek: FirstDayOfWeek,
     daysInMonth: Int,
-    firstDayOfWeek: FirstDayOfWeek
+    isMonthView: Boolean
 ): Int {
-    val totalDays = firstDayOfMonth + daysInMonth
-    val firstDayOffset = if (firstDayOfWeek == FirstDayOfWeek.SUNDAY) 0 else 1
-    val additionalWeek = if ((totalDays + firstDayOffset) % 7 > 0) 1 else 0
-    return if (isMonthView) (totalDays + firstDayOffset) / 7 + additionalWeek else 1
-}
-
-
-fun calculateDayOfWeekOffset(firstDayOfMonth: Int, firstDayOfWeek: FirstDayOfWeek): Int {
-    return if (firstDayOfWeek == FirstDayOfWeek.SUNDAY) {
-        firstDayOfMonth
-    } else {
-        (firstDayOfMonth - 1 + 7) % 7 // Adjust for Monday as the first day of the week
-    }
-}
-
-fun isSameDay(calendar: Calendar, date: Date, day: Int): Boolean {
-    val testCalendar = Calendar.getInstance().apply { time = date }
-    return calendar.get(Calendar.YEAR) == testCalendar.get(Calendar.YEAR) &&
-            calendar.get(Calendar.MONTH) == testCalendar.get(Calendar.MONTH) &&
-            day == testCalendar.get(Calendar.DAY_OF_MONTH)
+    if (!isMonthView) return 7
+    val dayOfWeekOffset = calculateDayOfWeekOffset(firstDayOfMonth, firstDayOfWeek)
+    val totalDays = dayOfWeekOffset + daysInMonth
+    val totalWeeks =
+        (totalDays + 6) / 7 // Same as Math.ceil(totalDays / 7.0) but without using floating-point arithmetic
+    return totalWeeks * 7
 }

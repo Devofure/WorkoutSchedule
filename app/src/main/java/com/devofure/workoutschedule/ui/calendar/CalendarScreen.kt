@@ -30,7 +30,7 @@ import androidx.navigation.NavHostController
 import com.devofure.workoutschedule.ui.WorkoutViewModel
 import com.devofure.workoutschedule.ui.main.WorkoutItem
 import com.devofure.workoutschedule.ui.settings.SettingsViewModel
-import java.util.Date
+import java.time.LocalDate
 
 @Composable
 fun CalendarScreen(
@@ -38,7 +38,7 @@ fun CalendarScreen(
     workoutViewModel: WorkoutViewModel,
     settingsViewModel: SettingsViewModel
 ) {
-    var selectedDate by remember { mutableStateOf(Date()) }
+    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var isMonthView by remember { mutableStateOf(true) }
     val logs by workoutViewModel.getLogsForDate(selectedDate).collectAsState(initial = emptyList())
     val firstDayOfWeek by settingsViewModel.firstDayOfWeek.collectAsState()
@@ -54,7 +54,7 @@ fun CalendarScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { selectedDate = Date() }) {
+                    IconButton(onClick = { selectedDate = LocalDate.now() }) {
                         Icon(Icons.Filled.Today, contentDescription = "Today")
                     }
                     IconButton(onClick = { isMonthView = !isMonthView }) {
