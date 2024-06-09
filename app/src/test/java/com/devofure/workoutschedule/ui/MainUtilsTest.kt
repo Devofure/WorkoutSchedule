@@ -172,7 +172,8 @@ class MainUtilsTest {
         val calendar = Calendar.getInstance().apply {
             set(2024, Calendar.JUNE, 10)
         }
-        val result = isSameDay(logCalendar, calendar, logCalendar.get(Calendar.DAY_OF_MONTH))
+        val result = isSameDay(logCalendar, calendar, 10)
         assertEquals(false, result)
     }
+
 }
