@@ -8,6 +8,7 @@ import com.devofure.workoutschedule.data.AppDatabase
 import com.devofure.workoutschedule.data.Exercise
 import com.devofure.workoutschedule.data.ExerciseRepository
 import com.devofure.workoutschedule.data.LogEntity
+import com.devofure.workoutschedule.data.SetDetails
 import com.devofure.workoutschedule.data.Workout
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -73,7 +74,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             logDao.insertLog(logEntity)
         }
     }
-
 
     fun generateSampleSchedule() {
         viewModelScope.launch {
@@ -148,7 +148,10 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         val workoutsByDay = sampleExercises.mapValues { (_, exercises) ->
             exercises.mapNotNull { exerciseName ->
                 exerciseRepository.getExerciseByName(exerciseName)?.let { exercise ->
-                    Workout(id = getNextWorkoutId(), exercise = exercise)
+                    Workout(
+                        id = getNextWorkoutId(),
+                        exercise = exercise,
+                    )
                 }
             }
         }
@@ -215,7 +218,11 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 existingWorkouts.add(
                     Workout(
                         id = getNextWorkoutId(),
-                        exercise = exercise
+                        exercise = exercise,
+                        repsList = listOf(
+                            SetDetails(reps = 10, weight = null, duration = null),
+                            SetDetails(reps = 10, weight = null, duration = null)
+                        )
                     )
                 )
             }

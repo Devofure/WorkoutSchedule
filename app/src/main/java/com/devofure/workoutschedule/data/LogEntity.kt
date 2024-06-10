@@ -10,6 +10,6 @@ data class LogEntity(
     val workoutId: Int,
     val exerciseName: String,
     val dayOfWeek: String,
-    val repsList: List<Int>? = null,
+    val repsList: List<SetDetails>? = null,
     val duration: Int? = null,
 )

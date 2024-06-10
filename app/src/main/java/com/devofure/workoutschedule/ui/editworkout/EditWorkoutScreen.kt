@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.devofure.workoutschedule.data.SetDetails
 import com.devofure.workoutschedule.ui.SharedViewModel
 import com.devofure.workoutschedule.ui.WorkoutViewModel
 
@@ -52,10 +53,12 @@ fun EditWorkoutScreen(
 
     workout?.let { workoutData ->
         var sets by remember { mutableIntStateOf(workoutData.repsList?.size ?: 0) }
-        var repsList by remember {
-            mutableStateOf(workoutData.repsList?.map { it.toString() } ?: List(
-                workoutData.repsList?.size ?: 0
-            ) { "" })
+        var setDetailsList by remember {
+            mutableStateOf(
+                workoutData.repsList ?: List(workoutData.repsList?.size ?: 0) {
+                    SetDetails(reps = 0)
+                }
+            )
         }
         var duration by remember { mutableStateOf(workoutData.duration?.toString() ?: "") }
         var setsError by remember { mutableStateOf<String?>(null) }
@@ -104,7 +107,7 @@ fun EditWorkoutScreen(
                         ValidatedTextField(
                             value = duration,
                             onValueChange = { duration = it },
-                            label = "Duration (mins)",
+                            label = "Total Duration (mins)",
                             error = durationError,
                             keyboardType = KeyboardType.Number
                         )
@@ -116,7 +119,7 @@ fun EditWorkoutScreen(
                                 onClick = {
                                     if (sets > 0) {
                                         sets -= 1
-                                        repsList = repsList.dropLast(1).toMutableList()
+                                        setDetailsList = setDetailsList.dropLast(1).toMutableList()
                                     }
                                 }
                             ) {
@@ -128,7 +131,9 @@ fun EditWorkoutScreen(
                             IconButton(
                                 onClick = {
                                     sets += 1
-                                    repsList = repsList.toMutableList().apply { add("") }
+                                    setDetailsList = setDetailsList.toMutableList().apply {
+                                        add(SetDetails(reps = 0))
+                                    }
                                 }
                             ) {
                                 Icon(
@@ -147,17 +152,15 @@ fun EditWorkoutScreen(
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         Column {
-                            repsList.forEachIndexed { index, repValue ->
-                                ValidatedTextField(
-                                    value = repValue,
-                                    onValueChange = { newValue ->
-                                        repsList =
-                                            repsList.toMutableList()
-                                                .apply { this[index] = newValue }
+                            setDetailsList.forEachIndexed { index, setDetails ->
+                                SetDetailsRow(
+                                    setDetails = setDetails,
+                                    onSetDetailsChange = { updatedSetDetails ->
+                                        setDetailsList = setDetailsList.toMutableList().apply {
+                                            this[index] = updatedSetDetails
+                                        }
                                     },
-                                    label = "Reps for set ${index + 1}",
-                                    error = if (repsError != null && index >= repsList.size) repsError else null,
-                                    keyboardType = KeyboardType.Number
+                                    setIndex = index
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
@@ -176,7 +179,7 @@ fun EditWorkoutScreen(
                         onClick = {
                             val validationResult = validateWorkoutInput(
                                 sets.toString(),
-                                repsList.joinToString(", "),
+                                setDetailsList.joinToString(", ") { it.reps.toString() },
                                 duration
                             )
                             setsError = validationResult.setsError
@@ -185,7 +188,7 @@ fun EditWorkoutScreen(
 
                             if (validationResult.isValid) {
                                 val updatedWorkout = workoutData.copy(
-                                    repsList = repsList.mapNotNull { it.trim().toIntOrNull() },
+                                    repsList = setDetailsList,
                                     duration = duration.toIntOrNull()
                                 )
                                 workoutViewModel.updateWorkout(day, updatedWorkout)
@@ -203,6 +206,53 @@ fun EditWorkoutScreen(
                 }
             }
         )
+    }
+}
+
+@Composable
+fun SetDetailsRow(
+    setDetails: SetDetails,
+    onSetDetailsChange: (SetDetails) -> Unit,
+    setIndex: Int
+) {
+    var reps by remember { mutableStateOf(setDetails.reps.toString()) }
+    var weight by remember { mutableStateOf(setDetails.weight?.toString() ?: "") }
+    var duration by remember { mutableStateOf(setDetails.duration?.toString() ?: "") }
+
+    Column {
+        ValidatedTextField(
+            value = reps,
+            onValueChange = {
+                reps = it
+                onSetDetailsChange(setDetails.copy(reps = it.toIntOrNull() ?: 0))
+            },
+            label = "Reps for set ${setIndex + 1}",
+            error = null,
+            keyboardType = KeyboardType.Number
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        ValidatedTextField(
+            value = weight,
+            onValueChange = {
+                weight = it
+                onSetDetailsChange(setDetails.copy(weight = it.toFloatOrNull()))
+            },
+            label = "Weight for set ${setIndex + 1} (kg)",
+            error = null,
+            keyboardType = KeyboardType.Number
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        ValidatedTextField(
+            value = duration,
+            onValueChange = {
+                duration = it
+                onSetDetailsChange(setDetails.copy(duration = it.toIntOrNull()))
+            },
+            label = "Duration for set ${setIndex + 1} (secs)",
+            error = null,
+            keyboardType = KeyboardType.Number
+        )
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
