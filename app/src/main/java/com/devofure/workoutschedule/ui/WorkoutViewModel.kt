@@ -24,7 +24,7 @@ import java.util.Locale
 class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val exerciseRepository = ExerciseRepository(application.applicationContext)
     private val _workouts = MutableStateFlow<Map<String, List<Workout>>>(emptyMap())
-    private val workouts: StateFlow<Map<String, List<Workout>>> = _workouts
+    val workouts: StateFlow<Map<String, List<Workout>>> = _workouts
     private val sharedPreferences =
         application.applicationContext.getSharedPreferences("WorkoutApp", Context.MODE_PRIVATE)
     private val logDao by lazy { AppDatabase.getDatabase(application).logDao() }
@@ -162,7 +162,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         editor.apply()
     }
 
-    private fun loadUserSchedule() {
+    fun loadUserSchedule() {
         val workoutsJson = sharedPreferences.getString("userSchedule", null)
         if (!workoutsJson.isNullOrEmpty()) {
             val workoutType = object : TypeToken<Map<String, List<Workout>>>() {}.type
