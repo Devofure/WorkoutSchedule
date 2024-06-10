@@ -1,5 +1,6 @@
 package com.devofure.workoutschedule.ui.editworkout
 
+import android.app.TimePickerDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -64,6 +67,7 @@ fun EditWorkoutScreen(
         var setsError by remember { mutableStateOf<String?>(null) }
         var repsError by remember { mutableStateOf<String?>(null) }
         var durationError by remember { mutableStateOf<String?>(null) }
+        val context = LocalContext.current
 
         Scaffold(
             topBar = {
@@ -104,12 +108,12 @@ fun EditWorkoutScreen(
                             .padding(16.dp)
                             .fillMaxWidth()
                     ) {
-                        ValidatedTextField(
+                        DurationPickerField(
                             value = duration,
                             onValueChange = { duration = it },
                             label = "Total Duration (mins)",
                             error = durationError,
-                            keyboardType = KeyboardType.Number
+                            context = context
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -210,6 +214,64 @@ fun EditWorkoutScreen(
 }
 
 @Composable
+fun DurationPickerField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    error: String?,
+    context: android.content.Context
+) {
+    val initialHour = remember { value.toIntOrNull()?.div(60) ?: 0 }
+    val initialMinute = remember { value.toIntOrNull()?.rem(60) ?: 0 }
+    var showPicker by remember { mutableStateOf(false) }
+
+    Box {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(label) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { showPicker = true },
+            isError = error != null,
+            readOnly = true,
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Schedule,
+                    contentDescription = "Pick Time",
+                    modifier = Modifier.clickable { showPicker = true }
+                )
+            }
+        )
+        if (error != null) {
+            Text(
+                text = error,
+                color = MaterialTheme.colors.error,
+                style = MaterialTheme.typography.caption,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+        }
+    }
+
+    if (showPicker) {
+        TimePickerDialog(
+            context,
+            { _, selectedHour: Int, selectedMinute: Int ->
+                val totalMinutes = selectedHour * 60 + selectedMinute
+                onValueChange(totalMinutes.toString())
+                showPicker = false
+            },
+            initialHour,
+            initialMinute,
+            true
+        ).apply {
+            setOnDismissListener { showPicker = false }
+        }.show()
+    }
+}
+
+@Composable
 fun SetDetailsRow(
     setDetails: SetDetails,
     onSetDetailsChange: (SetDetails) -> Unit,
@@ -242,15 +304,15 @@ fun SetDetailsRow(
             keyboardType = KeyboardType.Number
         )
         Spacer(modifier = Modifier.height(8.dp))
-        ValidatedTextField(
+        DurationPickerField(
             value = duration,
             onValueChange = {
                 duration = it
                 onSetDetailsChange(setDetails.copy(duration = it.toIntOrNull()))
             },
-            label = "Duration for set ${setIndex + 1} (secs)",
+            label = "Duration for set ${setIndex + 1} (minutes)",
             error = null,
-            keyboardType = KeyboardType.Number
+            context = LocalContext.current
         )
         Spacer(modifier = Modifier.height(16.dp))
     }
