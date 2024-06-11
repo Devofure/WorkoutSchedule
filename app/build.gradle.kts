@@ -1,10 +1,11 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
-    id("com.google.devtools.ksp")
+    alias(libs.plugins.devtools.ksp)
+    alias(libs.plugins.firebase.appdistribution)
     alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.google.services)
+    alias(libs.plugins.jetbrains.kotlin.android)
 }
 
 android {
@@ -56,6 +57,11 @@ composeCompiler {
     stabilityConfigurationFile = rootProject.layout.projectDirectory.file("stability_config.conf")
 }
 
+firebaseAppDistribution {
+    //releaseNotesFile = "release-notes.txt"
+    groups = "testers"
+}
+
 dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.accompanist.systemuicontroller)
@@ -90,7 +96,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit.ktx)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
-    testImplementation (libs.mockk)
+    testImplementation(libs.mockk)
     testImplementation(libs.androidx.arch.core.testing)
     testImplementation(libs.androidx.junit.ktx)
     testImplementation(libs.kotlinx.coroutines.test)

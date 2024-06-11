@@ -9,18 +9,20 @@ composeUiTest = "1.6.7"  # Same as Compose version
 constraintlayout = "2.1.4"
 coreKtx = "1.13.1"
 espressoCore = "3.5.1"
+firebase-appdistribution = "5.0.0"
 firebase-bom = "33.1.0"
 firebase-crashlytics-gradle = "3.0.1"
 google-services = "4.4.2"
 gson = "2.11.0"
 junit = "4.13.2"
+junitKtx = "1.1.5"
 kotlin = "2.0.0"  # Ensure the Kotlin version matches
+ksp = "2.0.0-1.0.22"
 lifecycle = "2.8.1"
 material = "1.12.0"
 navigation = "2.7.7"
 room = "2.6.1"
 timber = "5.0.1"
-junitKtx = "1.1.5"  # Add the latest version of Timber
 
 [libraries]
 accompanist-systemuicontroller = { group = "com.google.accompanist", name = "accompanist-systemuicontroller", version.ref = "accompanist" }
@@ -50,7 +52,6 @@ firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analy
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.8.1" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 mockk = { group = "io.mockk", name = "mockk", version = "1.13.11" }
@@ -63,6 +64,8 @@ timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "tim
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+firebase-appdistribution = { id = "com.google.firebase.appdistribution", version.ref = "firebase-appdistribution" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebase-crashlytics-gradle" }
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
