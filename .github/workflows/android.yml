@@ -58,9 +58,9 @@ jobs:
 
       - name: Upload to Firebase App Distribution
         env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          FIREBASE_FILE: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
-          echo $FIREBASE_TOKEN > service-account.json
+          echo $FIREBASE_FILE > service-account.json
           ./gradlew appDistributionUploadRelease -PfirebaseServiceCredentials=service-account.json
 
       - name: Clean up
