@@ -60,7 +60,7 @@ jobs:
         env:
           FIREBASE_FILE: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
-          echo $FIREBASE_FILE > service-account.json
+          echo $FIREBASE_SERVICE_ACCOUNT > service-account.json
           ./gradlew appDistributionUploadRelease -PfirebaseServiceCredentials=service-account.json
 
       - name: Clean up
