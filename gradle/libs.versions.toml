@@ -12,6 +12,7 @@ espressoCore = "3.5.1"
 firebase-appdistribution = "5.0.0"
 firebase-bom = "33.1.0"
 firebase-crashlytics-gradle = "3.0.1"
+firebase-ui-auth = "8.0.0"
 google-services = "4.4.2"
 gson = "2.11.0"
 junit = "4.13.2"
@@ -23,6 +24,7 @@ material = "1.12.0"
 navigation = "2.7.7"
 room = "2.6.1"
 timber = "5.0.1"
+
 
 [libraries]
 accompanist-systemuicontroller = { group = "com.google.accompanist", name = "accompanist-systemuicontroller", version.ref = "accompanist" }
@@ -51,6 +53,7 @@ androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation
 firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }
+firebase-ui-auth = { group = "com.firebaseui", name = "firebase-ui-auth", version.ref = "firebase-ui-auth" }  # Add this line
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.8.1" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }

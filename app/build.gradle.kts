@@ -60,10 +60,10 @@ composeCompiler {
 firebaseAppDistribution {
     //releaseNotesFile = "release-notes.txt"
     groups = "testers"
+    serviceCredentialsFile = "app/service-account.json"
 }
 
 dependencies {
-    implementation(platform(libs.firebase.bom))
     implementation(libs.accompanist.systemuicontroller)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
@@ -82,12 +82,16 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.firebase.analytics.ktx)
     implementation(libs.firebase.crashlytics.ktx)
+    implementation(libs.firebase.ui.auth)
     implementation(libs.gson)
     implementation(libs.material)
     implementation(libs.room.ktx)
     implementation(libs.room.runtime)
     implementation(libs.timber)
+    implementation(platform(libs.firebase.bom))
     ksp(libs.room.compiler)
+
+
     // Testing dependencies
     androidTestImplementation(libs.androidx.arch.core.testing)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
