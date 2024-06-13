@@ -22,6 +22,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -32,7 +33,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,24 +44,24 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.devofure.workoutschedule.data.Exercise
-import com.devofure.workoutschedule.ui.SharedViewModel
-import com.devofure.workoutschedule.ui.WorkoutViewModel
+import com.devofure.workoutschedule.ui.OrientationPreviews
+import com.devofure.workoutschedule.ui.ThemePreviews
 
 @Composable
 fun AddExerciseScreen(
     navController: NavHostController,
-    sharedViewModel: SharedViewModel,
-    workoutViewModel: WorkoutViewModel,
     day: String,
+    searchQuery: String,
+    filteredExercises: List<Exercise>,
+    isLoading: Boolean,
+    onSearchQueryChange: (String) -> Unit,
+    onAddWorkouts: (String, List<Exercise>) -> Unit
 ) {
     var selectedExercises by remember { mutableStateOf<List<Exercise>>(emptyList()) }
     var isSearchExpanded by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
-
-    val searchQuery by workoutViewModel.searchQuery.collectAsState()
-    val filteredExercises by workoutViewModel.filteredExercises.collectAsState()
-    val isLoading by workoutViewModel.isLoading.collectAsState()
 
     LaunchedEffect(isSearchExpanded) {
         if (isSearchExpanded) {
@@ -80,7 +80,7 @@ fun AddExerciseScreen(
                         ) {
                             TextField(
                                 value = searchQuery,
-                                onValueChange = { workoutViewModel.searchQuery.value = it },
+                                onValueChange = { onSearchQueryChange(it) },
                                 placeholder = { Text("Search Exercises") },
                                 singleLine = true,
                                 colors = TextFieldDefaults.textFieldColors(
@@ -94,7 +94,7 @@ fun AddExerciseScreen(
                             )
                             IconButton(
                                 onClick = {
-                                    workoutViewModel.searchQuery.value = ""
+                                    onSearchQueryChange("")
                                     isSearchExpanded = false
                                 },
                                 modifier = Modifier.align(Alignment.CenterEnd)
@@ -145,8 +145,7 @@ fun AddExerciseScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = {
-                        workoutViewModel.addWorkouts(day, selectedExercises)
-                        sharedViewModel.clearSelectedWorkout()
+                        onAddWorkouts(day, selectedExercises)
                         navController.popBackStack()
                     },
                     colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary),
@@ -232,4 +231,83 @@ fun ExerciseItem(
             }
         }
     }
+}
+
+@ThemePreviews
+@OrientationPreviews
+@Composable
+fun AddExerciseScreenPreview() {
+    val navController = rememberNavController()
+    val sampleExercises = listOf(
+        Exercise(
+            "Push Up",
+            "None",
+            "Beginner",
+            "Compound",
+            "None",
+            listOf("Chest"),
+            listOf("Triceps"),
+            listOf(),
+            "Strength"
+        ),
+        Exercise(
+            "Squat",
+            "None",
+            "Intermediate",
+            "Compound",
+            "None",
+            listOf("Legs"),
+            listOf("Glutes"),
+            listOf(),
+            "Strength"
+        ),
+        Exercise(
+            "Bicep Curl",
+            "None",
+            "Beginner",
+            "Isolation",
+            "Dumbbell",
+            listOf("Biceps"),
+            listOf("Forearms"),
+            listOf(),
+            "Strength"
+        )
+    )
+    MaterialTheme {
+        Surface {
+            AddExerciseScreen(
+                navController = navController,
+                day = "Monday",
+                searchQuery = "",
+                filteredExercises = sampleExercises,
+                isLoading = false,
+                onSearchQueryChange = {},
+                onAddWorkouts = { _, _ -> }
+            )
+        }
+    }
+}
+
+@ThemePreviews
+@OrientationPreviews
+@Composable
+fun ExerciseItemPreview() {
+    ExerciseItem(
+        exercise = Exercise(
+            name = "Push Up",
+            force = "Push",
+            level = "Beginner",
+            mechanic = "Compound",
+            equipment = "None",
+            primaryMuscles = listOf("Chest"),
+            secondaryMuscles = listOf("Triceps"),
+            instructions = listOf(
+                "Keep your body straight",
+                "Lower your body until your chest touches the ground"
+            ),
+            category = "Strength"
+        ),
+        isSelected = false,
+        onSelected = {}
+    )
 }

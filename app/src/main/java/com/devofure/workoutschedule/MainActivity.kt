@@ -41,6 +41,9 @@ class MainActivity : ComponentActivity() {
         val settingsViewModel: SettingsViewModel = viewModel()
         val isFirstLaunch by workoutViewModel.isFirstLaunch.collectAsState()
         val currentTheme by settingsViewModel.theme.collectAsState()
+        val searchQuery by workoutViewModel.searchQuery.collectAsState()
+        val filteredExercises by workoutViewModel.filteredExercises.collectAsState()
+        val isLoading by workoutViewModel.isLoading.collectAsState()
         val navController = rememberNavController()
         val systemUiController = rememberSystemUiController()
 
@@ -61,7 +64,14 @@ class MainActivity : ComponentActivity() {
                         WorkoutApp(
                             workoutViewModel = workoutViewModel,
                             settingsViewModel = settingsViewModel,
-                            onSettingsClick = { navController.navigate("settings") }
+                            onSettingsClick = { navController.navigate("settings") },
+                            searchQuery = searchQuery,
+                            filteredExercises = filteredExercises,
+                            isLoading = isLoading,
+                            onSearchQueryChange = { workoutViewModel.searchQuery.value = it },
+                            onAddWorkouts = { day, exercises ->
+                                workoutViewModel.addWorkouts(day, exercises)
+                            }
                         )
                     }
                 }
