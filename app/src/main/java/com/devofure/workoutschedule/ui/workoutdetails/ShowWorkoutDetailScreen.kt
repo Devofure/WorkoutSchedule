@@ -28,11 +28,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.SharedViewModel
 
 @Composable
-fun WorkoutDetailScreen(navController: NavController, sharedViewModel: SharedViewModel) {
+fun WorkoutDetailScreen(sharedViewModel: SharedViewModel, navigate: Navigate) {
     val workoutState by sharedViewModel.selectedWorkout.collectAsState()
     workoutState?.let { workout ->
         Scaffold(
@@ -47,7 +47,7 @@ fun WorkoutDetailScreen(navController: NavController, sharedViewModel: SharedVie
                     navigationIcon = {
                         IconButton(onClick = {
                             sharedViewModel.clearSelectedWorkout()
-                            navController.popBackStack()
+                            navigate.back()
                         }) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                         }

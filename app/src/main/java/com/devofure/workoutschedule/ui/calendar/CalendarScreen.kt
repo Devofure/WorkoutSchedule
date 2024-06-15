@@ -27,8 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
+import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.main.WorkoutItem
 import com.devofure.workoutschedule.ui.settings.SettingsViewModel
 import java.time.LocalDate
@@ -36,9 +35,9 @@ import java.time.LocalDate
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(
-    navController: NavHostController,
-    calendarViewModel: CalendarViewModel = viewModel(),
-    settingsViewModel: SettingsViewModel
+    calendarViewModel: CalendarViewModel,
+    settingsViewModel: SettingsViewModel,
+    navigate: Navigate,
 ) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var isMonthView by remember { mutableStateOf(true) }
@@ -57,7 +56,7 @@ fun CalendarScreen(
             TopAppBar(
                 title = { Text("Log Calendar") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = { navigate.back() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },

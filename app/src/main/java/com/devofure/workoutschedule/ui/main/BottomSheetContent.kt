@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalFoundationApi::class)
 
 package com.devofure.workoutschedule.ui.main
 
@@ -14,14 +14,14 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Reorder
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
+import com.devofure.workoutschedule.ui.Navigate
+import com.devofure.workoutschedule.ui.Route
 import com.devofure.workoutschedule.ui.WorkoutViewModel
 import com.devofure.workoutschedule.ui.getFullDayName
 
@@ -31,14 +31,14 @@ fun BottomSheetContent(
     pagerState: androidx.compose.foundation.pager.PagerState,
     nicknames: List<String>,
     workoutViewModel: WorkoutViewModel,
-    navController: NavHostController,
+    navigate: Navigate,
     onEditNickname: () -> Unit,
     onLogDay: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(8.dp)
     ) {
         TextButton(onClick = onLogDay) {
             Icon(Icons.Filled.CalendarToday, contentDescription = "Log day")
@@ -56,6 +56,7 @@ fun BottomSheetContent(
                 nicknames[pagerState.currentPage]
             )
             workoutViewModel.onAllWorkoutsChecked(dayFullName, true)
+            navigate.back()
         }) {
             Icon(Icons.Filled.CheckCircle, contentDescription = "Mark all as done")
             Spacer(modifier = Modifier.width(8.dp))
@@ -66,19 +67,18 @@ fun BottomSheetContent(
                 daysOfWeek[pagerState.currentPage],
                 nicknames[pagerState.currentPage]
             )
-            navController.navigate("add_exercise/$dayFullName")
+            navigate.to(Route.AddExercise(dayFullName))
         }) {
             Icon(Icons.Filled.FitnessCenter, contentDescription = "Add Exercise")
             Spacer(modifier = Modifier.width(8.dp))
             Text("Add Exercise")
         }
-        // Reorder button
         TextButton(onClick = {
             val dayFullName = getFullDayName(
                 daysOfWeek[pagerState.currentPage],
                 nicknames[pagerState.currentPage]
             )
-            navController.navigate("reorder_exercise/$dayFullName")
+            navigate.to(Route.ReorderExercise(dayFullName))
         }) {
             Icon(Icons.Filled.Reorder, contentDescription = "Reorder Exercises")
             Spacer(modifier = Modifier.width(8.dp))

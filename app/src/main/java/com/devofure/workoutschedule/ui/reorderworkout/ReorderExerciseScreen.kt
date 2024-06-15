@@ -43,17 +43,16 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHostController
 import com.devofure.workoutschedule.data.Workout
+import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.WorkoutViewModel
 import kotlin.math.roundToInt
 
 @Composable
 fun ReorderExerciseScreen(
-    navController: NavHostController,
     day: String,
-    workoutViewModel: WorkoutViewModel = viewModel()
+    workoutViewModel: WorkoutViewModel,
+    navigate: Navigate,
 ) {
     val workouts by workoutViewModel.workoutsForDay(day).collectAsState()
 
@@ -62,14 +61,14 @@ fun ReorderExerciseScreen(
             TopAppBar(
                 title = { Text("Reorder Exercises") },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = { navigate.back() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
                     TextButton(onClick = {
                         workoutViewModel.updateWorkoutOrder(day, workouts)
-                        navController.popBackStack()
+                        navigate.back()
                     }) {
                         Text("Save")
                     }
@@ -119,8 +118,14 @@ fun ReorderableExerciseList(
                 },
                 onDrag = { deltaY ->
                     val newOffset = offsets[index].value + deltaY
-                    val newIndex = (index + (newOffset / itemHeightPx).roundToInt()).coerceIn(0, exerciseList.size - 1)
-                    Log.d("DragDrop", "Dragging: ${exercise.exercise.name}, deltaY: $deltaY, newIndex: $newIndex, newOffset: $newOffset")
+                    val newIndex = (index + (newOffset / itemHeightPx).roundToInt()).coerceIn(
+                        0,
+                        exerciseList.size - 1
+                    )
+                    Log.d(
+                        "DragDrop",
+                        "Dragging: ${exercise.exercise.name}, deltaY: $deltaY, newIndex: $newIndex, newOffset: $newOffset"
+                    )
 
                     if (newIndex != index) {
                         exerciseList = exerciseList.toMutableList().apply {
@@ -129,7 +134,10 @@ fun ReorderableExerciseList(
 
                         offsets.add(newIndex, offsets.removeAt(index))
                         onReorder(exerciseList)
-                        Log.d("DragDrop", "Reordered list: ${exerciseList.map { it.exercise.name }}")
+                        Log.d(
+                            "DragDrop",
+                            "Reordered list: ${exerciseList.map { it.exercise.name }}"
+                        )
                     }
 
                     offsets[index].value = newOffset
@@ -171,7 +179,10 @@ fun DraggableExerciseCard(
                     onDrag = { change, dragAmount ->
                         change.consume()
                         onDrag(dragAmount.y)
-                        Log.d("DragDrop", "Dragging item: ${workout.exercise.name}, dragAmount: $dragAmount")
+                        Log.d(
+                            "DragDrop",
+                            "Dragging item: ${workout.exercise.name}, dragAmount: $dragAmount"
+                        )
                     },
                     onDragEnd = { onDragEnd() }
                 )

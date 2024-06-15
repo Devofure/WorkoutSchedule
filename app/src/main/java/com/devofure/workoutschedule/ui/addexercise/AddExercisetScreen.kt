@@ -48,21 +48,21 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.devofure.workoutschedule.data.Exercise
+import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.OrientationPreviews
 import com.devofure.workoutschedule.ui.ThemePreviews
 
 @Composable
 fun AddExerciseScreen(
-    navController: NavHostController,
     day: String,
     searchQuery: String,
     filteredExercises: List<Exercise>,
     isLoading: Boolean,
     onSearchQueryChange: (String) -> Unit,
-    onAddWorkouts: (String, List<Exercise>) -> Unit
+    onAddWorkouts: (String, List<Exercise>) -> Unit,
+    navigate: Navigate,
 ) {
     var selectedExercises by remember { mutableStateOf<List<Exercise>>(emptyList()) }
     var isSearchExpanded by remember { mutableStateOf(false) }
@@ -123,7 +123,7 @@ fun AddExerciseScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
+                    IconButton(onClick = { navigate.back() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -159,7 +159,7 @@ fun AddExerciseScreen(
                 Button(
                     onClick = {
                         onAddWorkouts(day, selectedExercises)
-                        navController.popBackStack()
+                        navigate.back()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                     modifier = Modifier.fillMaxWidth()
@@ -289,13 +289,13 @@ fun AddExerciseScreenPreview() {
     MaterialTheme {
         Surface {
             AddExerciseScreen(
-                navController = navController,
                 day = "Monday",
                 searchQuery = "",
                 filteredExercises = sampleExercises,
                 isLoading = false,
                 onSearchQueryChange = {},
-                onAddWorkouts = { _, _ -> }
+                onAddWorkouts = { _, _ -> },
+                navigate = Navigate(navController)
             )
         }
     }

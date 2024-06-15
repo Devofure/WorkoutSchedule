@@ -44,17 +44,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.devofure.workoutschedule.data.SetDetails
+import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.SharedViewModel
 import com.devofure.workoutschedule.ui.WorkoutViewModel
 
 @Composable
 fun EditWorkoutScreen(
-    navController: NavHostController,
     sharedViewModel: SharedViewModel,
     workoutViewModel: WorkoutViewModel,
-    day: String
+    day: String,
+    navigate: Navigate
 ) {
     val workout by sharedViewModel.selectedWorkout.collectAsState()
 
@@ -94,7 +94,7 @@ fun EditWorkoutScreen(
                                 .size(24.dp)
                                 .clickable {
                                     sharedViewModel.clearSelectedWorkout()
-                                    navController.popBackStack()
+                                    navigate.back()
                                 }
                         )
                     }
@@ -201,7 +201,7 @@ fun EditWorkoutScreen(
                                 )
                                 workoutViewModel.updateWorkout(day, updatedWorkout)
                                 sharedViewModel.clearSelectedWorkout()
-                                navController.popBackStack()
+                                navigate.back()
                             }
                         },
                         modifier = Modifier

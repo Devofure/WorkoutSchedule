@@ -1,0 +1,42 @@
+package com.devofure.workoutschedule.ui
+
+import androidx.navigation.NavController
+
+class Navigate(private val navController: NavController) {
+    fun to(route: Route) {
+        navController.navigate(route.route)
+    }
+
+    fun back() {
+        navController.popBackStack()
+    }
+}
+
+sealed class Route(val route: String) {
+    data object Main : Route("main")
+    data class AddExercise(val dayName: String) :
+        Route("add_exercise/${dayName}") {
+        companion object {
+            const val parameterName = "dayFullName"
+            const val route = "add_exercise/{$parameterName}"
+        }
+    }
+
+    data class EditWorkout(val dayName: String) : Route("edit_workout/${dayName}") {
+        companion object {
+            const val parameterName = "dayFullName"
+            const val route = "edit_workout/{$parameterName}"
+        }
+    }
+
+    data class ReorderExercise(val dayName: String) : Route("reorder_exercise/${dayName}") {
+        companion object {
+            const val parameterName = "dayFullName"
+            const val route = "reorder_exercise/{$parameterName}"
+        }
+    }
+
+    data object Calendar : Route("calendar")
+    data object Settings : Route("settings")
+    data object WorkoutDetail : Route("workout_detail")
+}

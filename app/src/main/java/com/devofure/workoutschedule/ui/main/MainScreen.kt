@@ -37,8 +37,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.devofure.workoutschedule.data.Workout
+import com.devofure.workoutschedule.ui.Navigate
+import com.devofure.workoutschedule.ui.Route
 import com.devofure.workoutschedule.ui.SharedViewModel
 import com.devofure.workoutschedule.ui.WorkoutViewModel
 import com.devofure.workoutschedule.ui.getFullDayName
@@ -47,10 +48,9 @@ import java.time.LocalDate
 
 @Composable
 fun MainScreen(
-    navController: NavHostController,
     workoutViewModel: WorkoutViewModel,
     sharedViewModel: SharedViewModel,
-    onSettingsClick: () -> Unit
+    navigate: Navigate
 ) {
     val initialDaysOfWeek =
         listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
@@ -79,10 +79,8 @@ fun MainScreen(
     Scaffold(
         topBar = {
             TopBar(
-                onSettingsClick = onSettingsClick,
-                onCalendarClick = {
-                    navController.navigate("calendar")
-                }
+                onSettingsClick = { navigate.to(Route.Settings) },
+                onCalendarClick = { navigate.to(Route.Calendar) },
             )
         },
         floatingActionButton = {
@@ -185,17 +183,17 @@ fun MainScreen(
                                         },
                                         onWorkoutDetail = {
                                             sharedViewModel.selectWorkout(workout)
-                                            navController.navigate("workout_detail")
+                                            navigate.to(Route.WorkoutDetail)
                                         },
                                         onWorkoutEdit = {
                                             sharedViewModel.selectWorkout(workout)
-                                            navController.navigate(
-                                                "edit_workout/${
+                                            navigate.to(
+                                                Route.EditWorkout(
                                                     getFullDayName(
                                                         daysOfWeek[page],
                                                         nicknames[page]
                                                     )
-                                                }"
+                                                )
                                             )
                                         },
                                     )
@@ -218,14 +216,14 @@ fun MainScreen(
                 pagerState = pagerState,
                 nicknames = nicknames,
                 workoutViewModel = workoutViewModel,
-                navController = navController,
                 onEditNickname = {
                     editedNickname = nicknames[pagerState.currentPage]
                     showEditNicknameDialog = true
                 },
                 onLogDay = {
                     showDateConfirmationDialog = true
-                }
+                },
+                navigate = navigate
             )
         }
     }

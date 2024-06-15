@@ -7,87 +7,14 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.devofure.workoutschedule.ui.WorkoutApp
-import com.devofure.workoutschedule.ui.WorkoutViewModel
-import com.devofure.workoutschedule.ui.settings.SettingsScreen
-import com.devofure.workoutschedule.ui.settings.SettingsViewModel
-import com.devofure.workoutschedule.ui.settings.ThemeType
-import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         createNotificationChannel()
         setContent {
-            MainContent()
-        }
-    }
-
-    @Composable
-    fun MainContent() {
-        val workoutViewModel: WorkoutViewModel = viewModel()
-        val settingsViewModel: SettingsViewModel = viewModel()
-        val isFirstLaunch by workoutViewModel.isFirstLaunch.collectAsState()
-        val currentTheme by settingsViewModel.theme.collectAsState()
-        val searchQuery by workoutViewModel.searchQuery.collectAsState()
-        val filteredExercises by workoutViewModel.filteredExercises.collectAsState()
-        val isLoading by workoutViewModel.isLoading.collectAsState()
-        val navController = rememberNavController()
-        val systemUiController = rememberSystemUiController()
-
-        MyWorkoutsTheme(themeType = currentTheme) {
-            NavHost(navController = navController, startDestination = "main") {
-                composable("main") {
-                    if (isFirstLaunch) {
-                        systemUiController.setSystemBarsColor(
-                            color = MaterialTheme.colorScheme.background,
-                            darkIcons = currentTheme != ThemeType.DARK
-                        )
-                        AskUserToGenerateSampleSchedule(workoutViewModel)
-                    } else {
-                        systemUiController.setSystemBarsColor(
-                            color = MaterialTheme.colorScheme.primary,
-                            darkIcons = currentTheme != ThemeType.DARK
-                        )
-                        WorkoutApp(
-                            workoutViewModel = workoutViewModel,
-                            settingsViewModel = settingsViewModel,
-                            onSettingsClick = { navController.navigate("settings") },
-                            searchQuery = searchQuery,
-                            filteredExercises = filteredExercises,
-                            isLoading = isLoading,
-                            onSearchQueryChange = { workoutViewModel.searchQuery.value = it },
-                            onAddWorkouts = { day, exercises ->
-                                workoutViewModel.addWorkouts(day, exercises)
-                            }
-                        )
-                    }
-                }
-                composable("settings") {
-                    systemUiController.setSystemBarsColor(
-                        color = MaterialTheme.colorScheme.background,
-                        darkIcons = currentTheme != ThemeType.DARK
-                    )
-                    SettingsScreen(
-                        settingsViewModel = settingsViewModel,
-                        onBack = { navController.popBackStack() },
-                        currentTheme = currentTheme,
-                        onThemeChange = { settingsViewModel.setTheme(it) }
-                    )
-                }
-            }
+            WorkoutApp()
         }
     }
 
@@ -101,32 +28,5 @@ class MainActivity : ComponentActivity() {
         val notificationManager: NotificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.createNotificationChannel(channel)
-    }
-
-    @Composable
-    fun AskUserToGenerateSampleSchedule(workoutViewModel: WorkoutViewModel) {
-        AlertDialog(
-            onDismissRequest = {},
-            title = { Text("Generate Sample Schedule") },
-            text = { Text("Would you like to generate a sample workout schedule?") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        workoutViewModel.generateSampleSchedule()
-                    }
-                ) {
-                    Text("Yes")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        workoutViewModel.declineSampleSchedule()
-                    }
-                ) {
-                    Text("No")
-                }
-            }
-        )
     }
 }
