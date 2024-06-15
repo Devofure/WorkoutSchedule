@@ -34,11 +34,14 @@ fun SettingsScreen(
     settingsViewModel: SettingsViewModel,
     navigate: Navigate,
     currentTheme: ThemeType,
-    onThemeChange: (ThemeType) -> Unit
+    currentPrimaryColor: Color,
+    onThemeChange: (ThemeType) -> Unit,
+    onPrimaryColorChange: (Color) -> Unit
 ) {
     var showReminderSetup by remember { mutableStateOf(false) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
+    var showPrimaryColorDialog by remember { mutableStateOf(false) }
     var showFirstDayDialog by remember { mutableStateOf(false) }
     val reminderTime by settingsViewModel.reminderTime.collectAsState()
     val firstDayOfWeek by settingsViewModel.firstDayOfWeek.collectAsState()
@@ -86,6 +89,12 @@ fun SettingsScreen(
                     backgroundColor = backgroundColor
                 )
                 SettingsItem(
+                    headline = "Theme Light color",
+                    supporting = "Choose your theme light color",
+                    onClick = { showPrimaryColorDialog = true },
+                    backgroundColor = backgroundColor
+                )
+                SettingsItem(
                     headline = "First Day of the Week",
                     supporting = "Choose the first day of the week",
                     onClick = { showFirstDayDialog = true },
@@ -119,6 +128,16 @@ fun SettingsScreen(
                         onDismiss = { showThemeDialog = false },
                         onThemeChange = { newTheme ->
                             onThemeChange(newTheme)
+                        }
+                    )
+                }
+
+                if (showPrimaryColorDialog) {
+                    PrimaryColorDialog(
+                        onDismiss = { showPrimaryColorDialog = false },
+                        onPrimaryColorChange = { newColor ->
+                            onPrimaryColorChange(newColor)
+                            showPrimaryColorDialog = false
                         }
                     )
                 }

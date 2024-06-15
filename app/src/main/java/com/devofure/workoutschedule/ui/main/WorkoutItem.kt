@@ -42,6 +42,7 @@ import com.devofure.workoutschedule.data.SetDetails
 import com.devofure.workoutschedule.data.Workout
 import com.devofure.workoutschedule.ui.OrientationPreviews
 import com.devofure.workoutschedule.ui.ThemePreviews
+import com.devofure.workoutschedule.ui.theme.Colors.BlueAccent
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 
 @Composable
@@ -215,32 +216,32 @@ fun WorkoutItem(
 @OrientationPreviews
 @Composable
 fun PreviewWorkoutItem() {
-    MyWorkoutsTheme {
-        val exercise = Exercise(
-            name = "Dumbbell Bench Press",
-            force = "Push",
-            level = "Intermediate",
-            mechanic = "Compound",
-            equipment = "Dumbbell",
-            primaryMuscles = listOf("Chest"),
-            secondaryMuscles = listOf("Triceps", "Shoulders"),
-            category = "Strength",
-            instructions = listOf(
-                "Lie down on a flat bench.",
-                "Hold a dumbbell in each hand.",
-                "Push the dumbbells up."
-            ),
-        )
-        val workout = Workout(
-            id = 1,
-            exercise = exercise,
-            repsList = listOf(
-                SetDetails(reps = 10),
-                SetDetails(reps = 10),
-                SetDetails(reps = 10)
-            ),
-            isDone = false
-        )
+    val exercise = Exercise(
+        name = "Dumbbell Bench Press",
+        force = "Push",
+        level = "Intermediate",
+        mechanic = "Compound",
+        equipment = "Dumbbell",
+        primaryMuscles = listOf("Chest"),
+        secondaryMuscles = listOf("Triceps", "Shoulders"),
+        category = "Strength",
+        instructions = listOf(
+            "Lie down on a flat bench.",
+            "Hold a dumbbell in each hand.",
+            "Push the dumbbells up."
+        ),
+    )
+    val workout = Workout(
+        id = 1,
+        exercise = exercise,
+        repsList = listOf(
+            SetDetails(reps = 10),
+            SetDetails(reps = 10),
+            SetDetails(reps = 10)
+        ),
+        isDone = false
+    )
+    MyWorkoutsTheme(primaryColor = BlueAccent) {
         WorkoutItem(
             workout = workout,
             expanded = true,
