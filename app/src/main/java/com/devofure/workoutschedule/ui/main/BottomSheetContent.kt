@@ -24,8 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.devofure.workoutschedule.ui.WorkoutViewModel
 import com.devofure.workoutschedule.ui.getFullDayName
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 @Composable
 fun BottomSheetContent(
@@ -33,8 +31,6 @@ fun BottomSheetContent(
     pagerState: androidx.compose.foundation.pager.PagerState,
     nicknames: List<String>,
     workoutViewModel: WorkoutViewModel,
-    coroutineScope: CoroutineScope,
-    scaffoldState: androidx.compose.material3.BottomSheetScaffoldState,
     navController: NavHostController,
     onEditNickname: () -> Unit,
     onLogDay: () -> Unit
@@ -60,9 +56,6 @@ fun BottomSheetContent(
                 nicknames[pagerState.currentPage]
             )
             workoutViewModel.onAllWorkoutsChecked(dayFullName, true)
-            coroutineScope.launch {
-                scaffoldState.snackbarHostState.showSnackbar("All workouts completed!")
-            }
         }) {
             Icon(Icons.Filled.CheckCircle, contentDescription = "Mark all as done")
             Spacer(modifier = Modifier.width(8.dp))

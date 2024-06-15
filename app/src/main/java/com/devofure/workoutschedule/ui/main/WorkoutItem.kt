@@ -80,7 +80,11 @@ fun WorkoutItem(
                 ) {
                     Text(
                         text = workout.exercise.name,
-                        style = MaterialTheme.typography.titleMedium.copy(color = textColor.copy(alpha = textAlpha)),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            color = textColor.copy(
+                                alpha = textAlpha
+                            )
+                        ),
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Start
                     )
@@ -127,7 +131,9 @@ fun WorkoutItem(
                     workout.repsList?.let { repsList ->
                         Text(
                             text = "${repsList.size} sets:",
-                            style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.primary),
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                color = MaterialTheme.colorScheme.primary
+                            ),
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Start
                         )

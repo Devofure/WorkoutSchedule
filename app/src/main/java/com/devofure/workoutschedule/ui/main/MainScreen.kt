@@ -2,6 +2,7 @@
 
 package com.devofure.workoutschedule.ui.main
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -15,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
@@ -89,8 +91,6 @@ fun MainScreen(
                     pagerState = pagerState,
                     nicknames = nicknames,
                     workoutViewModel = workoutViewModel,
-                    coroutineScope = coroutineScope,
-                    scaffoldState = scaffoldState,
                     navController = navController,
                     onEditNickname = {
                         editedNickname = nicknames[pagerState.currentPage]
@@ -215,31 +215,36 @@ fun MainScreen(
                 }
             }
         }
+
         val isExpanded = scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded
-        FloatingActionButton(
-            onClick = {
-                coroutineScope.launch {
-                    if (isExpanded) {
-                        scaffoldState.bottomSheetState.hide()
-                    } else {
-                        scaffoldState.bottomSheetState.expand()
-                    }
-                }
-            },
+
+        AnimatedVisibility(
+            visible = !isExpanded,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp)
         ) {
-            val rotation by animateFloatAsState(
-                targetValue = if (isExpanded) 0f else 0f,
-                animationSpec = tween(durationMillis = 150),
-                label = "",
-            )
-            Icon(
-                imageVector = if (isExpanded) Icons.Filled.Close else Icons.Filled.MoreVert,
-                contentDescription = if (isExpanded) "Close Options" else "More Options",
-                modifier = Modifier.rotate(rotation)
-            )
+            FloatingActionButton(
+                onClick = {
+                    coroutineScope.launch {
+                        if (!isExpanded) {
+                            scaffoldState.bottomSheetState.expand()
+                        }
+                    }
+                },
+                shape = CircleShape,
+            ) {
+                val rotation by animateFloatAsState(
+                    targetValue = if (isExpanded) 0f else 0f,
+                    animationSpec = tween(durationMillis = 150),
+                    label = "",
+                )
+                Icon(
+                    imageVector = if (isExpanded) Icons.Filled.Close else Icons.Filled.MoreVert,
+                    contentDescription = if (isExpanded) "Close Options" else "More Options",
+                    modifier = Modifier.rotate(rotation)
+                )
+            }
         }
     }
 
