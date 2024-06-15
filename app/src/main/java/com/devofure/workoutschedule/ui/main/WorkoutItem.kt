@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -33,11 +34,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.devofure.workoutschedule.data.Exercise
+import com.devofure.workoutschedule.data.SetDetails
 import com.devofure.workoutschedule.data.Workout
+import com.devofure.workoutschedule.ui.OrientationPreviews
+import com.devofure.workoutschedule.ui.ThemePreviews
+import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 
 @Composable
 fun WorkoutItem(
@@ -52,13 +57,18 @@ fun WorkoutItem(
     var showMenu by remember { mutableStateOf(false) }
 
     val textAlpha = if (workout.isDone) 0.5f else 1f
-    val textColor = if (workout.isDone) Color.Gray else MaterialTheme.colorScheme.onSurface
+    val textColor = if (workout.isDone)
+        MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
     Card(
         modifier = Modifier
             .padding(vertical = 8.dp)
             .fillMaxWidth()
             .clickable { onClick() },
-        elevation = CardDefaults.cardElevation(4.dp)
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        )
     ) {
         Column {
             Row(
@@ -70,7 +80,11 @@ fun WorkoutItem(
                 if (onWorkoutChecked != null)
                     Checkbox(
                         checked = workout.isDone,
-                        onCheckedChange = { isChecked -> onWorkoutChecked(workout.id, isChecked) }
+                        onCheckedChange = { isChecked -> onWorkoutChecked(workout.id, isChecked) },
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = MaterialTheme.colorScheme.primary,
+                            uncheckedColor = MaterialTheme.colorScheme.onSurface
+                        )
                     )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(
@@ -91,7 +105,11 @@ fun WorkoutItem(
                 }
                 Box {
                     IconButton(onClick = { showMenu = true }) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = "More options")
+                        Icon(
+                            Icons.Filled.MoreVert,
+                            contentDescription = "More options",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
                     }
                     DropdownMenu(
                         expanded = showMenu,
@@ -153,7 +171,11 @@ fun WorkoutItem(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Instructions:",
-                        style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.primary),
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            color = MaterialTheme.colorScheme.primary.copy(
+                                alpha = textAlpha
+                            )
+                        ),
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Start
                     )
@@ -186,5 +208,46 @@ fun WorkoutItem(
                 }
             }
         }
+    }
+}
+
+@ThemePreviews
+@OrientationPreviews
+@Composable
+fun PreviewWorkoutItem() {
+    MyWorkoutsTheme {
+        val exercise = Exercise(
+            name = "Dumbbell Bench Press",
+            force = "Push",
+            level = "Intermediate",
+            mechanic = "Compound",
+            equipment = "Dumbbell",
+            primaryMuscles = listOf("Chest"),
+            secondaryMuscles = listOf("Triceps", "Shoulders"),
+            category = "Strength",
+            instructions = listOf(
+                "Lie down on a flat bench.",
+                "Hold a dumbbell in each hand.",
+                "Push the dumbbells up."
+            ),
+        )
+        val workout = Workout(
+            id = 1,
+            exercise = exercise,
+            repsList = listOf(
+                SetDetails(reps = 10),
+                SetDetails(reps = 10),
+                SetDetails(reps = 10)
+            ),
+            isDone = false
+        )
+        WorkoutItem(
+            workout = workout,
+            expanded = true,
+            onClick = {},
+            onWorkoutRemove = {},
+            onWorkoutDetail = {},
+            onWorkoutEdit = {}
+        )
     }
 }

@@ -41,7 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.devofure.workoutschedule.data.Workout
@@ -150,7 +149,8 @@ fun MainScreen(
                         ) {
                             Text(
                                 text = getFullDayName(daysOfWeek[page], nicknames[page]),
-                                style = MaterialTheme.typography.titleLarge
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.onBackground
                             )
                         }
 
@@ -162,7 +162,7 @@ fun MainScreen(
                                 Text(
                                     text = "Rest day",
                                     style = MaterialTheme.typography.displaySmall,
-                                    color = Color.Gray
+                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
                                 )
                             }
                         } else {
@@ -207,7 +207,7 @@ fun MainScreen(
                                                     )
                                                 }"
                                             )
-                                        }
+                                        },
                                     )
                                 }
                             }
@@ -234,6 +234,8 @@ fun MainScreen(
                     }
                 },
                 shape = CircleShape,
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary
             ) {
                 val rotation by animateFloatAsState(
                     targetValue = if (isExpanded) 0f else 0f,

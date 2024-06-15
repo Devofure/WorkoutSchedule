@@ -1,7 +1,7 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.devofure.workoutschedule.ui.workoutdetails
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -27,15 +26,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.devofure.workoutschedule.ui.SharedViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkoutDetailScreen(navController: NavController, sharedViewModel: SharedViewModel) {
     val workoutState by sharedViewModel.selectedWorkout.collectAsState()
@@ -68,25 +63,25 @@ fun WorkoutDetailScreen(navController: NavController, sharedViewModel: SharedVie
                         .fillMaxSize()
                 ) {
                     workout.repsList?.let { repsList ->
-                        sectionHeader(title = "Sets & Reps")
+                        SectionHeader(title = "Sets & Reps")
                         repsList.forEachIndexed { index, reps ->
-                            detailText(text = "Set ${index + 1}: $reps reps")
+                            DetailText(text = "Set ${index + 1}: $reps reps")
                         }
                         Spacer(modifier = Modifier.height(12.dp))
                     }
 
                     workout.duration?.let { duration ->
-                        detailItem(label = "Duration", value = "$duration mins")
+                        DetailItem(label = "Duration", value = "$duration mins")
                     }
 
                     workout.exercise.equipment?.takeIf { equipment -> equipment.isNotEmpty() }
                         ?.let { equipment ->
-                            detailItem(label = "Equipment", value = equipment)
+                            DetailItem(label = "Equipment", value = equipment)
                         }
 
                     workout.exercise.primaryMuscles.takeIf { primaryMuscles -> primaryMuscles.isNotEmpty() }
                         ?.let { primaryMuscles ->
-                            detailItem(
+                            DetailItem(
                                 label = "Primary Muscles",
                                 value = primaryMuscles.joinToString(", ")
                             )
@@ -94,7 +89,7 @@ fun WorkoutDetailScreen(navController: NavController, sharedViewModel: SharedVie
 
                     workout.exercise.secondaryMuscles.takeIf { secondaryMuscles -> secondaryMuscles.isNotEmpty() }
                         ?.let { secondaryMuscles ->
-                            detailItem(
+                            DetailItem(
                                 label = "Secondary Muscles",
                                 value = secondaryMuscles.joinToString(", ")
                             )
@@ -102,9 +97,9 @@ fun WorkoutDetailScreen(navController: NavController, sharedViewModel: SharedVie
 
                     workout.exercise.instructions.takeIf { instructions -> instructions.isNotEmpty() }
                         ?.let { instructions ->
-                            sectionHeader(title = "Instructions")
+                            SectionHeader(title = "Instructions")
                             instructions.forEachIndexed { _, instruction ->
-                                instructionItem(instruction)
+                                InstructionItem(instruction)
                             }
                         }
                 }
@@ -114,7 +109,7 @@ fun WorkoutDetailScreen(navController: NavController, sharedViewModel: SharedVie
 }
 
 @Composable
-fun sectionHeader(title: String) {
+fun SectionHeader(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.titleMedium,
@@ -124,16 +119,16 @@ fun sectionHeader(title: String) {
 }
 
 @Composable
-fun detailItem(label: String, value: String) {
+fun DetailItem(label: String, value: String) {
     Column {
-        sectionHeader(title = label)
-        detailText(text = value)
+        SectionHeader(title = label)
+        DetailText(text = value)
         Spacer(modifier = Modifier.height(12.dp))
     }
 }
 
 @Composable
-fun detailText(text: String) {
+fun DetailText(text: String) {
     Text(
         text = text,
         style = MaterialTheme.typography.bodyLarge,
@@ -142,7 +137,7 @@ fun detailText(text: String) {
 }
 
 @Composable
-fun instructionItem(instruction: String) {
+fun InstructionItem(instruction: String) {
     Row(
         verticalAlignment = Alignment.Top,
         modifier = Modifier.padding(bottom = 4.dp)
@@ -159,29 +154,4 @@ fun instructionItem(instruction: String) {
             textAlign = TextAlign.Start
         )
     }
-}
-
-@Composable
-fun detailLink(text: String, url: String) {
-    val context = LocalContext.current
-    val annotatedString = buildAnnotatedString {
-        append(text)
-        addStyle(
-            style = SpanStyle(color = MaterialTheme.colorScheme.primary),
-            start = 0,
-            end = text.length
-        )
-        addStringAnnotation(tag = "URL", annotation = url, start = 0, end = text.length)
-    }
-    ClickableText(
-        text = annotatedString,
-        onClick = { offset ->
-            annotatedString.getStringAnnotations(tag = "URL", start = offset, end = offset)
-                .firstOrNull()?.let {
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it.item))
-                    context.startActivity(intent)
-                }
-        },
-        modifier = Modifier.padding(horizontal = 8.dp)
-    )
 }
