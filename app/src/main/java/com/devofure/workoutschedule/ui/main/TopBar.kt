@@ -20,7 +20,9 @@ fun TopBar(onSettingsClick: () -> Unit, onCalendarClick: () -> Unit) {
         title = { Text("Workout Schedule") },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onPrimary
+            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+            navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimary
         ),
         actions = {
             IconButton(onClick = onCalendarClick) {

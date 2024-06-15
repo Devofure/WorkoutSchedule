@@ -58,8 +58,9 @@ fun WorkoutItem(
     var showMenu by remember { mutableStateOf(false) }
 
     val textAlpha = if (workout.isDone) 0.5f else 1f
-    val textColor = if (workout.isDone)
-        MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface
+    val textColor = if (workout.isDone) MaterialTheme.colorScheme.onSurfaceVariant
+    else MaterialTheme.colorScheme.onSurface
+
     Card(
         modifier = Modifier
             .padding(vertical = 8.dp)
@@ -69,13 +70,13 @@ fun WorkoutItem(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface,
             contentColor = MaterialTheme.colorScheme.onSurface
-        )
+        ),
     ) {
         Column {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .padding(16.dp)
+                    .padding(8.dp)
                     .fillMaxWidth()
             ) {
                 if (onWorkoutChecked != null)

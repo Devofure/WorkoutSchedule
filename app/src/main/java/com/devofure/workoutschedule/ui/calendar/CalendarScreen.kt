@@ -1,5 +1,6 @@
 package com.devofure.workoutschedule.ui.calendar
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -53,6 +55,8 @@ fun CalendarScreen(
         currentYearMonth.value.second
     ).collectAsState(initial = emptyList())
 
+    val backgroundColor = MaterialTheme.colorScheme.background
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -75,7 +79,13 @@ fun CalendarScreen(
                             contentDescription = "Toggle View"
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                )
             )
         },
         content = { paddingValues ->
@@ -83,7 +93,7 @@ fun CalendarScreen(
                 modifier = Modifier
                     .padding(paddingValues)
                     .fillMaxSize()
-                    .fillMaxWidth()
+                    .background(backgroundColor)
             ) {
                 CalendarView(selectedDate, logDatesForMonth, isMonthView, firstDayOfWeek) { date ->
                     selectedDate = date
@@ -100,7 +110,7 @@ fun CalendarScreen(
                         Text(
                             "No logs for this day",
                             style = MaterialTheme.typography.titleMedium,
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 } else {

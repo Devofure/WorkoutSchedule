@@ -15,20 +15,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.devofure.workoutschedule.ui.calculateDayOfWeekOffset
 import com.devofure.workoutschedule.ui.getFirstDayOfMonthWeekIndex
@@ -36,6 +32,8 @@ import com.devofure.workoutschedule.ui.getTotalCells
 import com.devofure.workoutschedule.ui.getWeekStartDate
 import com.devofure.workoutschedule.ui.isSameDay
 import com.devofure.workoutschedule.ui.settings.FirstDayOfWeek
+import com.devofure.workoutschedule.ui.theme.Colors.GreenAccent
+import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -71,32 +69,28 @@ fun CalendarView(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MonthNavigation(
     selectedDate: LocalDate,
     isMonthView: Boolean,
     onDateSelected: (LocalDate) -> Unit
 ) {
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = {
-            val newDate = if (isMonthView) {
-                selectedDate.minusMonths(1)
-            } else {
-                selectedDate.minusWeeks(1)
-            }
-            onDateSelected(newDate)
-        }) {
-            Icon(
-                Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = if (isMonthView) "Previous month" else "Previous week"
-            )
+        TextButton(
+            modifier = Modifier.align(Alignment.CenterStart),
+            onClick = {
+                val newDate = if (isMonthView) {
+                    selectedDate.minusMonths(1)
+                } else {
+                    selectedDate.minusWeeks(1)
+                }
+                onDateSelected(newDate)
+            }) {
+            Text(text = "Previous")
         }
         Text(
             text = selectedDate.format(
@@ -105,22 +99,22 @@ fun MonthNavigation(
                     Locale.getDefault()
                 )
             ),
+            modifier = Modifier.align(Alignment.Center),
             style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center,
-            modifier = Modifier.weight(1f)
+            color = MaterialTheme.colorScheme.secondary
         )
-        IconButton(onClick = {
-            val newDate = if (isMonthView) {
-                selectedDate.plusMonths(1)
-            } else {
-                selectedDate.plusWeeks(1)
-            }
-            onDateSelected(newDate)
-        }) {
-            Icon(
-                Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = if (isMonthView) "Next month" else "Next week"
-            )
+        TextButton(
+            modifier = Modifier.align(Alignment.CenterEnd),
+            onClick = {
+                val newDate = if (isMonthView) {
+                    selectedDate.plusMonths(1)
+                } else {
+                    selectedDate.plusWeeks(1)
+                }
+                onDateSelected(newDate)
+            }) {
+            Text(text = "Next")
         }
     }
 }
@@ -201,7 +195,7 @@ fun DayCell(
         label = "backgroundColor"
     )
     val textColor by animateColorAsState(
-        if (isSelectedDay) Color.White else Color.Black,
+        if (isSelectedDay) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onBackground,
         label = "textColor"
     )
 
@@ -255,8 +249,23 @@ fun WeekDayHeaders(firstDayOfWeek: FirstDayOfWeek) {
                 text = day,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodySmall
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.secondary
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun CalendarViewPreview() {
+    MyWorkoutsTheme(primaryColor = GreenAccent) {
+        CalendarView(
+            selectedDate = LocalDate.now(),
+            logDates = listOf(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1)),
+            isMonthView = true,
+            firstDayOfWeek = FirstDayOfWeek.MONDAY,
+            onDateSelected = {}
+        )
     }
 }

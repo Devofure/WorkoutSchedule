@@ -88,8 +88,8 @@ fun MainScreen(
                 FloatingActionButton(
                     onClick = { showBottomSheet = true },
                     shape = CircleShape,
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
                     Icon(
                         imageVector = Icons.Filled.MoreVert,

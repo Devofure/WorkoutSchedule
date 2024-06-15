@@ -24,13 +24,13 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -53,6 +53,8 @@ import com.devofure.workoutschedule.data.Exercise
 import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.OrientationPreviews
 import com.devofure.workoutschedule.ui.ThemePreviews
+import com.devofure.workoutschedule.ui.theme.Colors
+import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 
 @Composable
 fun AddExerciseScreen(
@@ -123,7 +125,7 @@ fun AddExerciseScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navigate.back() }) {
+                    IconButton(onClick = navigate::back) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -136,10 +138,10 @@ fun AddExerciseScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.White,
-                    navigationIconContentColor = Color.White,
-                    actionIconContentColor = Color.White
-                )
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                ),
             )
         },
         bottomBar = {
@@ -209,12 +211,20 @@ fun ExerciseItem(
     isSelected: Boolean,
     onSelected: () -> Unit
 ) {
+    val textAlpha = if (isSelected) 0.8f else 1f
+    val textColor = if (isSelected) MaterialTheme.colorScheme.onSurfaceVariant
+    else MaterialTheme.colorScheme.onSurface
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable { onSelected() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -224,11 +234,22 @@ fun ExerciseItem(
         ) {
             Checkbox(
                 checked = isSelected,
-                onCheckedChange = { onSelected() }
+                onCheckedChange = { onSelected() },
+                colors = CheckboxDefaults.colors(
+                    checkedColor = MaterialTheme.colorScheme.primary,
+                    uncheckedColor = MaterialTheme.colorScheme.onSurface
+                )
             )
             Spacer(modifier = Modifier.width(8.dp))
             Column {
-                Text(text = exercise.name, style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = exercise.name,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        color = textColor.copy(
+                            alpha = textAlpha
+                        )
+                    ),
+                )
                 Text(
                     text = "Equipment: ${exercise.equipment}",
                     style = MaterialTheme.typography.bodyMedium
@@ -286,18 +307,17 @@ fun AddExerciseScreenPreview() {
             "Strength"
         )
     )
-    MaterialTheme {
-        Surface {
-            AddExerciseScreen(
-                day = "Monday",
-                searchQuery = "",
-                filteredExercises = sampleExercises,
-                isLoading = false,
-                onSearchQueryChange = {},
-                onAddWorkouts = { _, _ -> },
-                navigate = Navigate(navController)
-            )
-        }
+
+    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+        AddExerciseScreen(
+            day = "Monday",
+            searchQuery = "",
+            filteredExercises = sampleExercises,
+            isLoading = false,
+            onSearchQueryChange = {},
+            onAddWorkouts = { _, _ -> },
+            navigate = Navigate(navController)
+        )
     }
 }
 
@@ -305,22 +325,24 @@ fun AddExerciseScreenPreview() {
 @OrientationPreviews
 @Composable
 fun ExerciseItemPreview() {
-    ExerciseItem(
-        exercise = Exercise(
-            name = "Push Up",
-            force = "Push",
-            level = "Beginner",
-            mechanic = "Compound",
-            equipment = "None",
-            primaryMuscles = listOf("Chest"),
-            secondaryMuscles = listOf("Triceps"),
-            instructions = listOf(
-                "Keep your body straight",
-                "Lower your body until your chest touches the ground"
+    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+        ExerciseItem(
+            exercise = Exercise(
+                name = "Push Up",
+                force = "Push",
+                level = "Beginner",
+                mechanic = "Compound",
+                equipment = "None",
+                primaryMuscles = listOf("Chest"),
+                secondaryMuscles = listOf("Triceps"),
+                instructions = listOf(
+                    "Keep your body straight",
+                    "Lower your body until your chest touches the ground"
+                ),
+                category = "Strength"
             ),
-            category = "Strength"
-        ),
-        isSelected = false,
-        onSelected = {}
-    )
+            isSelected = false,
+            onSelected = {}
+        )
+    }
 }
