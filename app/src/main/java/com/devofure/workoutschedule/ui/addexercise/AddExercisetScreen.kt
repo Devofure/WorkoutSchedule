@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.devofure.workoutschedule.ui.addexercise
 
 import androidx.compose.foundation.background
@@ -13,24 +15,27 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Card
-import androidx.compose.material.Checkbox
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -83,10 +88,14 @@ fun AddExerciseScreen(
                                 onValueChange = { onSearchQueryChange(it) },
                                 placeholder = { Text("Search Exercises") },
                                 singleLine = true,
-                                colors = TextFieldDefaults.textFieldColors(
-                                    textColor = Color.White,
-                                    placeholderColor = Color.White.copy(alpha = 0.5f),
-                                    cursorColor = Color.White,
+                                colors = TextFieldDefaults.colors(
+                                    focusedTextColor = Color.White,
+                                    unfocusedTextColor = Color.White,
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedPlaceholderColor = Color.White.copy(alpha = 0.5f),
+                                    unfocusedPlaceholderColor = Color.White.copy(alpha = 0.5f),
+                                    cursorColor = Color.White
                                 ),
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -109,7 +118,7 @@ fun AddExerciseScreen(
                     } else {
                         Column {
                             Text("Add Exercises")
-                            Text(day, style = MaterialTheme.typography.subtitle2)
+                            Text(day, style = MaterialTheme.typography.titleMedium)
                         }
                     }
                 },
@@ -125,21 +134,25 @@ fun AddExerciseScreen(
                         }
                     }
                 },
-                backgroundColor = MaterialTheme.colors.primary,
-                contentColor = Color.White
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White,
+                    actionIconContentColor = Color.White
+                )
             )
         },
         bottomBar = {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colors.primary)
+                    .background(MaterialTheme.colorScheme.primary)
                     .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = "${selectedExercises.size} exercise(s) selected",
-                    style = MaterialTheme.typography.body1,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = Color.White
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -148,7 +161,7 @@ fun AddExerciseScreen(
                         onAddWorkouts(day, selectedExercises)
                         navController.popBackStack()
                     },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.secondary),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Add", color = Color.White)
@@ -167,7 +180,7 @@ fun AddExerciseScreen(
                 }
             } else if (filteredExercises.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "No exercises found", style = MaterialTheme.typography.h6)
+                    Text(text = "No exercises found", style = MaterialTheme.typography.titleMedium)
                 }
             } else {
                 LazyColumn {
@@ -201,7 +214,7 @@ fun ExerciseItem(
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable { onSelected() },
-        elevation = 4.dp
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -215,18 +228,18 @@ fun ExerciseItem(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Column {
-                Text(text = exercise.name, style = MaterialTheme.typography.subtitle1)
+                Text(text = exercise.name, style = MaterialTheme.typography.titleMedium)
                 Text(
                     text = "Equipment: ${exercise.equipment}",
-                    style = MaterialTheme.typography.body2
+                    style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
                     text = "Primary Muscles: ${exercise.primaryMuscles.joinToString(", ")}",
-                    style = MaterialTheme.typography.body2
+                    style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
                     text = "Secondary Muscles: ${exercise.secondaryMuscles.joinToString(", ")}",
-                    style = MaterialTheme.typography.body2
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }

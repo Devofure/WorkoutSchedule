@@ -7,17 +7,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material.icons.filled.ViewWeek
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,6 +33,7 @@ import com.devofure.workoutschedule.ui.main.WorkoutItem
 import com.devofure.workoutschedule.ui.settings.SettingsViewModel
 import java.time.LocalDate
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(
     navController: NavHostController,
@@ -54,7 +56,6 @@ fun CalendarScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Log Calendar") },
-                backgroundColor = MaterialTheme.colors.primary,
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -97,7 +98,7 @@ fun CalendarScreen(
                     ) {
                         Text(
                             "No logs for this day",
-                            style = MaterialTheme.typography.h6,
+                            style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.align(Alignment.CenterHorizontally)
                         )
                     }

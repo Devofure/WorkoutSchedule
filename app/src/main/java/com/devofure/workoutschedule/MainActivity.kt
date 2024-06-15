@@ -7,10 +7,10 @@ import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -52,14 +52,14 @@ class MainActivity : ComponentActivity() {
                 composable("main") {
                     if (isFirstLaunch) {
                         systemUiController.setSystemBarsColor(
-                            color = MaterialTheme.colors.background,
+                            color = MaterialTheme.colorScheme.background,
                             darkIcons = currentTheme != ThemeType.DARK
                         )
                         AskUserToGenerateSampleSchedule(workoutViewModel)
                     } else {
                         systemUiController.setSystemBarsColor(
-                            color = MaterialTheme.colors.primary,
-                            darkIcons = MaterialTheme.colors.isLight
+                            color = MaterialTheme.colorScheme.primary,
+                            darkIcons = currentTheme != ThemeType.DARK
                         )
                         WorkoutApp(
                             workoutViewModel = workoutViewModel,
@@ -77,7 +77,7 @@ class MainActivity : ComponentActivity() {
                 }
                 composable("settings") {
                     systemUiController.setSystemBarsColor(
-                        color = MaterialTheme.colors.background,
+                        color = MaterialTheme.colorScheme.background,
                         darkIcons = currentTheme != ThemeType.DARK
                     )
                     SettingsScreen(

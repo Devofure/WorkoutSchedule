@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
+
 package com.devofure.workoutschedule.ui.editworkout
 
 import android.app.TimePickerDialog
@@ -15,19 +17,21 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -77,7 +81,7 @@ fun EditWorkoutScreen(
                             Text("Edit Workout")
                             Text(
                                 workoutData.exercise.name,
-                                style = MaterialTheme.typography.subtitle2
+                                style = MaterialTheme.typography.titleSmall
                             )
                         }
                     },
@@ -117,7 +121,7 @@ fun EditWorkoutScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("Sets: $sets", style = MaterialTheme.typography.h6)
+                            Text("Sets: $sets", style = MaterialTheme.typography.titleLarge)
                             Spacer(modifier = Modifier.width(16.dp))
                             IconButton(
                                 onClick = {
@@ -149,8 +153,8 @@ fun EditWorkoutScreen(
                         if (setsError != null) {
                             Text(
                                 text = setsError ?: "",
-                                color = MaterialTheme.colors.error,
-                                style = MaterialTheme.typography.caption,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.padding(start = 16.dp)
                             )
                         }
@@ -171,8 +175,8 @@ fun EditWorkoutScreen(
                             if (repsError != null) {
                                 Text(
                                     text = repsError ?: "",
-                                    color = MaterialTheme.colors.error,
-                                    style = MaterialTheme.typography.caption,
+                                    color = MaterialTheme.colorScheme.error,
+                                    style = MaterialTheme.typography.bodySmall,
                                     modifier = Modifier.padding(start = 16.dp)
                                 )
                             }
@@ -242,13 +246,16 @@ fun DurationPickerField(
                     contentDescription = "Pick Time",
                     modifier = Modifier.clickable { showPicker = true }
                 )
-            }
+            },
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                errorBorderColor = MaterialTheme.colorScheme.error
+            )
         )
         if (error != null) {
             Text(
                 text = error,
-                color = MaterialTheme.colors.error,
-                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(start = 16.dp)
             )
         }
@@ -333,13 +340,16 @@ fun ValidatedTextField(
             label = { Text(label) },
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
             modifier = Modifier.fillMaxWidth(),
-            isError = error != null
+            isError = error != null,
+            colors = TextFieldDefaults.outlinedTextFieldColors(
+                errorBorderColor = MaterialTheme.colorScheme.error
+            )
         )
         if (error != null) {
             Text(
                 text = error,
-                color = MaterialTheme.colors.error,
-                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(start = 16.dp)
             )
         }

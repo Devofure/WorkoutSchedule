@@ -15,13 +15,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -70,6 +71,7 @@ fun CalendarView(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MonthNavigation(
     selectedDate: LocalDate,
@@ -103,7 +105,7 @@ fun MonthNavigation(
                     Locale.getDefault()
                 )
             ),
-            style = MaterialTheme.typography.h6,
+            style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center,
             modifier = Modifier.weight(1f)
         )
@@ -195,7 +197,7 @@ fun DayCell(
     modifier: Modifier = Modifier
 ) {
     val backgroundColor by animateColorAsState(
-        if (isSelectedDay) MaterialTheme.colors.primary else Color.Transparent,
+        if (isSelectedDay) MaterialTheme.colorScheme.primary else Color.Transparent,
         label = "backgroundColor"
     )
     val textColor by animateColorAsState(
@@ -219,7 +221,7 @@ fun DayCell(
             Text(
                 text = day.toString(),
                 color = textColor,
-                style = MaterialTheme.typography.body1
+                style = MaterialTheme.typography.bodyLarge
             )
         }
         if (logExists) {
@@ -228,7 +230,7 @@ fun DayCell(
                     .align(Alignment.BottomCenter)
                     .size(8.dp)
                     .background(
-                        MaterialTheme.colors.secondary,
+                        MaterialTheme.colorScheme.secondary,
                         shape = CircleShape
                     )
             )
@@ -253,7 +255,7 @@ fun WeekDayHeaders(firstDayOfWeek: FirstDayOfWeek) {
                 text = day,
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.body2
+                style = MaterialTheme.typography.bodySmall
             )
         }
     }

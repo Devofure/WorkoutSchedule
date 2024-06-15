@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -28,9 +28,9 @@ fun PagerIndicator(
     ) {
         repeat(pageCount) { index ->
             val color = if (pagerState.currentPage == index) {
-                MaterialTheme.colors.primary
+                MaterialTheme.colorScheme.primary
             } else {
-                MaterialTheme.colors.onSurface.copy(alpha = 0.5f)
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
             }
             Box(
                 modifier = Modifier

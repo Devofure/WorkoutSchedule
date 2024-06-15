@@ -1,8 +1,11 @@
+@file:OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+
 package com.devofure.workoutschedule.ui.main
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,16 +15,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.BottomSheetScaffold
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SheetValue
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -45,7 +49,6 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun MainScreen(
     navController: NavHostController,
@@ -70,166 +73,173 @@ fun MainScreen(
     var selectedWorkouts by remember { mutableStateOf<List<Workout>>(emptyList()) }
 
     val systemUiController = rememberSystemUiController()
-    val useDarkIcons = MaterialTheme.colors.isLight
+    val useDarkIcons = !isSystemInDarkTheme()
 
     systemUiController.setSystemBarsColor(
-        color = MaterialTheme.colors.primary,
+        color = MaterialTheme.colorScheme.primary,
         darkIcons = useDarkIcons
     )
 
-    BottomSheetScaffold(
-        scaffoldState = scaffoldState,
-        sheetContent = {
-            BottomSheetContent(
-                daysOfWeek = daysOfWeek,
-                pagerState = pagerState,
-                nicknames = nicknames,
-                workoutViewModel = workoutViewModel,
-                coroutineScope = coroutineScope,
-                scaffoldState = scaffoldState,
-                navController = navController,
-                onEditNickname = {
-                    editedNickname = nicknames[pagerState.currentPage]
-                    showEditNicknameDialog = true
-                },
-                onLogDay = {
-                    showDateConfirmationDialog = true
-                }
-            )
-        },
-        sheetPeekHeight = 0.dp,
-        floatingActionButton = {
-            val isExpanded = scaffoldState.bottomSheetState.isExpanded
-            FloatingActionButton(onClick = {
-                coroutineScope.launch {
-                    if (isExpanded) {
-                        scaffoldState.bottomSheetState.collapse()
-                    } else {
-                        scaffoldState.bottomSheetState.expand()
+    Box(modifier = Modifier.fillMaxSize()) {
+        BottomSheetScaffold(
+            scaffoldState = scaffoldState,
+            sheetContent = {
+                BottomSheetContent(
+                    daysOfWeek = daysOfWeek,
+                    pagerState = pagerState,
+                    nicknames = nicknames,
+                    workoutViewModel = workoutViewModel,
+                    coroutineScope = coroutineScope,
+                    scaffoldState = scaffoldState,
+                    navController = navController,
+                    onEditNickname = {
+                        editedNickname = nicknames[pagerState.currentPage]
+                        showEditNicknameDialog = true
+                    },
+                    onLogDay = {
+                        showDateConfirmationDialog = true
                     }
-                }
-            }) {
-                val rotation by animateFloatAsState(
-                    targetValue = if (isExpanded) 0f else 0f,
-                    animationSpec = tween(durationMillis = 150),
-                    label = "",
                 )
-                Icon(
-                    imageVector = if (isExpanded) Icons.Filled.Close else Icons.Filled.MoreVert,
-                    contentDescription = if (isExpanded) "Close Options" else "More Options",
-                    modifier = Modifier.rotate(rotation)
+            },
+            sheetPeekHeight = 0.dp,
+            topBar = {
+                TopBar(
+                    onSettingsClick = onSettingsClick,
+                    onCalendarClick = {
+                        navController.navigate("calendar")
+                    }
                 )
             }
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-        ) {
-            TopBar(
-                onSettingsClick = onSettingsClick,
-                onCalendarClick = {
-                    navController.navigate("calendar")
-                }
-            )
-            PagerIndicator(
-                pagerState = pagerState,
-                pageCount = daysOfWeek.size,
+        ) { paddingValues ->
+            Column(
                 modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(16.dp)
-            )
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.weight(1f)
-            ) { page ->
-                val workouts by workoutViewModel.workoutsForDay(
-                    getFullDayName(
-                        daysOfWeek[page],
-                        nicknames[page]
-                    )
-                ).collectAsState()
-
-                LaunchedEffect(workouts) {
-                    selectedWorkouts = workouts
-                }
-
-                Column(
+                    .padding(paddingValues)
+                    .fillMaxSize()
+            ) {
+                PagerIndicator(
+                    pagerState = pagerState,
+                    pageCount = daysOfWeek.size,
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 16.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    ) {
-                        Text(
-                            text = getFullDayName(daysOfWeek[page], nicknames[page]),
-                            style = MaterialTheme.typography.h6
+                        .align(Alignment.CenterHorizontally)
+                        .padding(16.dp)
+                )
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.weight(1f)
+                ) { page ->
+                    val workouts by workoutViewModel.workoutsForDay(
+                        getFullDayName(
+                            daysOfWeek[page],
+                            nicknames[page]
                         )
+                    ).collectAsState()
+
+                    LaunchedEffect(workouts) {
+                        selectedWorkouts = workouts
                     }
 
-                    if (workouts.isEmpty()) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
                         ) {
                             Text(
-                                text = "Rest day",
-                                style = MaterialTheme.typography.h4,
-                                color = Color.Gray
+                                text = getFullDayName(daysOfWeek[page], nicknames[page]),
+                                style = MaterialTheme.typography.titleLarge
                             )
                         }
-                    } else {
-                        WorkoutProgress(workouts)
-                        LazyColumn {
-                            items(workouts) { workout ->
-                                WorkoutItem(
-                                    workout = workout,
-                                    expanded = expandedWorkoutIds.contains(workout.id),
-                                    onClick = {
-                                        expandedWorkoutIds =
-                                            if (expandedWorkoutIds.contains(workout.id)) {
-                                                expandedWorkoutIds - workout.id
-                                            } else {
-                                                expandedWorkoutIds + workout.id
-                                            }
-                                    },
-                                    onWorkoutChecked = { workoutId, isChecked ->
-                                        workoutViewModel.onWorkoutChecked(
-                                            getFullDayName(daysOfWeek[page], nicknames[page]),
-                                            workoutId,
-                                            isChecked
-                                        )
-                                    },
-                                    onWorkoutRemove = {
-                                        workoutViewModel.removeWorkout(
-                                            getFullDayName(daysOfWeek[page], nicknames[page]),
-                                            workout
-                                        )
-                                    },
-                                    onWorkoutDetail = {
-                                        sharedViewModel.selectWorkout(workout)
-                                        navController.navigate("workout_detail")
-                                    },
-                                    onWorkoutEdit = {
-                                        sharedViewModel.selectWorkout(workout)
-                                        navController.navigate(
-                                            "edit_workout/${
-                                                getFullDayName(
-                                                    daysOfWeek[page],
-                                                    nicknames[page]
-                                                )
-                                            }"
-                                        )
-                                    }
+
+                        if (workouts.isEmpty()) {
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Rest day",
+                                    style = MaterialTheme.typography.displaySmall,
+                                    color = Color.Gray
                                 )
+                            }
+                        } else {
+                            WorkoutProgress(workouts)
+                            LazyColumn {
+                                items(workouts) { workout ->
+                                    WorkoutItem(
+                                        workout = workout,
+                                        expanded = expandedWorkoutIds.contains(workout.id),
+                                        onClick = {
+                                            expandedWorkoutIds =
+                                                if (expandedWorkoutIds.contains(workout.id)) {
+                                                    expandedWorkoutIds - workout.id
+                                                } else {
+                                                    expandedWorkoutIds + workout.id
+                                                }
+                                        },
+                                        onWorkoutChecked = { workoutId, isChecked ->
+                                            workoutViewModel.onWorkoutChecked(
+                                                getFullDayName(daysOfWeek[page], nicknames[page]),
+                                                workoutId,
+                                                isChecked
+                                            )
+                                        },
+                                        onWorkoutRemove = {
+                                            workoutViewModel.removeWorkout(
+                                                getFullDayName(daysOfWeek[page], nicknames[page]),
+                                                workout
+                                            )
+                                        },
+                                        onWorkoutDetail = {
+                                            sharedViewModel.selectWorkout(workout)
+                                            navController.navigate("workout_detail")
+                                        },
+                                        onWorkoutEdit = {
+                                            sharedViewModel.selectWorkout(workout)
+                                            navController.navigate(
+                                                "edit_workout/${
+                                                    getFullDayName(
+                                                        daysOfWeek[page],
+                                                        nicknames[page]
+                                                    )
+                                                }"
+                                            )
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
+        }
+        val isExpanded = scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded
+        FloatingActionButton(
+            onClick = {
+                coroutineScope.launch {
+                    if (isExpanded) {
+                        scaffoldState.bottomSheetState.hide()
+                    } else {
+                        scaffoldState.bottomSheetState.expand()
+                    }
+                }
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            val rotation by animateFloatAsState(
+                targetValue = if (isExpanded) 0f else 0f,
+                animationSpec = tween(durationMillis = 150),
+                label = "",
+            )
+            Icon(
+                imageVector = if (isExpanded) Icons.Filled.Close else Icons.Filled.MoreVert,
+                contentDescription = if (isExpanded) "Close Options" else "More Options",
+                modifier = Modifier.rotate(rotation)
+            )
         }
     }
 

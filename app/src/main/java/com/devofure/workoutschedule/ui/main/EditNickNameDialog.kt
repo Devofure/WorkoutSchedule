@@ -1,10 +1,13 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package com.devofure.workoutschedule.ui.main
 
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
@@ -24,17 +27,17 @@ fun EditNicknameDialog(
                 onValueChange = onNicknameChange,
                 label = { Text("Nickname") },
                 colors = TextFieldDefaults.textFieldColors(
-                    backgroundColor = Color.Transparent
+                    containerColor = Color.Transparent
                 )
             )
         },
         confirmButton = {
-            TextButton(onClick = onSave) {
+            Button(onClick = onSave) {
                 Text("Save")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            Button(onClick = onDismiss) {
                 Text("Cancel")
             }
         }

@@ -15,16 +15,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.Card
-import androidx.compose.material.Checkbox
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,13 +52,13 @@ fun WorkoutItem(
     var showMenu by remember { mutableStateOf(false) }
 
     val textAlpha = if (workout.isDone) 0.5f else 1f
-    val textColor = if (workout.isDone) Color.Gray else MaterialTheme.typography.body2.color
+    val textColor = if (workout.isDone) Color.Gray else MaterialTheme.colorScheme.onSurface
     Card(
         modifier = Modifier
             .padding(vertical = 8.dp)
             .fillMaxWidth()
             .clickable { onClick() },
-        elevation = 4.dp
+        elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column {
             Row(
@@ -79,7 +80,7 @@ fun WorkoutItem(
                 ) {
                     Text(
                         text = workout.exercise.name,
-                        style = MaterialTheme.typography.h6.copy(color = textColor.copy(alpha = textAlpha)),
+                        style = MaterialTheme.typography.titleMedium.copy(color = textColor.copy(alpha = textAlpha)),
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Start
                     )
@@ -93,24 +94,27 @@ fun WorkoutItem(
                         onDismissRequest = { showMenu = false },
                         offset = DpOffset(x = (-16).dp, y = 0.dp)
                     ) {
-                        DropdownMenuItem(onClick = {
-                            showMenu = false
-                            onWorkoutDetail()
-                        }) {
-                            Text("Details")
-                        }
-                        DropdownMenuItem(onClick = {
-                            showMenu = false
-                            onWorkoutEdit()
-                        }) {
-                            Text("Edit")
-                        }
-                        DropdownMenuItem(onClick = {
-                            showMenu = false
-                            onWorkoutRemove()
-                        }) {
-                            Text("Remove")
-                        }
+                        DropdownMenuItem(
+                            text = { Text("Details") },
+                            onClick = {
+                                showMenu = false
+                                onWorkoutDetail()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Edit") },
+                            onClick = {
+                                showMenu = false
+                                onWorkoutEdit()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Remove") },
+                            onClick = {
+                                showMenu = false
+                                onWorkoutRemove()
+                            }
+                        )
                     }
                 }
             }
@@ -123,14 +127,14 @@ fun WorkoutItem(
                     workout.repsList?.let { repsList ->
                         Text(
                             text = "${repsList.size} sets:",
-                            style = MaterialTheme.typography.subtitle1.copy(color = MaterialTheme.colors.primary),
+                            style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.primary),
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Start
                         )
                         repsList.forEachIndexed { index, reps ->
                             Text(
                                 text = "Set ${index + 1}: $reps reps",
-                                style = MaterialTheme.typography.body2.copy(
+                                style = MaterialTheme.typography.bodyMedium.copy(
                                     color = textColor.copy(
                                         alpha = textAlpha
                                     )
@@ -143,7 +147,7 @@ fun WorkoutItem(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Instructions:",
-                        style = MaterialTheme.typography.subtitle1.copy(color = MaterialTheme.colors.primary),
+                        style = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.primary),
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Start
                     )
@@ -154,7 +158,7 @@ fun WorkoutItem(
                         ) {
                             Text(
                                 text = "\u2022", // Bullet point
-                                style = MaterialTheme.typography.body2.copy(
+                                style = MaterialTheme.typography.bodyMedium.copy(
                                     color = textColor.copy(
                                         alpha = textAlpha
                                     )
@@ -163,7 +167,7 @@ fun WorkoutItem(
                             )
                             Text(
                                 text = instruction,
-                                style = MaterialTheme.typography.body2.copy(
+                                style = MaterialTheme.typography.bodyMedium.copy(
                                     color = textColor.copy(
                                         alpha = textAlpha
                                     )

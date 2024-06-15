@@ -5,16 +5,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.ListItem
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -24,7 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel,
@@ -40,7 +41,7 @@ fun SettingsScreen(
     val firstDayOfWeek by settingsViewModel.firstDayOfWeek.collectAsState()
 
     // Define a common background color for both the TopAppBar and the content
-    val backgroundColor = MaterialTheme.colors.background
+    val backgroundColor = MaterialTheme.colorScheme.background
 
     Scaffold(
         topBar = {
@@ -51,8 +52,11 @@ fun SettingsScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
-                backgroundColor = backgroundColor,
-                elevation = 0.dp // Set elevation to 0 to make it level with the background
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = backgroundColor,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground
+                ),
+                modifier = Modifier.padding(0.dp) // Set elevation to 0 to make it level with the background
             )
         },
         content = { paddingValues ->
@@ -63,23 +67,23 @@ fun SettingsScreen(
                     .background(backgroundColor)
             ) {
                 ListItem(
-                    text = { Text("Workout Reminders") },
-                    secondaryText = { Text("Set up your workout reminder time") },
+                    headlineContent = { Text("Workout Reminders") },
+                    supportingContent = { Text("Set up your workout reminder time") },
                     modifier = Modifier.clickable { showReminderSetup = true }
                 )
                 ListItem(
-                    text = { Text("Delete Schedule") },
-                    secondaryText = { Text("Delete your entire workout schedule") },
+                    headlineContent = { Text("Delete Schedule") },
+                    supportingContent = { Text("Delete your entire workout schedule") },
                     modifier = Modifier.clickable { showDeleteConfirmation = true }
                 )
                 ListItem(
-                    text = { Text("Theme Settings") },
-                    secondaryText = { Text("Switch between light and dark modes") },
+                    headlineContent = { Text("Theme Settings") },
+                    supportingContent = { Text("Switch between light and dark modes") },
                     modifier = Modifier.clickable { showThemeDialog = true }
                 )
                 ListItem(
-                    text = { Text("First Day of the Week") },
-                    secondaryText = { Text("Choose the first day of the week") },
+                    headlineContent = { Text("First Day of the Week") },
+                    supportingContent = { Text("Choose the first day of the week") },
                     modifier = Modifier.clickable { showFirstDayDialog = true }
                 )
 
