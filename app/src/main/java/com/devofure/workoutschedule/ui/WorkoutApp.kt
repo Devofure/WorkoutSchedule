@@ -11,6 +11,7 @@ import com.devofure.workoutschedule.ui.calendar.CalendarScreen
 import com.devofure.workoutschedule.ui.calendar.CalendarViewModel
 import com.devofure.workoutschedule.ui.editworkout.EditWorkoutScreen
 import com.devofure.workoutschedule.ui.main.MainScreen
+import com.devofure.workoutschedule.ui.reorderworkout.ReorderExerciseScreen
 import com.devofure.workoutschedule.ui.settings.SettingsViewModel
 import com.devofure.workoutschedule.ui.workoutdetails.WorkoutDetailScreen
 
@@ -62,6 +63,14 @@ fun WorkoutApp(
             val dayFullName = backStackEntry.arguments?.getString("dayFullName") ?: return@composable
             EditWorkoutScreen(navController, sharedViewModel, workoutViewModel, dayFullName)
         }
+        // Add the new route for reordering exercises
+        composable("reorder_exercise/{dayFullName}") { backStackEntry ->
+            val dayFullName = backStackEntry.arguments?.getString("dayFullName") ?: return@composable
+            ReorderExerciseScreen(
+                navController = navController,
+                day = dayFullName,
+                workoutViewModel = workoutViewModel
+            )
+        }
     }
 }
-

@@ -265,4 +265,12 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         _filteredExercises.value = exerciseRepository.searchExercises(query)
         _isLoading.value = false
     }
+
+    fun updateWorkoutOrder(day: String, updatedList: List<Workout>) {
+        val normalizedDay = normalizeDayKey(day)
+        _workouts.value = _workouts.value.toMutableMap().apply {
+            this[normalizedDay] = updatedList
+        }
+        saveUserSchedule(_workouts.value)
+    }
 }

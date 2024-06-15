@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.filled.Reorder
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -77,6 +78,18 @@ fun BottomSheetContent(
             Icon(Icons.Filled.FitnessCenter, contentDescription = "Add Exercise")
             Spacer(modifier = Modifier.width(8.dp))
             Text("Add Exercise")
+        }
+        // Reorder button
+        TextButton(onClick = {
+            val dayFullName = getFullDayName(
+                daysOfWeek[pagerState.currentPage],
+                nicknames[pagerState.currentPage]
+            )
+            navController.navigate("reorder_exercise/$dayFullName")
+        }) {
+            Icon(Icons.Filled.Reorder, contentDescription = "Reorder Exercises")
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Reorder Exercises")
         }
     }
 }
