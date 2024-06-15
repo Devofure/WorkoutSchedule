@@ -9,10 +9,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.navigation.compose.rememberNavController
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.devofure.workoutschedule.MainActivity
+import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 import org.junit.Before
 import org.junit.Rule
@@ -49,15 +51,15 @@ class SettingsScreenTest {
     @Test
     fun testSettingsScreenDisplaysCorrectly() {
         val settingsViewModel = SettingsViewModel(composeTestRule.activity.application)
-
         composeTestRule.activity.runOnUiThread {
             composeTestRule.activity.setContent {
+                val navigate = Navigate(rememberNavController())
                 MyWorkoutsTheme {
                     SettingsScreen(
                         settingsViewModel = settingsViewModel,
-                        onBack = {},
                         currentTheme = settingsViewModel.theme.collectAsState().value,
-                        onThemeChange = { settingsViewModel.setTheme(it) }
+                        onThemeChange = { settingsViewModel.setTheme(it) },
+                        navigate = navigate,
                     )
                 }
             }
@@ -76,11 +78,12 @@ class SettingsScreenTest {
 
         composeTestRule.activity.runOnUiThread {
             composeTestRule.activity.setContent {
+                val navigate = Navigate(rememberNavController())
                 SettingsScreen(
                     settingsViewModel = settingsViewModel,
-                    onBack = {},
                     currentTheme = settingsViewModel.theme.collectAsState().value,
-                    onThemeChange = { settingsViewModel.setTheme(it) }
+                    onThemeChange = { settingsViewModel.setTheme(it) },
+                    navigate = navigate,
                 )
             }
         }
@@ -122,11 +125,12 @@ class SettingsScreenTest {
 
         composeTestRule.activity.runOnUiThread {
             composeTestRule.activity.setContent {
+                val navigate = Navigate(rememberNavController())
                 SettingsScreen(
                     settingsViewModel = settingsViewModel,
-                    onBack = {},
                     currentTheme = settingsViewModel.theme.collectAsState().value,
-                    onThemeChange = { settingsViewModel.setTheme(it) }
+                    onThemeChange = { settingsViewModel.setTheme(it) },
+                    navigate = navigate,
                 )
             }
         }
@@ -156,11 +160,12 @@ class SettingsScreenTest {
 
         composeTestRule.activity.runOnUiThread {
             composeTestRule.activity.setContent {
+                val navigate = Navigate(rememberNavController())
                 SettingsScreen(
                     settingsViewModel = settingsViewModel,
-                    onBack = {},
                     currentTheme = settingsViewModel.theme.collectAsState().value,
-                    onThemeChange = { settingsViewModel.setTheme(it) }
+                    onThemeChange = { settingsViewModel.setTheme(it) },
+                    navigate = navigate,
                 )
             }
         }

@@ -33,7 +33,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -44,177 +43,175 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.rememberNavController
+import com.devofure.workoutschedule.data.Exercise
 import com.devofure.workoutschedule.data.SetDetails
+import com.devofure.workoutschedule.data.Workout
 import com.devofure.workoutschedule.ui.Navigate
-import com.devofure.workoutschedule.ui.SharedViewModel
-import com.devofure.workoutschedule.ui.WorkoutViewModel
+import com.devofure.workoutschedule.ui.OrientationPreviews
+import com.devofure.workoutschedule.ui.ThemePreviews
 
 @Composable
 fun EditWorkoutScreen(
-    sharedViewModel: SharedViewModel,
-    workoutViewModel: WorkoutViewModel,
     day: String,
-    navigate: Navigate
+    updateWorkout: (String, Workout) -> Unit,
+    workout: Workout,
+    navigate: Navigate,
 ) {
-    val workout by sharedViewModel.selectedWorkout.collectAsState()
 
-    workout?.let { workoutData ->
-        var sets by remember { mutableIntStateOf(workoutData.repsList?.size ?: 0) }
-        var setDetailsList by remember {
-            mutableStateOf(
-                workoutData.repsList ?: List(workoutData.repsList?.size ?: 0) {
-                    SetDetails(reps = 0)
-                }
-            )
-        }
-        var duration by remember { mutableStateOf(workoutData.duration?.toString() ?: "") }
-        var setsError by remember { mutableStateOf<String?>(null) }
-        var repsError by remember { mutableStateOf<String?>(null) }
-        var durationError by remember { mutableStateOf<String?>(null) }
-        val context = LocalContext.current
+    var sets by remember { mutableIntStateOf(workout.repsList?.size ?: 0) }
+    var setDetailsList by remember {
+        mutableStateOf(
+            workout.repsList ?: List(workout.repsList?.size ?: 0) {
+                SetDetails(reps = 0)
+            }
+        )
+    }
+    var duration by remember { mutableStateOf(workout.duration?.toString() ?: "") }
+    var setsError by remember { mutableStateOf<String?>(null) }
+    var repsError by remember { mutableStateOf<String?>(null) }
+    var durationError by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
 
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Column {
-                            Text("Edit Workout")
-                            Text(
-                                workoutData.exercise.name,
-                                style = MaterialTheme.typography.titleSmall
-                            )
-                        }
-                    },
-                    navigationIcon = {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Close",
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .size(24.dp)
-                                .clickable {
-                                    sharedViewModel.clearSelectedWorkout()
-                                    navigate.back()
-                                }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column {
+                        Text("Edit Workout")
+                        Text(
+                            workout.exercise.name,
+                            style = MaterialTheme.typography.titleSmall
                         )
                     }
-                )
-            },
-            content = { paddingValues ->
-                Box(
-                    modifier = Modifier
-                        .padding(paddingValues)
-                        .fillMaxSize()
-                ) {
-                    Column(
+                },
+                navigationIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Close",
                         modifier = Modifier
-                            .verticalScroll(rememberScrollState())
                             .padding(16.dp)
-                            .fillMaxWidth()
-                    ) {
-                        DurationPickerField(
-                            value = duration,
-                            onValueChange = { duration = it },
-                            label = "Total Duration (mins)",
-                            error = durationError,
-                            context = context
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("Sets: $sets", style = MaterialTheme.typography.titleLarge)
-                            Spacer(modifier = Modifier.width(16.dp))
-                            IconButton(
-                                onClick = {
-                                    if (sets > 0) {
-                                        sets -= 1
-                                        setDetailsList = setDetailsList.dropLast(1).toMutableList()
-                                    }
-                                }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Remove,
-                                    contentDescription = "Remove Set"
-                                )
+                            .size(24.dp)
+                            .clickable {
+                                navigate.back()
                             }
-                            IconButton(
-                                onClick = {
-                                    sets += 1
-                                    setDetailsList = setDetailsList.toMutableList().apply {
-                                        add(SetDetails(reps = 0))
-                                    }
+                    )
+                }
+            )
+        },
+        content = { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .fillMaxSize()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp)
+                        .fillMaxWidth()
+                ) {
+                    DurationPickerField(
+                        value = duration,
+                        onValueChange = { duration = it },
+                        label = "Total Duration (mins)",
+                        error = durationError,
+                        context = context
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Sets: $sets", style = MaterialTheme.typography.titleLarge)
+                        Spacer(modifier = Modifier.width(16.dp))
+                        IconButton(
+                            onClick = {
+                                if (sets > 0) {
+                                    sets -= 1
+                                    setDetailsList = setDetailsList.dropLast(1).toMutableList()
                                 }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = "Add Set"
-                                )
                             }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Remove,
+                                contentDescription = "Remove Set"
+                            )
                         }
-                        if (setsError != null) {
+                        IconButton(
+                            onClick = {
+                                sets += 1
+                                setDetailsList = setDetailsList.toMutableList().apply {
+                                    add(SetDetails(reps = 0))
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add Set"
+                            )
+                        }
+                    }
+                    if (setsError != null) {
+                        Text(
+                            text = setsError ?: "",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Column {
+                        setDetailsList.forEachIndexed { index, setDetails ->
+                            SetDetailsRow(
+                                setDetails = setDetails,
+                                onSetDetailsChange = { updatedSetDetails ->
+                                    setDetailsList = setDetailsList.toMutableList().apply {
+                                        this[index] = updatedSetDetails
+                                    }
+                                },
+                                setIndex = index
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                        if (repsError != null) {
                             Text(
-                                text = setsError ?: "",
+                                text = repsError ?: "",
                                 color = MaterialTheme.colorScheme.error,
                                 style = MaterialTheme.typography.bodySmall,
                                 modifier = Modifier.padding(start = 16.dp)
                             )
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Column {
-                            setDetailsList.forEachIndexed { index, setDetails ->
-                                SetDetailsRow(
-                                    setDetails = setDetails,
-                                    onSetDetailsChange = { updatedSetDetails ->
-                                        setDetailsList = setDetailsList.toMutableList().apply {
-                                            this[index] = updatedSetDetails
-                                        }
-                                    },
-                                    setIndex = index
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                            }
-                            if (repsError != null) {
-                                Text(
-                                    text = repsError ?: "",
-                                    color = MaterialTheme.colorScheme.error,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    modifier = Modifier.padding(start = 16.dp)
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(80.dp)) // Add space to avoid the button covering content
                     }
-                    Button(
-                        onClick = {
-                            val validationResult = validateWorkoutInput(
-                                sets.toString(),
-                                setDetailsList.joinToString(", ") { it.reps.toString() },
-                                duration
-                            )
-                            setsError = validationResult.setsError
-                            repsError = validationResult.repsError
-                            durationError = validationResult.durationError
+                    Spacer(modifier = Modifier.height(80.dp)) // Add space to avoid the button covering content
+                }
+                Button(
+                    onClick = {
+                        val validationResult = validateWorkoutInput(
+                            sets.toString(),
+                            setDetailsList.joinToString(", ") { it.reps.toString() },
+                            duration
+                        )
+                        setsError = validationResult.setsError
+                        repsError = validationResult.repsError
+                        durationError = validationResult.durationError
 
-                            if (validationResult.isValid) {
-                                val updatedWorkout = workoutData.copy(
-                                    repsList = setDetailsList,
-                                    duration = duration.toIntOrNull()
-                                )
-                                workoutViewModel.updateWorkout(day, updatedWorkout)
-                                sharedViewModel.clearSelectedWorkout()
-                                navigate.back()
-                            }
-                        },
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(16.dp)
-                            .fillMaxWidth()
-                    ) {
-                        Text("Save")
-                    }
+                        if (validationResult.isValid) {
+                            val updatedWorkout = workout.copy(
+                                repsList = setDetailsList,
+                                duration = duration.toIntOrNull()
+                            )
+                            updateWorkout(day, updatedWorkout)
+                            navigate.back()
+                        }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp)
+                        .fillMaxWidth()
+                ) {
+                    Text("Save")
                 }
             }
-        )
-    }
+        }
+    )
 }
 
 @Composable
@@ -387,3 +384,34 @@ fun validateWorkoutInput(sets: String, repsList: String, duration: String): Vali
 data class ValidationResult(
     val isValid: Boolean, val setsError: String?, val repsError: String?, val durationError: String?
 )
+
+@ThemePreviews
+@OrientationPreviews
+@Composable
+fun EditWorkoutScreenPreview() {
+    val navController = rememberNavController()
+    val navigate = Navigate(navController)
+    val mockWorkout = Workout(
+        id = 1,
+        exercise = Exercise(
+            name = "Bench Press",
+            force = "Push",
+            level = "Intermediate",
+            mechanic = "Compound",
+            equipment = "Barbell",
+            primaryMuscles = listOf("Chest"),
+            secondaryMuscles = listOf("Triceps", "Shoulders"),
+            instructions = listOf("Lift weight", "Lower weight"),
+            category = "Strength",
+        ),
+        repsList = listOf(SetDetails(reps = 10), SetDetails(reps = 8)),
+        duration = 30
+    )
+
+    EditWorkoutScreen(
+        day = "Monday",
+        updateWorkout = { _, _ -> },
+        workout = mockWorkout,
+        navigate = navigate
+    )
+}

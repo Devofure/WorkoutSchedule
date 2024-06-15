@@ -111,7 +111,6 @@ fun ReorderableExerciseList(
                 workout = exercise,
                 isBeingDragged = draggedExercise == exercise,
                 offsetY = offset,
-                itemHeightPx = itemHeightPx,
                 onDragStart = {
                     draggedExercise = exercise
                     Log.d("DragDrop", "Started dragging: ${exercise.exercise.name}")
@@ -157,7 +156,6 @@ fun DraggableExerciseCard(
     workout: Workout,
     isBeingDragged: Boolean,
     offsetY: Float,
-    itemHeightPx: Float,
     onDragStart: () -> Unit,
     onDrag: (Float) -> Unit,
     onDragEnd: () -> Unit

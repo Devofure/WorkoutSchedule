@@ -36,7 +36,7 @@ class MainActivityTest {
         // Set the content for each test
         composeTestRule.activity.setContent {
             MyWorkoutsTheme {
-                composeTestRule.activity.MainContent()
+                composeTestRule.activity.WorkoutApp()
             }
         }
 

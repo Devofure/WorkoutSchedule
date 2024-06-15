@@ -2,60 +2,39 @@ build:
   maxIssues: 0
   excludeCorrectable: false
   weights:
-    # complexity: 2
-    # LongParameterList: 1
-    # style: 1
-    # comments: 1
+    complexity: 2
+    LongParameterList: 1
+    style: 1
+    comments: 1
 
 config:
   validation: true
   warningsAsErrors: false
   checkExhaustiveness: false
-  # when writing own rules with new properties, exclude the property path e.g.: 'my_rule_set,.*>.*>[my_property]'
   excludes: ''
 
 processors:
   active: true
   exclude:
     - 'DetektProgressListener'
-  # - 'KtFileCountProcessor'
-  # - 'PackageCountProcessor'
-  # - 'ClassCountProcessor'
-  # - 'FunctionCountProcessor'
-  # - 'PropertyCountProcessor'
-  # - 'ProjectComplexityProcessor'
-  # - 'ProjectCognitiveComplexityProcessor'
-  # - 'ProjectLLOCProcessor'
-  # - 'ProjectCLOCProcessor'
-  # - 'ProjectLOCProcessor'
-  # - 'ProjectSLOCProcessor'
-  # - 'LicenseHeaderLoaderExtension'
 
 console-reports:
   active: true
   exclude:
-     - 'ProjectStatisticsReport'
-     - 'ComplexityReport'
-     - 'NotificationReport'
-     - 'FindingsReport'
-     - 'FileBasedFindingsReport'
-  #  - 'LiteFindingsReport'
+    - 'ProjectStatisticsReport'
+    - 'ComplexityReport'
+    - 'NotificationReport'
+    - 'FindingsReport'
+    - 'FileBasedFindingsReport'
 
 output-reports:
   active: true
   exclude:
-  # - 'TxtOutputReport'
-  # - 'XmlOutputReport'
-  # - 'HtmlOutputReport'
-  # - 'MdOutputReport'
-  # - 'SarifOutputReport'
 
 comments:
   active: true
   AbsentOrWrongFileLicense:
     active: false
-    licenseTemplateFile: 'license.template'
-    licenseTemplateIsRegex: false
   CommentOverPrivateFunction:
     active: false
   CommentOverPrivateProperty:
@@ -782,3 +761,36 @@ style:
     active: true
     excludeImports:
       - 'java.util.*'
+
+  compose:
+    active: true
+    ComposeModifierMissing:
+      active: true
+    ComposeModifierComposable:
+      active: true
+    ComposeMultipleContentEmitters:
+      active: true
+    ComposeNaming:
+      active: true
+    ComposeUnstableCollections:
+      active: true
+    ComposeViewModelForwarding:
+      active: true
+    ComposeViewModelInjection:
+      active: true
+    ForbiddenComposeFunction:
+      active: true
+    ModifierWithoutDefault:
+      active: true
+    ModifierWrappingNewLine:
+      active: true
+    MutableParams:
+      active: true
+    RepeatedModifier:
+      active: true
+    StateInComposition:
+      active: true
+    ViewModelForwarding:
+      active: true
+    ViewModelInjection:
+      active: true

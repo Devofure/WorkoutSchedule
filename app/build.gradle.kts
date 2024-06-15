@@ -65,6 +65,7 @@ firebaseAppDistribution {
 }
 
 dependencies {
+    detektPlugins(libs.detekt.compose)
     implementation(libs.accompanist.systemuicontroller)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
@@ -91,7 +92,6 @@ dependencies {
     implementation(libs.timber)
     implementation(platform(libs.firebase.bom))
     ksp(libs.room.compiler)
-
 
     // Testing dependencies
     androidTestImplementation(libs.androidx.arch.core.testing)

@@ -27,17 +27,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import com.devofure.workoutschedule.ui.Navigate
+import com.devofure.workoutschedule.ui.OrientationPreviews
+import com.devofure.workoutschedule.ui.ThemePreviews
 import com.devofure.workoutschedule.ui.main.WorkoutItem
-import com.devofure.workoutschedule.ui.settings.SettingsViewModel
+import com.devofure.workoutschedule.ui.settings.FirstDayOfWeek
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(
     calendarViewModel: CalendarViewModel,
-    settingsViewModel: SettingsViewModel,
     navigate: Navigate,
+    firstDayOfWeek: FirstDayOfWeek,
 ) {
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var isMonthView by remember { mutableStateOf(true) }
@@ -48,8 +52,6 @@ fun CalendarScreen(
         currentYearMonth.value.first,
         currentYearMonth.value.second
     ).collectAsState(initial = emptyList())
-
-    val firstDayOfWeek by settingsViewModel.firstDayOfWeek.collectAsState()
 
     Scaffold(
         topBar = {
@@ -112,7 +114,7 @@ fun CalendarScreen(
                                     onClick = {},
                                     onWorkoutRemove = {},
                                     onWorkoutDetail = {},
-                                    onWorkoutEdit = {}
+                                    onWorkoutEdit = {},
                                 )
                             }
                         }
@@ -120,5 +122,17 @@ fun CalendarScreen(
                 }
             }
         }
+    )
+}
+
+@ThemePreviews
+@OrientationPreviews
+@Composable
+fun CalendarScreenPreview() {
+    val navigate = Navigate(rememberNavController())
+    CalendarScreen(
+        calendarViewModel = viewModel(),
+        navigate = navigate,
+        firstDayOfWeek = FirstDayOfWeek.MONDAY
     )
 }
