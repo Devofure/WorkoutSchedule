@@ -11,6 +11,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -23,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.devofure.workoutschedule.ui.Navigate
 
@@ -41,7 +43,6 @@ fun SettingsScreen(
     val reminderTime by settingsViewModel.reminderTime.collectAsState()
     val firstDayOfWeek by settingsViewModel.firstDayOfWeek.collectAsState()
 
-    // Define a common background color for both the TopAppBar and the content
     val backgroundColor = MaterialTheme.colorScheme.background
 
     Scaffold(
@@ -56,8 +57,7 @@ fun SettingsScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = backgroundColor,
                     titleContentColor = MaterialTheme.colorScheme.onBackground
-                ),
-                modifier = Modifier.padding(0.dp) // Set elevation to 0 to make it level with the background
+                )
             )
         },
         content = { paddingValues ->
@@ -67,25 +67,29 @@ fun SettingsScreen(
                     .fillMaxSize()
                     .background(backgroundColor)
             ) {
-                ListItem(
-                    headlineContent = { Text("Workout Reminders") },
-                    supportingContent = { Text("Set up your workout reminder time") },
-                    modifier = Modifier.clickable { showReminderSetup = true }
+                SettingsItem(
+                    headline = "Workout Reminders",
+                    supporting = "Set up your workout reminder time",
+                    onClick = { showReminderSetup = true },
+                    backgroundColor = backgroundColor
                 )
-                ListItem(
-                    headlineContent = { Text("Delete Schedule") },
-                    supportingContent = { Text("Delete your entire workout schedule") },
-                    modifier = Modifier.clickable { showDeleteConfirmation = true }
+                SettingsItem(
+                    headline = "Delete Schedule",
+                    supporting = "Delete your entire workout schedule",
+                    onClick = { showDeleteConfirmation = true },
+                    backgroundColor = backgroundColor
                 )
-                ListItem(
-                    headlineContent = { Text("Theme") },
-                    supportingContent = { Text("Switch between light and dark modes") },
-                    modifier = Modifier.clickable { showThemeDialog = true }
+                SettingsItem(
+                    headline = "Theme",
+                    supporting = "Switch between light and dark modes",
+                    onClick = { showThemeDialog = true },
+                    backgroundColor = backgroundColor
                 )
-                ListItem(
-                    headlineContent = { Text("First Day of the Week") },
-                    supportingContent = { Text("Choose the first day of the week") },
-                    modifier = Modifier.clickable { showFirstDayDialog = true }
+                SettingsItem(
+                    headline = "First Day of the Week",
+                    supporting = "Choose the first day of the week",
+                    onClick = { showFirstDayDialog = true },
+                    backgroundColor = backgroundColor
                 )
 
                 if (showReminderSetup) {
@@ -131,5 +135,35 @@ fun SettingsScreen(
                 }
             }
         }
+    )
+}
+
+@Composable
+fun SettingsItem(
+    headline: String,
+    supporting: String,
+    onClick: () -> Unit,
+    backgroundColor: Color
+) {
+    ListItem(
+        headlineContent = {
+            Text(
+                text = headline,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        },
+        supportingContent = {
+            Text(
+                text = supporting,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+            )
+        },
+        modifier = Modifier
+            .clickable { onClick() }
+            .background(backgroundColor)
+            .padding(vertical = 4.dp),
+        colors = ListItemDefaults.colors(
+            containerColor = backgroundColor
+        )
     )
 }

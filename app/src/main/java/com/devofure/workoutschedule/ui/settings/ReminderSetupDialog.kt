@@ -4,14 +4,16 @@ package com.devofure.workoutschedule.ui.settings
 import android.Manifest
 import android.app.TimePickerDialog
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,7 +51,7 @@ fun ReminderSetupDialog(
             Column {
                 Text("When would you like to be reminded about your workouts?")
                 Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = {
+                OutlinedButton(onClick = {
                     if (ContextCompat.checkSelfPermission(
                             context,
                             Manifest.permission.POST_NOTIFICATIONS
@@ -57,7 +59,9 @@ fun ReminderSetupDialog(
                     ) {
                         showTimePicker = true
                     } else {
-                        requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                            requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                        }
                     }
                 }) {
                     Text("Pick Time")
@@ -69,12 +73,12 @@ fun ReminderSetupDialog(
             }
         },
         confirmButton = {
-            Button(onClick = { onSave(reminderTime) }) {
+            TextButton(onClick = { onSave(reminderTime) }) {
                 Text("Save")
             }
         },
         dismissButton = {
-            Button(onClick = onDismiss) {
+            TextButton(onClick = onDismiss) {
                 Text("Cancel")
             }
         }
