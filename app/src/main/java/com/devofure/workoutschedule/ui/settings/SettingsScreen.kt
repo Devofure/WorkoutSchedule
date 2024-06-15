@@ -78,7 +78,7 @@ fun SettingsScreen(
                     modifier = Modifier.clickable { showDeleteConfirmation = true }
                 )
                 ListItem(
-                    headlineContent = { Text("Theme Settings") },
+                    headlineContent = { Text("Theme") },
                     supportingContent = { Text("Switch between light and dark modes") },
                     modifier = Modifier.clickable { showThemeDialog = true }
                 )
