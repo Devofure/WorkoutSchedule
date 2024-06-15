@@ -9,6 +9,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -166,7 +167,7 @@ fun MainScreen(
                             }
                         } else {
                             WorkoutProgress(workouts)
-                            LazyColumn {
+                            LazyColumn(contentPadding = PaddingValues(top = 16.dp)) {
                                 items(workouts) { workout ->
                                     WorkoutItem(
                                         workout = workout,
