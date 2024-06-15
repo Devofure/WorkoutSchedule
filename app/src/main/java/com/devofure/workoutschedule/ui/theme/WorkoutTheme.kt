@@ -66,10 +66,12 @@ object Colors {
     val Gray800 = Color(0xFF424242)
     val Gray900 = Color(0xFF212121)
     val White = Color(0xFFFFFFFF)
-    val BlueAccent = Color(0xFF009688)
-    val BlueAccentLight = Color(0xFFBBDEFB)
-    val RedAccent = Color(0xFFE53935)
-    val RedAccentLight = Color(0xFFFFCDD2)
+    val BlueAccent = Color(0xFF2196F3)
+    val GreenAccent = Color(0xFF009688)
+    val YellowAccent = Color(0xFFFFC107)
+    val PurpleAccent = Color(0xFF673AB7)
+    val RedAccent = Color(0xFFE91E63)
+    val OrangeAccent = Color(0xFFFF5722)
 }
 
 private fun customLightColorScheme(primaryColor: Color) = lightColorScheme(

@@ -6,7 +6,11 @@ import android.app.Application
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.AndroidViewModel
 import com.devofure.workoutschedule.receiver.ReminderReceiver
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,6 +44,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val _theme = MutableStateFlow(ThemeType.SYSTEM)
     val theme: StateFlow<ThemeType> = _theme
 
+    private val _primaryColor = MutableStateFlow(Color.Blue) // Default primary color
+    val primaryColor: StateFlow<Color> = _primaryColor
+
     private val _reminderTime = MutableStateFlow(ReminderTime(0, 0))
     val reminderTime: StateFlow<ReminderTime> = _reminderTime
 
@@ -54,6 +61,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         val savedTheme = sharedPreferences.getString("theme", ThemeType.SYSTEM.name)
         _theme.value = ThemeType.valueOf(savedTheme!!)
 
+        val savedPrimaryColor = sharedPreferences.getInt("primaryColor", Color.Blue.toArgb())
+        _primaryColor.value = Color(savedPrimaryColor)
+
         val savedFirstDay = sharedPreferences.getString("firstDayOfWeek", FirstDayOfWeek.MONDAY.name)
         _firstDayOfWeek.value = FirstDayOfWeek.valueOf(savedFirstDay!!)
     }
@@ -63,10 +73,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             if (!alarmManager.canScheduleExactAlarms()) {
-                // Request permission from the user to schedule exact alarms
                 val intent = Intent(
-                    android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
-                    android.net.Uri.fromParts("package", context.packageName, null)
+                    Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM,
+                    Uri.fromParts("package", context.packageName, null)
                 )
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
@@ -79,7 +88,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
             context,
             0,
             intent,
-            PendingIntent.FLAG_IMMUTABLE // Use FLAG_IMMUTABLE
+            PendingIntent.FLAG_IMMUTABLE
         )
 
         val calendar = Calendar.getInstance().apply {
@@ -106,6 +115,11 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     fun setTheme(themeType: ThemeType) {
         _theme.value = themeType
         sharedPreferences.edit().putString("theme", themeType.name).apply()
+    }
+
+    fun setPrimaryColor(color: Color) {
+        _primaryColor.value = color
+        sharedPreferences.edit().putInt("primaryColor", color.toArgb()).apply()
     }
 
     fun setFirstDayOfWeek(firstDay: FirstDayOfWeek) {

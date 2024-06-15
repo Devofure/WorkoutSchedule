@@ -14,8 +14,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -33,7 +31,6 @@ import com.devofure.workoutschedule.ui.reorderworkout.ReorderExerciseScreen
 import com.devofure.workoutschedule.ui.settings.SettingsScreen
 import com.devofure.workoutschedule.ui.settings.SettingsViewModel
 import com.devofure.workoutschedule.ui.settings.ThemeType
-import com.devofure.workoutschedule.ui.theme.Colors.BlueAccent
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 import com.devofure.workoutschedule.ui.workoutdetails.WorkoutDetailScreen
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
@@ -64,14 +61,12 @@ class MainActivity : ComponentActivity() {
         val settingsViewModel: SettingsViewModel = viewModel()
         val workoutViewModel: WorkoutViewModel = viewModel()
         val currentTheme by settingsViewModel.theme.collectAsState()
+        val currentPrimaryColor by settingsViewModel.primaryColor.collectAsState()
         val systemUiController = rememberSystemUiController()
         val navController = rememberNavController()
         val navigate = Navigate(navController)
         val sharedViewModel: SharedViewModel = viewModel()
         val isFirstLaunch by workoutViewModel.isFirstLaunch.collectAsState()
-
-        val (themeType, setThemeType) = remember { mutableStateOf(currentTheme) }
-        val (primaryColor, setPrimaryColor) = remember { mutableStateOf(BlueAccent) }
 
         if (isFirstLaunch) {
             AskUserToGenerateSampleSchedule(
@@ -79,7 +74,7 @@ class MainActivity : ComponentActivity() {
                 declineSampleSchedule = { workoutViewModel.declineSampleSchedule() },
             )
         }
-        MyWorkoutsTheme(themeType = themeType, primaryColor) {
+        MyWorkoutsTheme(themeType = currentTheme, primaryColor = currentPrimaryColor) {
             NavHost(navController = navController, startDestination = Route.Main.route) {
                 composable(Route.Main.route) {
                     MainScreen(
@@ -126,9 +121,13 @@ class MainActivity : ComponentActivity() {
                         settingsViewModel = settingsViewModel,
                         navigate = navigate,
                         currentTheme = currentTheme,
-                        onThemeChange = setThemeType,
-                        currentPrimaryColor = primaryColor,
-                        onPrimaryColorChange = { setPrimaryColor(it) }
+                        onThemeChange = { theme ->
+                            settingsViewModel.setTheme(theme)
+                        },
+                        currentPrimaryColor = currentPrimaryColor,
+                        onPrimaryColorChange = { color ->
+                            settingsViewModel.setPrimaryColor(color)
+                        }
                     )
                 }
                 composable(Route.WorkoutDetail.route) {
@@ -189,5 +188,4 @@ class MainActivity : ComponentActivity() {
             }
         )
     }
-
 }
