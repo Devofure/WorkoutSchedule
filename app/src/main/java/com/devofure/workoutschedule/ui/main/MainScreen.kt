@@ -3,8 +3,6 @@
 package com.devofure.workoutschedule.ui.main
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -19,16 +17,15 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SheetValue
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberBottomSheetScaffoldState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -36,11 +33,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.devofure.workoutschedule.data.Workout
@@ -48,7 +43,6 @@ import com.devofure.workoutschedule.ui.SharedViewModel
 import com.devofure.workoutschedule.ui.WorkoutViewModel
 import com.devofure.workoutschedule.ui.getFullDayName
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 @Composable
@@ -64,8 +58,8 @@ fun MainScreen(
     val nicknames = remember { mutableStateListOf(*Array(initialDaysOfWeek.size) { "" }) }
     val pagerState = rememberPagerState { daysOfWeek.size }
 
-    val scaffoldState = rememberBottomSheetScaffoldState()
-    val coroutineScope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    var showBottomSheet by remember { mutableStateOf(false) }
     var expandedWorkoutIds by remember { mutableStateOf(setOf<Int>()) }
     var showDatePicker by remember { mutableStateOf(false) }
     var editedNickname by remember { mutableStateOf("") }
@@ -82,35 +76,31 @@ fun MainScreen(
         darkIcons = useDarkIcons
     )
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        BottomSheetScaffold(
-            scaffoldState = scaffoldState,
-            sheetContent = {
-                BottomSheetContent(
-                    daysOfWeek = daysOfWeek,
-                    pagerState = pagerState,
-                    nicknames = nicknames,
-                    workoutViewModel = workoutViewModel,
-                    navController = navController,
-                    onEditNickname = {
-                        editedNickname = nicknames[pagerState.currentPage]
-                        showEditNicknameDialog = true
-                    },
-                    onLogDay = {
-                        showDateConfirmationDialog = true
-                    }
-                )
-            },
-            sheetPeekHeight = 0.dp,
-            topBar = {
-                TopBar(
-                    onSettingsClick = onSettingsClick,
-                    onCalendarClick = {
-                        navController.navigate("calendar")
-                    }
-                )
+    Scaffold(
+        topBar = {
+            TopBar(
+                onSettingsClick = onSettingsClick,
+                onCalendarClick = {
+                    navController.navigate("calendar")
+                }
+            )
+        },
+        floatingActionButton = {
+            AnimatedVisibility(visible = !showBottomSheet) {
+                FloatingActionButton(
+                    onClick = { showBottomSheet = true },
+                    shape = CircleShape,
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.MoreVert,
+                        contentDescription = "More Options"
+                    )
+                }
             }
-        ) { paddingValues ->
+        },
+        content = { paddingValues ->
             Column(
                 modifier = Modifier
                     .padding(paddingValues)
@@ -216,38 +206,27 @@ fun MainScreen(
                 }
             }
         }
+    )
 
-        val isExpanded = scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded
-
-        AnimatedVisibility(
-            visible = !isExpanded,
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
+    if (showBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet = false },
+            sheetState = sheetState
         ) {
-            FloatingActionButton(
-                onClick = {
-                    coroutineScope.launch {
-                        if (!isExpanded) {
-                            scaffoldState.bottomSheetState.expand()
-                        }
-                    }
+            BottomSheetContent(
+                daysOfWeek = daysOfWeek,
+                pagerState = pagerState,
+                nicknames = nicknames,
+                workoutViewModel = workoutViewModel,
+                navController = navController,
+                onEditNickname = {
+                    editedNickname = nicknames[pagerState.currentPage]
+                    showEditNicknameDialog = true
                 },
-                shape = CircleShape,
-                containerColor = MaterialTheme.colorScheme.secondary,
-                contentColor = MaterialTheme.colorScheme.onSecondary
-            ) {
-                val rotation by animateFloatAsState(
-                    targetValue = if (isExpanded) 0f else 0f,
-                    animationSpec = tween(durationMillis = 150),
-                    label = "",
-                )
-                Icon(
-                    imageVector = if (isExpanded) Icons.Filled.Close else Icons.Filled.MoreVert,
-                    contentDescription = if (isExpanded) "Close Options" else "More Options",
-                    modifier = Modifier.rotate(rotation)
-                )
-            }
+                onLogDay = {
+                    showDateConfirmationDialog = true
+                }
+            )
         }
     }
 
@@ -259,9 +238,7 @@ fun MainScreen(
                     workoutViewModel.logWorkout(workout, selectedDate)
                 }
                 showDateConfirmationDialog = false
-                coroutineScope.launch {
-                    scaffoldState.snackbarHostState.showSnackbar("Workout logged!")
-                }
+                showBottomSheet = false
             },
             onDismiss = { showDateConfirmationDialog = false },
             onPickAnotherDate = { showDatePicker = true }
