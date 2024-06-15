@@ -127,7 +127,7 @@ fun WorkoutItem(
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically()
             ) {
-                Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp)) {
+                Column(modifier = Modifier.padding(start = 16.dp, end = 16.dp)) {
                     workout.repsList?.let { repsList ->
                         Text(
                             text = "${repsList.size} sets:",

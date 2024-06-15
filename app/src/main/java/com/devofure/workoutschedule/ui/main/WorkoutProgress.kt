@@ -3,7 +3,6 @@ package com.devofure.workoutschedule.ui.main
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,7 +20,6 @@ fun WorkoutProgress(workouts: List<Workout>) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 16.dp)
     ) {
         Text(
             text = "Progress: $completedWorkouts / $totalWorkouts",
