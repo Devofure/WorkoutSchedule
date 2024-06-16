@@ -64,4 +64,4 @@ jobs:
           ./gradlew appDistributionUploadRelease -PfirebaseServiceCredentials=app/service-account.json
 
       - name: Clean up
-        run: rm service-account.json
+        run: rm app/service-account.json
