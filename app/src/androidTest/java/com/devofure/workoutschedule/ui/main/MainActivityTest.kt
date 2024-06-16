@@ -10,7 +10,6 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.devofure.workoutschedule.MainActivity
-import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -35,9 +34,7 @@ class MainActivityTest {
 
         // Set the content for each test
         composeTestRule.activity.setContent {
-            MyWorkoutsTheme {
-                composeTestRule.activity.WorkoutApp()
-            }
+            composeTestRule.activity.WorkoutApp()
         }
 
         // Wait for Compose to be idle

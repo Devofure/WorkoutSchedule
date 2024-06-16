@@ -15,7 +15,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.devofure.workoutschedule.MainActivity
 import com.devofure.workoutschedule.ui.Navigate
-import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -54,14 +53,13 @@ class SettingsScreenTest {
         composeTestRule.activity.runOnUiThread {
             composeTestRule.activity.setContent {
                 val navigate = Navigate(rememberNavController())
-                MyWorkoutsTheme {
-                    SettingsScreen(
-                        settingsViewModel = settingsViewModel,
-                        currentTheme = settingsViewModel.theme.collectAsState().value,
-                        onThemeChange = { settingsViewModel.setTheme(it) },
-                        navigate = navigate,
-                    )
-                }
+                SettingsScreen(
+                    settingsViewModel = settingsViewModel,
+                    navigate = navigate,
+                    currentTheme = settingsViewModel.theme.collectAsState().value,
+                    onThemeChange = { settingsViewModel.setTheme(it) },
+                    onPrimaryColorChange = { settingsViewModel.setPrimaryColor(it) }
+                )
             }
         }
 
@@ -69,27 +67,29 @@ class SettingsScreenTest {
         composeTestRule.onNodeWithText("Settings").assertExists()
         composeTestRule.onNodeWithText("Workout Reminders").assertExists()
         composeTestRule.onNodeWithText("Delete Schedule").assertExists()
-        composeTestRule.onNodeWithText("Theme Settings").assertExists()
+        composeTestRule.onNodeWithText("Theme Mode").assertExists()
+        composeTestRule.onNodeWithText("Theme Light color").assertExists()
+        composeTestRule.onNodeWithText("First Day of the Week").assertExists()
     }
 
     @Test
     fun testThemeChange() {
         val settingsViewModel = SettingsViewModel(composeTestRule.activity.application)
-
         composeTestRule.activity.runOnUiThread {
             composeTestRule.activity.setContent {
                 val navigate = Navigate(rememberNavController())
                 SettingsScreen(
                     settingsViewModel = settingsViewModel,
+                    navigate = navigate,
                     currentTheme = settingsViewModel.theme.collectAsState().value,
                     onThemeChange = { settingsViewModel.setTheme(it) },
-                    navigate = navigate,
+                    onPrimaryColorChange = { settingsViewModel.setPrimaryColor(it) }
                 )
             }
         }
 
         // Open the theme settings dialog
-        composeTestRule.onNodeWithText("Theme Settings").performClick()
+        composeTestRule.onNodeWithText("Theme Mode").performClick()
 
         // Select Light theme
         composeTestRule.onNodeWithText("Light").performClick()
@@ -99,7 +99,7 @@ class SettingsScreenTest {
         assert(settingsViewModel.theme.value == ThemeType.LIGHT)
 
         // Open the theme settings dialog again
-        composeTestRule.onNodeWithText("Theme Settings").performClick()
+        composeTestRule.onNodeWithText("Theme Mode").performClick()
 
         // Select Dark theme
         composeTestRule.onNodeWithText("Dark").performClick()
@@ -109,7 +109,7 @@ class SettingsScreenTest {
         assert(settingsViewModel.theme.value == ThemeType.DARK)
 
         // Open the theme settings dialog again
-        composeTestRule.onNodeWithText("Theme Settings").performClick()
+        composeTestRule.onNodeWithText("Theme Mode").performClick()
 
         // Select System Default theme
         composeTestRule.onNodeWithText("System Default").performClick()
@@ -128,9 +128,10 @@ class SettingsScreenTest {
                 val navigate = Navigate(rememberNavController())
                 SettingsScreen(
                     settingsViewModel = settingsViewModel,
+                    navigate = navigate,
                     currentTheme = settingsViewModel.theme.collectAsState().value,
                     onThemeChange = { settingsViewModel.setTheme(it) },
-                    navigate = navigate,
+                    onPrimaryColorChange = { settingsViewModel.setPrimaryColor(it) }
                 )
             }
         }
@@ -163,9 +164,10 @@ class SettingsScreenTest {
                 val navigate = Navigate(rememberNavController())
                 SettingsScreen(
                     settingsViewModel = settingsViewModel,
+                    navigate = navigate,
                     currentTheme = settingsViewModel.theme.collectAsState().value,
                     onThemeChange = { settingsViewModel.setTheme(it) },
-                    navigate = navigate,
+                    onPrimaryColorChange = { settingsViewModel.setPrimaryColor(it) }
                 )
             }
         }

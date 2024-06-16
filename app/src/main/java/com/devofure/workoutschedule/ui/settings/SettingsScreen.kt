@@ -79,7 +79,7 @@ fun SettingsScreen(
                     onClick = { showDeleteConfirmation = true },
                 )
                 GenericItem(
-                    headline = "Theme",
+                    headline = "Theme Mode",
                     supporting = "Switch between light and dark modes",
                     backgroundColor = MaterialTheme.colorScheme.background,
                     onClick = { showThemeDialog = true },
