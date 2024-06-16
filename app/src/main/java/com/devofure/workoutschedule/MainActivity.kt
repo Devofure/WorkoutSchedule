@@ -151,7 +151,6 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 }
-                // Add the new route for reordering exercises
                 composable(Route.ReorderExercise.route) { backStackEntry ->
                     val dayFullName =
                         backStackEntry.arguments?.getString(Route.ReorderExercise.parameterName)
