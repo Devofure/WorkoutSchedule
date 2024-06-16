@@ -8,12 +8,13 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -30,18 +31,24 @@ import com.devofure.workoutschedule.ui.main.MainScreen
 import com.devofure.workoutschedule.ui.reorderworkout.ReorderExerciseScreen
 import com.devofure.workoutschedule.ui.settings.SettingsScreen
 import com.devofure.workoutschedule.ui.settings.SettingsViewModel
-import com.devofure.workoutschedule.ui.settings.ThemeType
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 import com.devofure.workoutschedule.ui.workoutdetails.WorkoutDetailScreen
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         createNotificationChannel()
         setContent {
             WorkoutApp()
         }
+        enableEdgeToEdge()
+    }
+
+    private fun enableEdgeToEdge() {
+        val controller = WindowInsetsControllerCompat(window, window.decorView)
+        controller.isAppearanceLightStatusBars = true
+        controller.isAppearanceLightNavigationBars = true
     }
 
     private fun createNotificationChannel() {
@@ -62,7 +69,6 @@ class MainActivity : ComponentActivity() {
         val workoutViewModel: WorkoutViewModel = viewModel()
         val currentTheme by settingsViewModel.theme.collectAsState()
         val currentPrimaryColor by settingsViewModel.primaryColor.collectAsState()
-        val systemUiController = rememberSystemUiController()
         val navController = rememberNavController()
         val navigate = Navigate(navController)
         val sharedViewModel: SharedViewModel = viewModel()
@@ -113,10 +119,6 @@ class MainActivity : ComponentActivity() {
                     )
                 }
                 composable(Route.Settings.route) {
-                    systemUiController.setSystemBarsColor(
-                        color = MaterialTheme.colorScheme.background,
-                        darkIcons = currentTheme != ThemeType.DARK
-                    )
                     SettingsScreen(
                         settingsViewModel = settingsViewModel,
                         navigate = navigate,

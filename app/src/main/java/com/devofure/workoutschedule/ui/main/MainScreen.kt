@@ -4,7 +4,6 @@ package com.devofure.workoutschedule.ui.main
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -43,7 +42,6 @@ import com.devofure.workoutschedule.ui.Route
 import com.devofure.workoutschedule.ui.SharedViewModel
 import com.devofure.workoutschedule.ui.WorkoutViewModel
 import com.devofure.workoutschedule.ui.getFullDayName
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.time.LocalDate
 
 @Composable
@@ -67,14 +65,6 @@ fun MainScreen(
     var showDateConfirmationDialog by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var selectedWorkouts by remember { mutableStateOf<List<Workout>>(emptyList()) }
-
-    val systemUiController = rememberSystemUiController()
-    val useDarkIcons = !isSystemInDarkTheme()
-
-    systemUiController.setSystemBarsColor(
-        color = MaterialTheme.colorScheme.primary,
-        darkIcons = useDarkIcons
-    )
 
     Scaffold(
         topBar = {
