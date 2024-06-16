@@ -28,13 +28,13 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -110,56 +110,54 @@ fun ReorderableExerciseList(
     exercises: List<Workout>,
     onReorder: (List<Workout>) -> Unit
 ) {
-    var draggedExercise by remember { mutableStateOf<Workout?>(null) }
-    var exerciseList by remember { mutableStateOf(exercises) }
-    val offsets = remember { mutableStateListOf(*Array(exercises.size) { mutableStateOf(0f) }) }
-    val itemHeightPx = with(LocalDensity.current) { 50.dp.toPx() }
+    var draggedItem by remember { mutableStateOf<Workout?>(null) }
+    var items by remember { mutableStateOf(exercises) }
+    var currentIndex by remember { mutableStateOf(-1) }
+    val density = LocalDensity.current
+    val itemHeightPx = with(density) { 56.dp.toPx() }
+    val dragState = remember { mutableStateOf(DragState()) }
 
-    LazyColumn {
-        itemsIndexed(
-            exerciseList,
-            key = { index, item -> item.id.hashCode() * 31 + index }) { index, exercise ->
-            val offset = offsets[index].value
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        itemsIndexed(items) { index, item ->
+            val isDragging = dragState.value.isDragging && dragState.value.draggedItemIndex == index
+            val offset = if (isDragging) dragState.value.currentOffset else Offset.Zero
+
             DraggableExerciseCard(
-                workout = exercise,
-                isBeingDragged = draggedExercise == exercise,
-                offsetY = offset,
-                onDragStart = {
-                    draggedExercise = exercise
-                    Log.d("DragDrop", "Started dragging: ${exercise.exercise.name}")
+                workout = item,
+                isBeingDragged = isDragging,
+                offsetY = offset.y,
+                onDragStart = { startOffset ->
+                    dragState.value = dragState.value.copy(
+                        isDragging = true,
+                        initialOffset = startOffset,
+                        draggedItemIndex = index
+                    )
+                    draggedItem = item
+                    currentIndex = index
+                    Log.d("ReorderExerciseScreen", "Drag started at offset: $startOffset, item index: $index")
                 },
-                onDrag = { deltaY ->
-                    val newOffset = offsets[index].value + deltaY
-                    val newIndex = (index + (newOffset / itemHeightPx).roundToInt()).coerceIn(
-                        0,
-                        exerciseList.size - 1
+                onDrag = { change, dragAmount ->
+                    val newOffset = dragState.value.currentOffset + dragAmount
+                    dragState.value = dragState.value.copy(
+                        currentOffset = newOffset,
+                        draggedItemIndex = updateDraggedItemIndex(newOffset, items, dragState.value, itemHeightPx)
                     )
-                    Log.d(
-                        "DragDrop",
-                        "Dragging: ${exercise.exercise.name}, deltaY: $deltaY, newIndex: $newIndex, newOffset: $newOffset"
-                    )
-
-                    if (newIndex != index) {
-                        exerciseList = exerciseList.toMutableList().apply {
-                            add(newIndex, removeAt(index))
-                        }
-
-                        offsets.add(newIndex, offsets.removeAt(index))
-                        onReorder(exerciseList)
-                        Log.d(
-                            "DragDrop",
-                            "Reordered list: ${exerciseList.map { it.exercise.name }}"
-                        )
-                    }
-
-                    offsets[index].value = newOffset
+                    Log.d("ReorderExerciseScreen", "Dragging... New offset: $newOffset")
+                    change.consume()
                 },
                 onDragEnd = {
-                    draggedExercise = null
-                    offsets.forEachIndexed { i, _ -> offsets[i].value = 0f }
-                    Log.d("DragDrop", "Ended dragging: ${exercise.exercise.name}")
+                    items = reorderItems(items, dragState.value)
+                    dragState.value = dragState.value.copy(isDragging = false, currentOffset = Offset.Zero)
+                    draggedItem = null
+                    currentIndex = -1
+                    Log.d("ReorderExerciseScreen", "Drag ended. New items order: $items")
+                    onReorder(items)
                 }
             )
+            Log.d("ReorderExerciseScreen", "Rendering item at index $index: ${item.exercise.name}")
         }
     }
 }
@@ -169,32 +167,28 @@ fun DraggableExerciseCard(
     workout: Workout,
     isBeingDragged: Boolean,
     offsetY: Float,
-    onDragStart: () -> Unit,
-    onDrag: (Float) -> Unit,
+    onDragStart: (Offset) -> Unit,
+    onDrag: (androidx.compose.ui.input.pointer.PointerInputChange, Offset) -> Unit,
     onDragEnd: () -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
     Box(
-        Modifier
+        modifier = Modifier
             .padding(8.dp)
             .background(if (isBeingDragged) Color.LightGray else MaterialTheme.colorScheme.background)
             .offset { IntOffset(0, offsetY.roundToInt()) }
             .fillMaxWidth()
             .pointerInput(Unit) {
                 detectDragGestures(
-                    onDragStart = {
-                        onDragStart()
+                    onDragStart = { offset ->
+                        onDragStart(offset)
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     },
                     onDrag = { change, dragAmount ->
-                        change.consume()
-                        onDrag(dragAmount.y)
-                        Log.d(
-                            "DragDrop",
-                            "Dragging item: ${workout.exercise.name}, dragAmount: $dragAmount"
-                        )
+                        onDrag(change, dragAmount)
                     },
-                    onDragEnd = { onDragEnd() }
+                    onDragEnd = { onDragEnd() },
+                    onDragCancel = { onDragEnd() }
                 )
             }
             .shadow(if (isBeingDragged) 2.dp else 0.dp, shape = MaterialTheme.shapes.medium)
@@ -207,6 +201,37 @@ fun DraggableExerciseCard(
             Icon(Icons.Default.Menu, contentDescription = "Drag", tint = Color.Gray)
         }
     }
+}
+
+data class DragState(
+    val isDragging: Boolean = false,
+    val initialOffset: Offset = Offset.Zero,
+    val currentOffset: Offset = Offset.Zero,
+    val draggedItemIndex: Int = -1
+)
+
+fun getItemIndexAtOffset(offset: Offset, items: List<Workout>, itemHeightPx: Float): Int {
+    return (offset.y / itemHeightPx).toInt().coerceIn(0, items.size - 1)
+}
+
+fun updateDraggedItemIndex(offset: Offset, items: List<Workout>, dragState: DragState, itemHeightPx: Float): Int {
+    val absoluteOffset = dragState.initialOffset.y + offset.y
+    return (absoluteOffset / itemHeightPx).toInt().coerceIn(0, items.size - 1)
+}
+
+fun reorderItems(items: List<Workout>, dragState: DragState): List<Workout> {
+    val fromIndex = dragState.draggedItemIndex
+    val toIndex = getItemIndexAtOffset(dragState.initialOffset + dragState.currentOffset, items, 56f) // assuming item height is 56.dp
+
+    Log.d("ReorderExerciseScreen", "Reordering items from index $fromIndex to index $toIndex")
+
+    if (fromIndex == toIndex || fromIndex < 0 || toIndex < 0) return items
+
+    val mutableItems = items.toMutableList()
+    val movedItem = mutableItems.removeAt(fromIndex)
+    mutableItems.add(toIndex, movedItem)
+    Log.d("ReorderExerciseScreen", "Items after reordering: $mutableItems")
+    return mutableItems
 }
 
 @PreviewLightDark
