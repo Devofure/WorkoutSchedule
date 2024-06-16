@@ -123,9 +123,6 @@ fun ReorderableExerciseList(
         state = lazyListState,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        item {
-            Text("Header", Modifier.padding(8.dp), color = MaterialTheme.colorScheme.onBackground)
-        }
         itemsIndexed(list, key = { _, item -> item.id }) { index, item ->
             ReorderableItem(reorderableLazyColumnState, item.id) {
                 val interactionSource = remember { MutableInteractionSource() }
@@ -190,9 +187,6 @@ fun ReorderableExerciseList(
                     }
                 }
             }
-        }
-        item {
-            Text("Footer", Modifier.padding(8.dp), color = MaterialTheme.colorScheme.onBackground)
         }
     }
 }

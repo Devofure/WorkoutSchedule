@@ -24,16 +24,20 @@ import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 @Composable
 fun GenericItem(
     headline: String,
+    modifier: Modifier = Modifier,
     supporting: String? = null,
     imageVector: ImageVector? = null,
     backgroundColor: Color? = null,
     onClick: () -> Unit,
 ) {
-    val modifier = Modifier
+    val baseModifier = modifier
         .clickable { onClick() }
         .padding(vertical = 4.dp)
-    if (backgroundColor != null)
-        modifier.background(backgroundColor)
+    val finalModifier = if (backgroundColor != null) {
+        baseModifier.background(backgroundColor)
+    } else {
+        baseModifier
+    }
 
     val colors = backgroundColor?.let {
         ListItemDefaults.colors(
@@ -63,7 +67,7 @@ fun GenericItem(
                     color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
                 )
         },
-        modifier = modifier,
+        modifier = finalModifier,
         colors = colors ?: ListItemDefaults.colors()
     )
 }
