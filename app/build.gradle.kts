@@ -90,6 +90,7 @@ dependencies {
     implementation(libs.room.ktx)
     implementation(libs.room.runtime)
     implementation(libs.timber)
+    implementation(libs.reorderable)
     implementation(platform(libs.firebase.bom))
     ksp(libs.room.compiler)
 

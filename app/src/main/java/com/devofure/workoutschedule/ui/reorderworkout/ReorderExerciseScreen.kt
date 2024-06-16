@@ -1,22 +1,22 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 
 package com.devofure.workoutschedule.ui.reorderworkout
 
-import android.util.Log
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,19 +33,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.PreviewFontScale
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
 import com.devofure.workoutschedule.data.Exercise
 import com.devofure.workoutschedule.data.SetDetails
@@ -54,7 +49,8 @@ import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.OrientationPreviews
 import com.devofure.workoutschedule.ui.theme.Colors
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
-import kotlin.math.roundToInt
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun ReorderExerciseScreen(
@@ -105,133 +101,100 @@ fun ReorderExerciseScreen(
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ReorderableExerciseList(
     exercises: List<Workout>,
     onReorder: (List<Workout>) -> Unit
 ) {
-    var draggedItem by remember { mutableStateOf<Workout?>(null) }
-    var items by remember { mutableStateOf(exercises) }
-    var currentIndex by remember { mutableStateOf(-1) }
-    val density = LocalDensity.current
-    val itemHeightPx = with(density) { 56.dp.toPx() }
-    val dragState = remember { mutableStateOf(DragState()) }
+    var list by remember { mutableStateOf(exercises) }
+    val lazyListState = rememberLazyListState()
+    val reorderableLazyColumnState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        list = list.toMutableList().apply {
+            val fromIndex = indexOfFirst { it.id == from.key }
+            val toIndex = indexOfFirst { it.id == to.key }
+            add(toIndex, removeAt(fromIndex))
+        }
+        onReorder(list)
+    }
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = Modifier.fillMaxSize(),
+        state = lazyListState,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        itemsIndexed(items) { index, item ->
-            val isDragging = dragState.value.isDragging && dragState.value.draggedItemIndex == index
-            val offset = if (isDragging) dragState.value.currentOffset else Offset.Zero
+        item {
+            Text("Header", Modifier.padding(8.dp), color = MaterialTheme.colorScheme.onBackground)
+        }
+        itemsIndexed(list, key = { _, item -> item.id }) { index, item ->
+            ReorderableItem(reorderableLazyColumnState, item.id) {
+                val interactionSource = remember { MutableInteractionSource() }
 
-            DraggableExerciseCard(
-                workout = item,
-                isBeingDragged = isDragging,
-                offsetY = offset.y,
-                onDragStart = { startOffset ->
-                    dragState.value = dragState.value.copy(
-                        isDragging = true,
-                        initialOffset = startOffset,
-                        draggedItemIndex = index
-                    )
-                    draggedItem = item
-                    currentIndex = index
-                    Log.d("ReorderExerciseScreen", "Drag started at offset: $startOffset, item index: $index")
-                },
-                onDrag = { change, dragAmount ->
-                    val newOffset = dragState.value.currentOffset + dragAmount
-                    dragState.value = dragState.value.copy(
-                        currentOffset = newOffset,
-                        draggedItemIndex = updateDraggedItemIndex(newOffset, items, dragState.value, itemHeightPx)
-                    )
-                    Log.d("ReorderExerciseScreen", "Dragging... New offset: $newOffset")
-                    change.consume()
-                },
-                onDragEnd = {
-                    items = reorderItems(items, dragState.value)
-                    dragState.value = dragState.value.copy(isDragging = false, currentOffset = Offset.Zero)
-                    draggedItem = null
-                    currentIndex = -1
-                    Log.d("ReorderExerciseScreen", "Drag ended. New items order: $items")
-                    onReorder(items)
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp)
+                        .semantics {
+                            customActions = listOf(
+                                CustomAccessibilityAction(
+                                    label = "Move Up",
+                                    action = {
+                                        if (index > 0) {
+                                            list = list.toMutableList().apply {
+                                                add(index - 1, removeAt(index))
+                                            }
+                                            true
+                                        } else {
+                                            false
+                                        }
+                                    }
+                                ),
+                                CustomAccessibilityAction(
+                                    label = "Move Down",
+                                    action = {
+                                        if (index < list.size - 1) {
+                                            list = list.toMutableList().apply {
+                                                add(index + 1, removeAt(index))
+                                            }
+                                            true
+                                        } else {
+                                            false
+                                        }
+                                    }
+                                ),
+                            )
+                        },
+                ) {
+                    Row(
+                        Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(item.exercise.name, Modifier.padding(horizontal = 8.dp))
+                        IconButton(
+                            modifier = Modifier
+                                .draggableHandle(
+                                    onDragStarted = {
+                                        // Haptic feedback on drag start
+                                    },
+                                    onDragStopped = {
+                                        // Haptic feedback on drag stop
+                                    },
+                                    interactionSource = interactionSource,
+                                )
+                                .clearAndSetSemantics { },
+                            onClick = {},
+                        ) {
+                            Icon(Icons.Default.Menu, contentDescription = "Reorder")
+                        }
+                    }
                 }
-            )
-            Log.d("ReorderExerciseScreen", "Rendering item at index $index: ${item.exercise.name}")
-        }
-    }
-}
-
-@Composable
-fun DraggableExerciseCard(
-    workout: Workout,
-    isBeingDragged: Boolean,
-    offsetY: Float,
-    onDragStart: (Offset) -> Unit,
-    onDrag: (androidx.compose.ui.input.pointer.PointerInputChange, Offset) -> Unit,
-    onDragEnd: () -> Unit
-) {
-    val haptic = LocalHapticFeedback.current
-    Box(
-        modifier = Modifier
-            .padding(8.dp)
-            .background(if (isBeingDragged) Color.LightGray else MaterialTheme.colorScheme.background)
-            .offset { IntOffset(0, offsetY.roundToInt()) }
-            .fillMaxWidth()
-            .pointerInput(Unit) {
-                detectDragGestures(
-                    onDragStart = { offset ->
-                        onDragStart(offset)
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    },
-                    onDrag = { change, dragAmount ->
-                        onDrag(change, dragAmount)
-                    },
-                    onDragEnd = { onDragEnd() },
-                    onDragCancel = { onDragEnd() }
-                )
             }
-            .shadow(if (isBeingDragged) 2.dp else 0.dp, shape = MaterialTheme.shapes.medium)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(workout.exercise.name, Modifier.weight(1f), fontSize = 18.sp)
-            Icon(Icons.Default.Menu, contentDescription = "Drag", tint = Color.Gray)
+        }
+        item {
+            Text("Footer", Modifier.padding(8.dp), color = MaterialTheme.colorScheme.onBackground)
         }
     }
-}
-
-data class DragState(
-    val isDragging: Boolean = false,
-    val initialOffset: Offset = Offset.Zero,
-    val currentOffset: Offset = Offset.Zero,
-    val draggedItemIndex: Int = -1
-)
-
-fun getItemIndexAtOffset(offset: Offset, items: List<Workout>, itemHeightPx: Float): Int {
-    return (offset.y / itemHeightPx).toInt().coerceIn(0, items.size - 1)
-}
-
-fun updateDraggedItemIndex(offset: Offset, items: List<Workout>, dragState: DragState, itemHeightPx: Float): Int {
-    val absoluteOffset = dragState.initialOffset.y + offset.y
-    return (absoluteOffset / itemHeightPx).toInt().coerceIn(0, items.size - 1)
-}
-
-fun reorderItems(items: List<Workout>, dragState: DragState): List<Workout> {
-    val fromIndex = dragState.draggedItemIndex
-    val toIndex = getItemIndexAtOffset(dragState.initialOffset + dragState.currentOffset, items, 56f) // assuming item height is 56.dp
-
-    Log.d("ReorderExerciseScreen", "Reordering items from index $fromIndex to index $toIndex")
-
-    if (fromIndex == toIndex || fromIndex < 0 || toIndex < 0) return items
-
-    val mutableItems = items.toMutableList()
-    val movedItem = mutableItems.removeAt(fromIndex)
-    mutableItems.add(toIndex, movedItem)
-    Log.d("ReorderExerciseScreen", "Items after reordering: $mutableItems")
-    return mutableItems
 }
 
 @PreviewLightDark

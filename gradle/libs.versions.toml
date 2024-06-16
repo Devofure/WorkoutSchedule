@@ -25,6 +25,8 @@ lifecycle = "2.8.2"
 material = "1.12.0"
 material3 = "1.2.1"
 navigation = "2.7.7"
+reorderable = "2.1.1"
+reorderableVersion = "2.1.1"
 room = "2.6.1"
 timber = "5.0.1"
 
@@ -63,6 +65,7 @@ gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.8.1" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 mockk = { group = "io.mockk", name = "mockk", version = "1.13.11" }
+reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderableVersion" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
