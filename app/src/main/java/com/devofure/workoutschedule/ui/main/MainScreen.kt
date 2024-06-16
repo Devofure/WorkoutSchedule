@@ -215,7 +215,6 @@ fun MainScreen(
                 daysOfWeek = daysOfWeek,
                 pagerState = pagerState,
                 nicknames = nicknames,
-                workoutViewModel = workoutViewModel,
                 onEditNickname = {
                     editedNickname = nicknames[pagerState.currentPage]
                     showEditNicknameDialog = true
@@ -223,7 +222,8 @@ fun MainScreen(
                 onLogDay = {
                     showDateConfirmationDialog = true
                 },
-                navigate = navigate
+                navigate = navigate,
+                checkAllWorkouts = workoutViewModel::onAllWorkoutsChecked,
             )
         }
     }

@@ -4,85 +4,100 @@ package com.devofure.workoutschedule.ui.main
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FitnessCenter
 import androidx.compose.material.icons.filled.Reorder
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.PreviewFontScale
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
+import com.devofure.workoutschedule.ui.GenericItem
 import com.devofure.workoutschedule.ui.Navigate
+import com.devofure.workoutschedule.ui.OrientationPreviews
 import com.devofure.workoutschedule.ui.Route
-import com.devofure.workoutschedule.ui.WorkoutViewModel
 import com.devofure.workoutschedule.ui.getFullDayName
+import com.devofure.workoutschedule.ui.theme.Colors
+import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 
 @Composable
 fun BottomSheetContent(
     daysOfWeek: List<String>,
     pagerState: androidx.compose.foundation.pager.PagerState,
     nicknames: List<String>,
-    workoutViewModel: WorkoutViewModel,
     navigate: Navigate,
     onEditNickname: () -> Unit,
-    onLogDay: () -> Unit
+    onLogDay: () -> Unit,
+    checkAllWorkouts: (String) -> Unit,
 ) {
+    val dayFullName = getFullDayName(
+        daysOfWeek[pagerState.currentPage],
+        nicknames[pagerState.currentPage]
+    )
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
     ) {
-        TextButton(onClick = onLogDay) {
-            Icon(Icons.Filled.CalendarToday, contentDescription = "Log day")
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Log day")
+        GenericItem(
+            imageVector = Icons.Filled.CalendarToday,
+            headline = "Log day",
+            onClick = onLogDay,
+        )
+        GenericItem(
+            imageVector = Icons.Filled.Edit,
+            headline = "Edit Nickname",
+            onClick = onEditNickname
+        )
+        GenericItem(
+            imageVector = Icons.Filled.CheckCircle,
+            headline = "Mark all as done",
+        ) {
+            checkAllWorkouts(dayFullName)
         }
-        TextButton(onClick = onEditNickname) {
-            Icon(Icons.Filled.Edit, contentDescription = "Edit Nickname")
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Edit Nickname")
-        }
-        TextButton(onClick = {
-            val dayFullName = getFullDayName(
-                daysOfWeek[pagerState.currentPage],
-                nicknames[pagerState.currentPage]
-            )
-            workoutViewModel.onAllWorkoutsChecked(dayFullName, true)
-            navigate.back()
-        }) {
-            Icon(Icons.Filled.CheckCircle, contentDescription = "Mark all as done")
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Mark all as done")
-        }
-        TextButton(onClick = {
-            val dayFullName = getFullDayName(
-                daysOfWeek[pagerState.currentPage],
-                nicknames[pagerState.currentPage]
-            )
+        GenericItem(
+            imageVector = Icons.Filled.FitnessCenter,
+            headline = "Add Exercise",
+        ) {
             navigate.to(Route.AddExercise(dayFullName))
-        }) {
-            Icon(Icons.Filled.FitnessCenter, contentDescription = "Add Exercise")
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Add Exercise")
         }
-        TextButton(onClick = {
-            val dayFullName = getFullDayName(
-                daysOfWeek[pagerState.currentPage],
-                nicknames[pagerState.currentPage]
-            )
+        GenericItem(
+            imageVector = Icons.Filled.Reorder,
+            headline = "Reorder Exercises",
+            ) {
             navigate.to(Route.ReorderExercise(dayFullName))
-        }) {
-            Icon(Icons.Filled.Reorder, contentDescription = "Reorder Exercises")
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Reorder Exercises")
         }
+    }
+}
+
+@PreviewLightDark
+@PreviewScreenSizes
+@PreviewFontScale
+@OrientationPreviews
+@Composable
+fun BottomSheetContentPreview() {
+    val daysOfWeek =
+        listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+    val nicknames = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
+    val pagerState = rememberPagerState(pageCount = { daysOfWeek.size })
+    val navigate = Navigate(navController = androidx.navigation.compose.rememberNavController())
+
+    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+        BottomSheetContent(
+            daysOfWeek = daysOfWeek,
+            pagerState = pagerState,
+            nicknames = nicknames,
+            navigate = navigate,
+            onEditNickname = {},
+            onLogDay = {},
+            checkAllWorkouts = {}
+        )
     }
 }

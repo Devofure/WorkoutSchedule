@@ -124,7 +124,6 @@ class MainActivity : ComponentActivity() {
                         onThemeChange = { theme ->
                             settingsViewModel.setTheme(theme)
                         },
-                        currentPrimaryColor = currentPrimaryColor,
                         onPrimaryColorChange = { color ->
                             settingsViewModel.setPrimaryColor(color)
                         }
@@ -157,10 +156,12 @@ class MainActivity : ComponentActivity() {
                     val dayFullName =
                         backStackEntry.arguments?.getString(Route.ReorderExercise.parameterName)
                             ?: return@composable
+                    val workouts by workoutViewModel.workoutsForDay(dayFullName).collectAsState()
                     ReorderExerciseScreen(
-                        day = dayFullName,
-                        workoutViewModel = workoutViewModel,
                         navigate = navigate,
+                        day = dayFullName,
+                        workouts = workouts,
+                        updateWorkoutOrder = workoutViewModel::updateWorkoutOrder
                     )
                 }
             }

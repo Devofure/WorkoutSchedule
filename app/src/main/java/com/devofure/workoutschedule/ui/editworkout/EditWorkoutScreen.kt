@@ -1,9 +1,10 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.devofure.workoutschedule.ui.editworkout
 
 import android.app.TimePickerDialog
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -22,16 +22,18 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -42,6 +44,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.PreviewFontScale
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.devofure.workoutschedule.data.Exercise
@@ -49,7 +54,8 @@ import com.devofure.workoutschedule.data.SetDetails
 import com.devofure.workoutschedule.data.Workout
 import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.OrientationPreviews
-import com.devofure.workoutschedule.ui.ThemePreviews
+import com.devofure.workoutschedule.ui.theme.Colors
+import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 
 @Composable
 fun EditWorkoutScreen(
@@ -90,13 +96,48 @@ fun EditWorkoutScreen(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Close",
                         modifier = Modifier
-                            .padding(16.dp)
-                            .size(24.dp)
+                            .padding(horizontal = 16.dp)
+                            .size(32.dp)
                             .clickable {
                                 navigate.back()
                             }
                     )
-                }
+                },
+                actions = {
+                    TextButton(
+                        onClick = {
+                            val validationResult = validateWorkoutInput(
+                                sets.toString(),
+                                setDetailsList.joinToString(", ") { it.reps.toString() },
+                                duration
+                            )
+                            setsError = validationResult.setsError
+                            repsError = validationResult.repsError
+                            durationError = validationResult.durationError
+
+                            if (validationResult.isValid) {
+                                val updatedWorkout = workout.copy(
+                                    repsList = setDetailsList,
+                                    duration = duration.toIntOrNull()
+                                )
+                                updateWorkout(day, updatedWorkout)
+                                navigate.back()
+                            }
+                        }
+                    ) {
+                        Text(
+                            text = "Save",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                )
             )
         },
         content = { paddingValues ->
@@ -118,11 +159,24 @@ fun EditWorkoutScreen(
                         error = durationError,
                         context = context
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Sets: $sets", style = MaterialTheme.typography.titleLarge)
-                        Spacer(modifier = Modifier.width(16.dp))
-                        IconButton(
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp),
+                    ) {
+                        Text(
+                            "Sets: $sets",
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                        OutlinedIconButton(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.primary
+                            ),
                             onClick = {
                                 if (sets > 0) {
                                     sets -= 1
@@ -135,7 +189,11 @@ fun EditWorkoutScreen(
                                 contentDescription = "Remove Set"
                             )
                         }
-                        IconButton(
+                        OutlinedIconButton(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            colors = IconButtonDefaults.iconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.primary
+                            ),
                             onClick = {
                                 sets += 1
                                 setDetailsList = setDetailsList.toMutableList().apply {
@@ -182,33 +240,6 @@ fun EditWorkoutScreen(
                     }
                     Spacer(modifier = Modifier.height(80.dp)) // Add space to avoid the button covering content
                 }
-                Button(
-                    onClick = {
-                        val validationResult = validateWorkoutInput(
-                            sets.toString(),
-                            setDetailsList.joinToString(", ") { it.reps.toString() },
-                            duration
-                        )
-                        setsError = validationResult.setsError
-                        repsError = validationResult.repsError
-                        durationError = validationResult.durationError
-
-                        if (validationResult.isValid) {
-                            val updatedWorkout = workout.copy(
-                                repsList = setDetailsList,
-                                duration = duration.toIntOrNull()
-                            )
-                            updateWorkout(day, updatedWorkout)
-                            navigate.back()
-                        }
-                    },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(16.dp)
-                        .fillMaxWidth()
-                ) {
-                    Text("Save")
-                }
             }
         }
     )
@@ -241,7 +272,8 @@ fun DurationPickerField(
                 Icon(
                     imageVector = Icons.Default.Schedule,
                     contentDescription = "Pick Time",
-                    modifier = Modifier.clickable { showPicker = true }
+                    modifier = Modifier.clickable { showPicker = true },
+                    tint = MaterialTheme.colorScheme.primary
                 )
             },
             colors = TextFieldDefaults.outlinedTextFieldColors(
@@ -385,7 +417,9 @@ data class ValidationResult(
     val isValid: Boolean, val setsError: String?, val repsError: String?, val durationError: String?
 )
 
-@ThemePreviews
+@PreviewLightDark
+@PreviewScreenSizes
+@PreviewFontScale
 @OrientationPreviews
 @Composable
 fun EditWorkoutScreenPreview() {
@@ -408,10 +442,12 @@ fun EditWorkoutScreenPreview() {
         duration = 30
     )
 
-    EditWorkoutScreen(
-        day = "Monday",
-        updateWorkout = { _, _ -> },
-        workout = mockWorkout,
-        navigate = navigate
-    )
+    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+        EditWorkoutScreen(
+            day = "Monday",
+            updateWorkout = { _, _ -> },
+            workout = mockWorkout,
+            navigate = navigate
+        )
+    }
 }

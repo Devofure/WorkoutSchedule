@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 
 package com.devofure.workoutschedule.ui.main
 
@@ -13,6 +13,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import com.devofure.workoutschedule.ui.theme.Colors
+import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 
 @Composable
 fun TopBar(onSettingsClick: () -> Unit, onCalendarClick: () -> Unit) {
@@ -33,4 +36,15 @@ fun TopBar(onSettingsClick: () -> Unit, onCalendarClick: () -> Unit) {
             }
         }
     )
+}
+
+@PreviewLightDark
+@Composable
+fun TopBarPreview() {
+    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+        TopBar(
+            onSettingsClick = {},
+            onCalendarClick = {}
+        )
+    }
 }

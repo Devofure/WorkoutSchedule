@@ -200,11 +200,11 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         saveUserSchedule(_workouts.value)
     }
 
-    fun onAllWorkoutsChecked(day: String, isChecked: Boolean) {
+    fun onAllWorkoutsChecked(day: String) {
         val normalizedDay = normalizeDayKey(day)
         _workouts.value = _workouts.value.mapValues { entry ->
             if (normalizeDayKey(entry.key) == normalizedDay) {
-                entry.value.map { it.copy(isDone = isChecked) }
+                entry.value.map { it.copy(isDone = true) }
             } else entry.value
         }
         saveUserSchedule(_workouts.value)

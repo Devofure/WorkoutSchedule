@@ -1,7 +1,6 @@
 package com.devofure.workoutschedule.ui.settings
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -10,8 +9,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,7 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import com.devofure.workoutschedule.ui.GenericItem
 import com.devofure.workoutschedule.ui.Navigate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,7 +31,6 @@ fun SettingsScreen(
     settingsViewModel: SettingsViewModel,
     navigate: Navigate,
     currentTheme: ThemeType,
-    currentPrimaryColor: Color,
     onThemeChange: (ThemeType) -> Unit,
     onPrimaryColorChange: (Color) -> Unit
 ) {
@@ -70,35 +66,35 @@ fun SettingsScreen(
                     .fillMaxSize()
                     .background(backgroundColor)
             ) {
-                SettingsItem(
+                GenericItem(
                     headline = "Workout Reminders",
                     supporting = "Set up your workout reminder time",
+                    backgroundColor = MaterialTheme.colorScheme.background,
                     onClick = { showReminderSetup = true },
-                    backgroundColor = backgroundColor
                 )
-                SettingsItem(
+                GenericItem(
                     headline = "Delete Schedule",
                     supporting = "Delete your entire workout schedule",
+                    backgroundColor = MaterialTheme.colorScheme.background,
                     onClick = { showDeleteConfirmation = true },
-                    backgroundColor = backgroundColor
                 )
-                SettingsItem(
+                GenericItem(
                     headline = "Theme",
                     supporting = "Switch between light and dark modes",
+                    backgroundColor = MaterialTheme.colorScheme.background,
                     onClick = { showThemeDialog = true },
-                    backgroundColor = backgroundColor
                 )
-                SettingsItem(
+                GenericItem(
                     headline = "Theme Light color",
                     supporting = "Choose your theme light color",
+                    backgroundColor = MaterialTheme.colorScheme.background,
                     onClick = { showPrimaryColorDialog = true },
-                    backgroundColor = backgroundColor
                 )
-                SettingsItem(
+                GenericItem(
                     headline = "First Day of the Week",
                     supporting = "Choose the first day of the week",
+                    backgroundColor = MaterialTheme.colorScheme.background,
                     onClick = { showFirstDayDialog = true },
-                    backgroundColor = backgroundColor
                 )
 
                 if (showReminderSetup) {
@@ -154,35 +150,5 @@ fun SettingsScreen(
                 }
             }
         }
-    )
-}
-
-@Composable
-fun SettingsItem(
-    headline: String,
-    supporting: String,
-    onClick: () -> Unit,
-    backgroundColor: Color
-) {
-    ListItem(
-        headlineContent = {
-            Text(
-                text = headline,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-        },
-        supportingContent = {
-            Text(
-                text = supporting,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-            )
-        },
-        modifier = Modifier
-            .clickable { onClick() }
-            .background(backgroundColor)
-            .padding(vertical = 4.dp),
-        colors = ListItemDefaults.colors(
-            containerColor = backgroundColor
-        )
     )
 }

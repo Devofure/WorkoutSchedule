@@ -25,8 +25,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -40,22 +40,29 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.tooling.preview.PreviewFontScale
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.rememberNavController
+import com.devofure.workoutschedule.data.Exercise
+import com.devofure.workoutschedule.data.SetDetails
 import com.devofure.workoutschedule.data.Workout
 import com.devofure.workoutschedule.ui.Navigate
-import com.devofure.workoutschedule.ui.WorkoutViewModel
+import com.devofure.workoutschedule.ui.OrientationPreviews
+import com.devofure.workoutschedule.ui.theme.Colors
+import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 import kotlin.math.roundToInt
 
 @Composable
 fun ReorderExerciseScreen(
-    day: String,
-    workoutViewModel: WorkoutViewModel,
     navigate: Navigate,
+    day: String,
+    workouts: List<Workout>,
+    updateWorkoutOrder: (String, List<Workout>) -> Unit,
 ) {
-    val workouts by workoutViewModel.workoutsForDay(day).collectAsState()
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -67,12 +74,18 @@ fun ReorderExerciseScreen(
                 },
                 actions = {
                     TextButton(onClick = {
-                        workoutViewModel.updateWorkoutOrder(day, workouts)
+                        updateWorkoutOrder(day, workouts)
                         navigate.back()
                     }) {
                         Text("Save")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                )
             )
         },
         content = { paddingValues ->
@@ -84,7 +97,7 @@ fun ReorderExerciseScreen(
                 ReorderableExerciseList(
                     exercises = workouts,
                     onReorder = { updatedList ->
-                        workoutViewModel.updateWorkoutOrder(day, updatedList)
+                        updateWorkoutOrder(day, updatedList)
                     }
                 )
             }
@@ -161,11 +174,10 @@ fun DraggableExerciseCard(
     onDragEnd: () -> Unit
 ) {
     val haptic = LocalHapticFeedback.current
-
     Box(
         Modifier
             .padding(8.dp)
-            .background(if (isBeingDragged) Color.LightGray else Color.White)
+            .background(if (isBeingDragged) Color.LightGray else MaterialTheme.colorScheme.background)
             .offset { IntOffset(0, offsetY.roundToInt()) }
             .fillMaxWidth()
             .pointerInput(Unit) {
@@ -194,5 +206,41 @@ fun DraggableExerciseCard(
             Text(workout.exercise.name, Modifier.weight(1f), fontSize = 18.sp)
             Icon(Icons.Default.Menu, contentDescription = "Drag", tint = Color.Gray)
         }
+    }
+}
+
+@PreviewLightDark
+@PreviewScreenSizes
+@PreviewFontScale
+@OrientationPreviews
+@Composable
+fun ReorderExerciseScreenPreview() {
+    val mockWorkout = Workout(
+        id = 1,
+        exercise = Exercise(
+            name = "Bench Press",
+            force = "Push",
+            level = "Intermediate",
+            mechanic = "Compound",
+            equipment = "Barbell",
+            primaryMuscles = listOf("Chest"),
+            secondaryMuscles = listOf("Triceps", "Shoulders"),
+            instructions = listOf("Lift weight", "Lower weight"),
+            category = "Strength",
+        ),
+        repsList = listOf(SetDetails(reps = 10), SetDetails(reps = 8)),
+        duration = 30
+    )
+    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+        ReorderExerciseScreen(
+            navigate = Navigate(rememberNavController()),
+            day = "Monday",
+            workouts = listOf(
+                mockWorkout,
+                mockWorkout,
+                mockWorkout,
+            ),
+            updateWorkoutOrder = { _, _ -> }
+        )
     }
 }

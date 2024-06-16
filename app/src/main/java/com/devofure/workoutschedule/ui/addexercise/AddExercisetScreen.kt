@@ -47,12 +47,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.devofure.workoutschedule.data.Exercise
 import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.OrientationPreviews
-import com.devofure.workoutschedule.ui.ThemePreviews
 import com.devofure.workoutschedule.ui.theme.Colors
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 
@@ -267,7 +267,7 @@ fun ExerciseItem(
     }
 }
 
-@ThemePreviews
+@PreviewLightDark
 @OrientationPreviews
 @Composable
 fun AddExerciseScreenPreview() {
@@ -321,7 +321,7 @@ fun AddExerciseScreenPreview() {
     }
 }
 
-@ThemePreviews
+@PreviewLightDark
 @OrientationPreviews
 @Composable
 fun ExerciseItemPreview() {

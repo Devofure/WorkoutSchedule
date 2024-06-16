@@ -20,14 +20,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewFontScale
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.rememberNavController
+import com.devofure.workoutschedule.data.Exercise
+import com.devofure.workoutschedule.data.SetDetails
 import com.devofure.workoutschedule.data.Workout
 import com.devofure.workoutschedule.ui.Navigate
+import com.devofure.workoutschedule.ui.OrientationPreviews
+import com.devofure.workoutschedule.ui.theme.Colors
+import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 
 @Composable
 fun WorkoutDetailScreen(workout: Workout, navigate: Navigate) {
@@ -47,6 +57,12 @@ fun WorkoutDetailScreen(workout: Workout, navigate: Navigate) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                )
             )
         },
         content = { paddingValues ->
@@ -148,5 +164,32 @@ fun InstructionItem(instruction: String) {
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Start
         )
+    }
+}
+
+@PreviewLightDark
+@PreviewScreenSizes
+@PreviewFontScale
+@OrientationPreviews
+@Composable
+fun PreviewWorkoutDetailScreen() {
+    val workout = Workout(
+        id = 1,
+        exercise = Exercise(
+            "Push Up",
+            "None",
+            "Beginner",
+            "Compound",
+            "None",
+            listOf("Chest"),
+            listOf("Triceps"),
+            listOf(),
+            "Strength"
+        ),
+        repsList = listOf(SetDetails(10), SetDetails(10), SetDetails(10)),
+        duration = 45,
+    )
+    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+        WorkoutDetailScreen(workout = workout, navigate = Navigate(rememberNavController()))
     }
 }

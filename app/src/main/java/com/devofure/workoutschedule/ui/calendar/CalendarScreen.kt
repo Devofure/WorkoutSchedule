@@ -29,13 +29,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.PreviewFontScale
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.OrientationPreviews
-import com.devofure.workoutschedule.ui.ThemePreviews
 import com.devofure.workoutschedule.ui.main.WorkoutItem
 import com.devofure.workoutschedule.ui.settings.FirstDayOfWeek
+import com.devofure.workoutschedule.ui.theme.Colors
+import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -135,14 +139,18 @@ fun CalendarScreen(
     )
 }
 
-@ThemePreviews
+@PreviewLightDark
+@PreviewScreenSizes
+@PreviewFontScale
 @OrientationPreviews
 @Composable
 fun CalendarScreenPreview() {
     val navigate = Navigate(rememberNavController())
-    CalendarScreen(
-        calendarViewModel = viewModel(),
-        navigate = navigate,
-        firstDayOfWeek = FirstDayOfWeek.MONDAY
-    )
+    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+        CalendarScreen(
+            calendarViewModel = viewModel(),
+            navigate = navigate,
+            firstDayOfWeek = FirstDayOfWeek.MONDAY
+        )
+    }
 }

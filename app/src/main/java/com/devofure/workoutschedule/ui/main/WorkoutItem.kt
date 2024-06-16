@@ -35,13 +35,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewFontScale
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.devofure.workoutschedule.data.Exercise
 import com.devofure.workoutschedule.data.SetDetails
 import com.devofure.workoutschedule.data.Workout
 import com.devofure.workoutschedule.ui.OrientationPreviews
-import com.devofure.workoutschedule.ui.ThemePreviews
 import com.devofure.workoutschedule.ui.theme.Colors.BlueAccent
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 
@@ -213,7 +215,9 @@ fun WorkoutItem(
     }
 }
 
-@ThemePreviews
+@PreviewLightDark
+@PreviewScreenSizes
+@PreviewFontScale
 @OrientationPreviews
 @Composable
 fun PreviewWorkoutItem() {
@@ -249,7 +253,8 @@ fun PreviewWorkoutItem() {
             onClick = {},
             onWorkoutRemove = {},
             onWorkoutDetail = {},
-            onWorkoutEdit = {}
+            onWorkoutEdit = {},
+            onWorkoutChecked = { _, _ -> }
         )
     }
 }
