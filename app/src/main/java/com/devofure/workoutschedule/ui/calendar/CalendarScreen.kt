@@ -36,10 +36,10 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import com.devofure.workoutschedule.data.FirstDayOfWeek
 import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.OrientationPreviews
 import com.devofure.workoutschedule.ui.main.WorkoutItem
-import com.devofure.workoutschedule.ui.settings.FirstDayOfWeek
 import com.devofure.workoutschedule.ui.theme.Colors
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 import java.time.LocalDate

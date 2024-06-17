@@ -10,7 +10,8 @@ fun DeleteConfirmationDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Delete Schedule") },
-        text = { Text("Are you sure you want to delete your entire workout schedule? This action cannot be undone.") },
+        text = { Text("Are you sure you want to delete your entire workout schedule?\n" +
+                "This action cannot be undone.") },
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text("Delete")

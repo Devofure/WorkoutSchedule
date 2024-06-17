@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.devofure.workoutschedule.data.AppDatabase
+import com.devofure.workoutschedule.data.DayOfWeek
 import com.devofure.workoutschedule.data.Exercise
 import com.devofure.workoutschedule.data.ExerciseRepository
 import com.devofure.workoutschedule.data.LogEntity
@@ -24,8 +25,7 @@ import java.util.Locale
 
 class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val exerciseRepository = ExerciseRepository(application.applicationContext)
-    private val _workouts = MutableStateFlow<Map<String, List<Workout>>>(emptyMap())
-    val workouts: StateFlow<Map<String, List<Workout>>> = _workouts
+    private val _workouts = MutableStateFlow<Map<Int, List<Workout>>>(emptyMap())
     private val sharedPreferences =
         application.applicationContext.getSharedPreferences("WorkoutApp", Context.MODE_PRIVATE)
     private val logDao by lazy { AppDatabase.getDatabase(application).logDao() }
@@ -92,60 +92,8 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    private fun loadWorkoutsFromExercises(): Map<String, List<Workout>> {
-        val sampleExercises = mapOf(
-            "Monday" to listOf(
-                "Dumbbell Bench Press",
-                "Close-Grip Push-Up off of a Dumbbell",
-                "Dumbbell Flyes",
-                "Cable Chest Press",
-                "Triceps Pushdown - Rope Attachment"
-            ),
-            "Tuesday" to listOf(
-                "Bent Over Barbell Row",
-                "One-Arm Dumbbell Row",
-                "Alternating Kettlebell Row",
-                "Hammer Curls",
-                "Dumbbell Bicep Curl"
-            ),
-            "Wednesday" to listOf(
-                "Barbell Squat",
-                "Dumbbell Lunges",
-                "Goblet Squat",
-                "Hamstring Stretch",
-                "Calf Raises - With Bands"
-            ),
-            "Thursday" to listOf(
-                "Arnold Dumbbell Press",
-                "Dumbbell Shoulder Press",
-                "Side Lateral Raise",
-                "3/4 Sit-Up",
-                "Cable Russian Twists"
-            ),
-            "Friday" to listOf(
-                "Deadlift",
-                "Kettlebell Dead Clean",
-                "Bear Crawl Sled Drags",
-                "Child's Pose",
-                "Dynamic Chest Stretch"
-            ),
-            "Saturday" to listOf(
-                "Mountain Climbers",
-                "Air Bike",
-                "Plank",
-                "Russian Twist",
-                "Flutter Kicks"
-            ),
-            "Sunday" to listOf(
-                "Cat Stretch",
-                "Quad Stretch",
-                "Hamstring Stretch",
-                "Butterfly",
-                "Child's Pose"
-            )
-        )
-
-        val workoutsByDay = sampleExercises.mapValues { (_, exercises) ->
+    private fun loadWorkoutsFromExercises(): Map<Int, List<Workout>> {
+        val workoutsByDay = SAMPLE_EXERCISE_SCHEDULE.mapValues { (_, exercises) ->
             exercises.mapNotNull { exerciseName ->
                 exerciseRepository.getExerciseByName(exerciseName)?.let { exercise ->
                     Workout(
@@ -158,99 +106,92 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         return workoutsByDay
     }
 
-    private fun saveUserSchedule(workouts: Map<String, List<Workout>>) {
+    private fun saveUserSchedule(workouts: Map<Int, List<Workout>>) {
         val editor = sharedPreferences.edit()
         val workoutsJson = gson.toJson(workouts)
         editor.putString("userSchedule", workoutsJson)
         editor.apply()
     }
 
-    fun loadUserSchedule() {
+    private fun loadUserSchedule() {
         val workoutsJson = sharedPreferences.getString("userSchedule", null)
         if (!workoutsJson.isNullOrEmpty()) {
-            val workoutType = object : TypeToken<Map<String, List<Workout>>>() {}.type
-            val loadedWorkouts: Map<String, List<Workout>> =
+            val workoutType = object : TypeToken<Map<Int, List<Workout>>>() {}.type
+            val loadedWorkouts: Map<Int, List<Workout>> =
                 gson.fromJson(workoutsJson, workoutType)
             _workouts.value = loadedWorkouts
             nextWorkoutId = loadedWorkouts.values.flatten().maxOfOrNull { it.id + 1 } ?: 1
         }
     }
 
-    fun workoutsForDay(day: String): StateFlow<List<Workout>> {
-        val normalizedDay = normalizeDayKey(day)
-        return workouts
-            .map { it[normalizedDay] ?: emptyList() }
+    fun workoutsForDay(dayOfWeek: DayOfWeek): StateFlow<List<Workout>> {
+        return _workouts
+            .map { it[dayOfWeek.dayIndex] ?: emptyList() }
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
     }
 
-    private fun normalizeDayKey(day: String): String {
-        return day.substringBefore(" (")
-    }
-
-    fun onWorkoutChecked(day: String, workoutId: Int, isChecked: Boolean) {
-        val normalizedDay = normalizeDayKey(day)
+    fun onWorkoutChecked(dayIndex: Int, workoutId: Int, isChecked: Boolean) {
         _workouts.value = _workouts.value.toMutableMap().apply {
-            val updatedWorkouts = this[normalizedDay]?.map {
-                if (it.id == workoutId) it.copy(isDone = isChecked) else it
+            val updatedWorkouts = this[dayIndex]?.map { workout ->
+                if (workout.id == workoutId) workout.copy(isDone = isChecked) else workout
             }
             if (updatedWorkouts != null) {
-                this[normalizedDay] = updatedWorkouts
+                this[dayIndex] = updatedWorkouts
             }
         }
         saveUserSchedule(_workouts.value)
     }
 
-    fun onAllWorkoutsChecked(day: String) {
-        val normalizedDay = normalizeDayKey(day)
-        _workouts.value = _workouts.value.mapValues { entry ->
-            if (normalizeDayKey(entry.key) == normalizedDay) {
-                entry.value.map { it.copy(isDone = true) }
-            } else entry.value
+    fun onAllWorkoutsChecked(dayIndex: Int) {
+        _workouts.value = _workouts.value.toMutableMap().apply {
+            val updatedWorkouts = this[dayIndex]?.map { workout ->
+                workout.copy(isDone = true)
+            }
+            if (updatedWorkouts != null) {
+                this[dayIndex] = updatedWorkouts
+            }
         }
         saveUserSchedule(_workouts.value)
     }
 
-    fun addWorkouts(day: String, exercises: List<Exercise>) {
-        val normalizedDay = normalizeDayKey(day)
+    fun addWorkouts(dayIndex: Int, exercises: List<Exercise>) {
         _workouts.value = _workouts.value.toMutableMap().apply {
-            val existingWorkouts = this[normalizedDay]?.toMutableList() ?: mutableListOf()
+            val existingWorkouts = this[dayIndex]?.toMutableList() ?: mutableListOf()
             exercises.forEach { exercise ->
                 existingWorkouts.add(
                     Workout(
                         id = getNextWorkoutId(),
                         exercise = exercise,
                         repsList = listOf(
-                            SetDetails(reps = 10, weight = null, duration = null),
-                            SetDetails(reps = 10, weight = null, duration = null)
+                            SetDetails(reps = 1),
+                            SetDetails(reps = 1)
                         )
                     )
                 )
             }
-            this[normalizedDay] = existingWorkouts
+            this[dayIndex] = existingWorkouts
         }
         saveUserSchedule(_workouts.value)
     }
 
-    fun removeWorkout(day: String, workout: Workout) {
-        val normalizedDay = normalizeDayKey(day)
+    fun removeWorkout(dayIndex: Int, workout: Workout) {
         _workouts.value = _workouts.value.toMutableMap().apply {
-            val existingWorkouts = this[normalizedDay]?.toMutableList()
+            val existingWorkouts = this[dayIndex]?.toMutableList()
             existingWorkouts?.remove(workout)
             if (existingWorkouts != null) {
-                this[normalizedDay] = existingWorkouts
+                this[dayIndex] = existingWorkouts
             }
         }
         saveUserSchedule(_workouts.value)
     }
 
-    fun updateWorkout(day: String, updatedWorkout: Workout) {
-        val normalizedDay = normalizeDayKey(day)
+    fun updateWorkout(dayIndex: Int, updatedWorkout: Workout) {
         _workouts.value = _workouts.value.toMutableMap().apply {
-            val updatedWorkouts = this[normalizedDay]?.map {
+            val updatedWorkouts = this[dayIndex]?.map {
                 if (it.id == updatedWorkout.id) updatedWorkout else it
             }
             if (updatedWorkouts != null) {
-                this[normalizedDay] = updatedWorkouts
+                this[dayIndex] = updatedWorkouts
             }
         }
         saveUserSchedule(_workouts.value)
@@ -266,11 +207,18 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         _isLoading.value = false
     }
 
-    fun updateWorkoutOrder(day: String, updatedList: List<Workout>) {
-        val normalizedDay = normalizeDayKey(day)
+    fun updateWorkoutOrder(dayIndex: Int, updatedList: List<Workout>) {
         _workouts.value = _workouts.value.toMutableMap().apply {
-            this[normalizedDay] = updatedList
+            this[dayIndex] = updatedList
         }
         saveUserSchedule(_workouts.value)
+    }
+
+    fun saveNicknames(dayIndex: Int, dayName: String) {
+        sharedPreferences.edit().putString("nicknames_$dayIndex", dayName).apply()
+    }
+
+    fun getNickname(dayIndex: Int): String {
+        return sharedPreferences.getString("nicknames_$dayIndex", "") ?: ""
     }
 }

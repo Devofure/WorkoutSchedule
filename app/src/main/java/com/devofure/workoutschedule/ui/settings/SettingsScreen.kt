@@ -39,8 +39,11 @@ fun SettingsScreen(
     var showThemeDialog by remember { mutableStateOf(false) }
     var showPrimaryColorDialog by remember { mutableStateOf(false) }
     var showFirstDayDialog by remember { mutableStateOf(false) }
+    var showDayNamingPreferenceDialog by remember { mutableStateOf(false) }
+
     val reminderTime by settingsViewModel.reminderTime.collectAsState()
     val firstDayOfWeek by settingsViewModel.firstDayOfWeek.collectAsState()
+    val dayNamingPreference by settingsViewModel.dayNamingPreference.collectAsState()
 
     val backgroundColor = MaterialTheme.colorScheme.background
 
@@ -96,6 +99,12 @@ fun SettingsScreen(
                     backgroundColor = MaterialTheme.colorScheme.background,
                     onClick = { showFirstDayDialog = true },
                 )
+                GenericItem(
+                    headline = "Schedule Day Naming",
+                    supporting = "Choose between week day and numeric naming",
+                    backgroundColor = MaterialTheme.colorScheme.background,
+                    onClick = { showDayNamingPreferenceDialog = true },
+                )
 
                 if (showReminderSetup) {
                     ReminderSetupDialog(
@@ -145,6 +154,17 @@ fun SettingsScreen(
                         onFirstDayChange = { newFirstDay ->
                             settingsViewModel.setFirstDayOfWeek(newFirstDay)
                             showFirstDayDialog = false
+                        }
+                    )
+                }
+
+                if (showDayNamingPreferenceDialog) {
+                    DayNamingPreferenceDialog(
+                        currentPreference = dayNamingPreference,
+                        onDismiss = { showDayNamingPreferenceDialog = false },
+                        onPreferenceChange = { newPreference ->
+                            settingsViewModel.setDayNamingPreference(newPreference)
+                            showDayNamingPreferenceDialog = false
                         }
                     )
                 }

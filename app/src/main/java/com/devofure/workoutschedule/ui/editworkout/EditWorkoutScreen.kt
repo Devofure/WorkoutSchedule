@@ -59,8 +59,8 @@ import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 
 @Composable
 fun EditWorkoutScreen(
-    day: String,
-    updateWorkout: (String, Workout) -> Unit,
+    dayIndex: Int,
+    updateWorkout: (Int, Workout) -> Unit,
     workout: Workout,
     navigate: Navigate,
 ) {
@@ -120,7 +120,7 @@ fun EditWorkoutScreen(
                                     repsList = setDetailsList,
                                     duration = duration.toIntOrNull()
                                 )
-                                updateWorkout(day, updatedWorkout)
+                                updateWorkout(dayIndex, updatedWorkout)
                                 navigate.back()
                             }
                         }
@@ -444,7 +444,7 @@ fun EditWorkoutScreenPreview() {
 
     MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
         EditWorkoutScreen(
-            day = "Monday",
+            dayIndex = 0,
             updateWorkout = { _, _ -> },
             workout = mockWorkout,
             navigate = navigate

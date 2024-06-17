@@ -1,4 +1,8 @@
-@file:OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+// MainScreen.kt
+@file:OptIn(
+    ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class,
+    ExperimentalFoundationApi::class
+)
 
 package com.devofure.workoutschedule.ui.main
 
@@ -29,42 +33,39 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.devofure.workoutschedule.data.DayOfWeek
+import com.devofure.workoutschedule.data.WEEK
 import com.devofure.workoutschedule.data.Workout
 import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.Route
 import com.devofure.workoutschedule.ui.SharedViewModel
 import com.devofure.workoutschedule.ui.WorkoutViewModel
-import com.devofure.workoutschedule.ui.getFullDayName
+import com.devofure.workoutschedule.ui.getDayName
 import java.time.LocalDate
 
 @Composable
 fun MainScreen(
     workoutViewModel: WorkoutViewModel,
     sharedViewModel: SharedViewModel,
-    navigate: Navigate
+    navigate: Navigate,
+    dayNamingPreference: DayOfWeek.DayNamingPreference,
 ) {
-    val initialDaysOfWeek =
-        listOf("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
-    val daysOfWeek = remember { mutableStateListOf(*initialDaysOfWeek.toTypedArray()) }
-    val nicknames = remember { mutableStateListOf(*Array(initialDaysOfWeek.size) { "" }) }
-    val pagerState = rememberPagerState { daysOfWeek.size }
-
+    val pagerState = rememberPagerState { WEEK.size }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var showBottomSheet by remember { mutableStateOf(false) }
     var expandedWorkoutIds by remember { mutableStateOf(setOf<Int>()) }
     var showDatePicker by remember { mutableStateOf(false) }
-    var editedNickname by remember { mutableStateOf("") }
     var showEditNicknameDialog by remember { mutableStateOf(false) }
     var showDateConfirmationDialog by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var selectedWorkouts by remember { mutableStateOf<List<Workout>>(emptyList()) }
+    var editedNickname by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -96,7 +97,7 @@ fun MainScreen(
             ) {
                 PagerIndicator(
                     pagerState = pagerState,
-                    pageCount = daysOfWeek.size,
+                    pageCount = WEEK.size,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
                         .padding(16.dp)
@@ -105,14 +106,16 @@ fun MainScreen(
                     state = pagerState,
                     modifier = Modifier.weight(1f)
                 ) { page ->
-                    val workouts by workoutViewModel.workoutsForDay(
-                        getFullDayName(
-                            daysOfWeek[page],
-                            nicknames[page]
-                        )
-                    ).collectAsState()
-
+                    val dayOfWeek = WEEK[page]
+                    val workouts by workoutViewModel.workoutsForDay(dayOfWeek).collectAsState()
+                    val dayNickname = workoutViewModel.getNickname(dayOfWeek.dayIndex)
+                    val dayName = getDayName(
+                        dayOfWeek,
+                        dayNamingPreference,
+                        dayNickname
+                    )
                     LaunchedEffect(workouts) {
+                        editedNickname = dayNickname
                         selectedWorkouts = workouts
                     }
 
@@ -126,7 +129,7 @@ fun MainScreen(
                             modifier = Modifier.align(Alignment.CenterHorizontally)
                         ) {
                             Text(
-                                text = getFullDayName(daysOfWeek[page], nicknames[page]),
+                                text = dayName,
                                 style = MaterialTheme.typography.titleLarge,
                                 color = MaterialTheme.colorScheme.onBackground
                             )
@@ -160,15 +163,15 @@ fun MainScreen(
                                         },
                                         onWorkoutChecked = { workoutId, isChecked ->
                                             workoutViewModel.onWorkoutChecked(
-                                                getFullDayName(daysOfWeek[page], nicknames[page]),
+                                                dayOfWeek.dayIndex,
                                                 workoutId,
                                                 isChecked
                                             )
                                         },
                                         onWorkoutRemove = {
                                             workoutViewModel.removeWorkout(
-                                                getFullDayName(daysOfWeek[page], nicknames[page]),
-                                                workout
+                                                dayOfWeek.dayIndex,
+                                                workout,
                                             )
                                         },
                                         onWorkoutDetail = {
@@ -177,14 +180,7 @@ fun MainScreen(
                                         },
                                         onWorkoutEdit = {
                                             sharedViewModel.selectWorkout(workout)
-                                            navigate.to(
-                                                Route.EditWorkout(
-                                                    getFullDayName(
-                                                        daysOfWeek[page],
-                                                        nicknames[page]
-                                                    )
-                                                )
-                                            )
+                                            navigate.to(Route.EditWorkout(dayName))
                                         },
                                     )
                                 }
@@ -202,17 +198,14 @@ fun MainScreen(
             sheetState = sheetState
         ) {
             BottomSheetContent(
-                daysOfWeek = daysOfWeek,
-                pagerState = pagerState,
-                nicknames = nicknames,
-                onEditNickname = {
-                    editedNickname = nicknames[pagerState.currentPage]
+                showEditDialogDayNickname = {
                     showEditNicknameDialog = true
                 },
-                onLogDay = {
+                showLogWorkoutDay = {
                     showDateConfirmationDialog = true
                 },
                 navigate = navigate,
+                dayOfWeek = WEEK[pagerState.currentPage],
                 checkAllWorkouts = workoutViewModel::onAllWorkoutsChecked,
             )
         }
@@ -245,16 +238,21 @@ fun MainScreen(
             }
         )
     }
-
     if (showEditNicknameDialog) {
+        val day = WEEK[pagerState.currentPage]
         EditNicknameDialog(
             editedNickname = editedNickname,
             onNicknameChange = { editedNickname = it },
-            onSave = {
-                nicknames[pagerState.currentPage] = editedNickname
+            dayNamingPreference = dayNamingPreference,
+            dayOfWeek = day,
+            save = { dayOfWeek ->
+                workoutViewModel.saveNicknames(dayOfWeek.dayIndex, editedNickname)
                 showEditNicknameDialog = false
             },
-            onDismiss = { showEditNicknameDialog = false }
+            onDismiss = {
+                editedNickname = ""
+                showEditNicknameDialog = false
+            }
         )
     }
 }

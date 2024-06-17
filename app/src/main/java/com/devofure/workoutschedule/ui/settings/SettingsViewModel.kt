@@ -12,30 +12,18 @@ import android.provider.Settings
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.AndroidViewModel
+import com.devofure.workoutschedule.data.DayOfWeek
+import com.devofure.workoutschedule.data.FirstDayOfWeek
+import com.devofure.workoutschedule.data.ReminderTime
 import com.devofure.workoutschedule.receiver.ReminderReceiver
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Locale
 
 enum class ThemeType {
     LIGHT, DARK, SYSTEM
-}
-
-data class ReminderTime(
-    val hour: Int,
-    val minute: Int
-) {
-    fun format(): String {
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, hour)
-            set(Calendar.MINUTE, minute)
-        }
-        val timeFormat = SimpleDateFormat("hh:mm a", Locale.getDefault())
-        return timeFormat.format(calendar.time)
-    }
 }
 
 class SettingsViewModel(application: Application) : AndroidViewModel(application) {
@@ -51,7 +39,12 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     val reminderTime: StateFlow<ReminderTime> = _reminderTime
 
     private val _firstDayOfWeek = MutableStateFlow(FirstDayOfWeek.MONDAY)
-    val firstDayOfWeek: StateFlow<FirstDayOfWeek> = _firstDayOfWeek
+    val firstDayOfWeek: StateFlow<FirstDayOfWeek> = _firstDayOfWeek.asStateFlow()
+
+    private val _dayNamingPreference = MutableStateFlow(DayOfWeek.DayNamingPreference.DAY_NUMBERS)
+    val dayNamingPreference: StateFlow<DayOfWeek.DayNamingPreference> =
+        _dayNamingPreference.asStateFlow()
+
 
     init {
         val savedHour = sharedPreferences.getInt("reminderHour", 0)
@@ -64,8 +57,16 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         val savedPrimaryColor = sharedPreferences.getInt("primaryColor", Color.Blue.toArgb())
         _primaryColor.value = Color(savedPrimaryColor)
 
-        val savedFirstDay = sharedPreferences.getString("firstDayOfWeek", FirstDayOfWeek.MONDAY.name)
+        val savedFirstDay =
+            sharedPreferences.getString("firstDayOfWeek", FirstDayOfWeek.MONDAY.name)
         _firstDayOfWeek.value = FirstDayOfWeek.valueOf(savedFirstDay!!)
+
+        val savedDayNaming =
+            sharedPreferences.getString(
+                "dayNamingPreference",
+                DayOfWeek.DayNamingPreference.DAY_NUMBERS.name
+            )
+        _dayNamingPreference.value = DayOfWeek.DayNamingPreference.valueOf(savedDayNaming!!)
     }
 
     fun setReminder(reminderTime: ReminderTime) {
@@ -126,8 +127,9 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
         _firstDayOfWeek.value = firstDay
         sharedPreferences.edit().putString("firstDayOfWeek", firstDay.name).apply()
     }
-}
 
-enum class FirstDayOfWeek {
-    SUNDAY, MONDAY
+    fun setDayNamingPreference(preference: DayOfWeek.DayNamingPreference) {
+        _dayNamingPreference.value = preference
+        sharedPreferences.edit().putString("dayNamingPreference", preference.name).apply()
+    }
 }

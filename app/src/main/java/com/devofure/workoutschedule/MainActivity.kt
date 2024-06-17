@@ -19,6 +19,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.devofure.workoutschedule.data.WEEK
 import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.Route
 import com.devofure.workoutschedule.ui.SharedViewModel
@@ -73,6 +74,7 @@ class MainActivity : ComponentActivity() {
         val navigate = Navigate(navController)
         val sharedViewModel: SharedViewModel = viewModel()
         val isFirstLaunch by workoutViewModel.isFirstLaunch.collectAsState()
+        val dayNamingPreference by settingsViewModel.dayNamingPreference.collectAsState()
 
         if (isFirstLaunch) {
             AskUserToGenerateSampleSchedule(
@@ -86,25 +88,27 @@ class MainActivity : ComponentActivity() {
                     MainScreen(
                         workoutViewModel = workoutViewModel,
                         sharedViewModel = sharedViewModel,
-                        navigate = navigate
+                        navigate = navigate,
+                        dayNamingPreference = dayNamingPreference,
                     )
                 }
                 composable(Route.AddExercise.route) { backStackEntry ->
-                    val dayFullName =
-                        backStackEntry.arguments?.getString(Route.AddExercise.parameterName)
+                    val dayIndexParam =
+                        backStackEntry.arguments?.getInt(Route.AddExercise.parameterName)
                             ?: return@composable
                     val isLoading by workoutViewModel.isLoading.collectAsState()
                     val filteredExercises by workoutViewModel.filteredExercises.collectAsState()
                     val searchQuery by workoutViewModel.searchQuery.collectAsState()
 
                     AddExerciseScreen(
-                        day = dayFullName,
+                        dayIndex = dayIndexParam,
+                        subTitle = WEEK[dayIndexParam].getFullName(dayNamingPreference),
                         searchQuery = searchQuery,
                         filteredExercises = filteredExercises,
                         isLoading = isLoading,
                         onSearchQueryChange = { workoutViewModel.searchQuery.value = it },
-                        onAddWorkouts = { day, exercises ->
-                            workoutViewModel.addWorkouts(day, exercises)
+                        onAddWorkouts = { dayIndex, exercises ->
+                            workoutViewModel.addWorkouts(dayIndex, exercises)
                         },
                         navigate = navigate,
                     )
@@ -140,11 +144,12 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 composable(Route.EditWorkout.route) { backStackEntry ->
-                    val dayFullName =
-                        backStackEntry.arguments?.getString("dayFullName") ?: return@composable
+                    val dayIndex =
+                        backStackEntry.arguments?.getInt(Route.EditWorkout.parameterName)
+                            ?: return@composable
                     sharedViewModel.selectedWorkout.collectAsState().value?.let { workout ->
                         EditWorkoutScreen(
-                            day = dayFullName,
+                            dayIndex = dayIndex,
                             navigate = navigate,
                             workout = workout,
                             updateWorkout = { day, exercises ->
@@ -154,13 +159,14 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 composable(Route.ReorderExercise.route) { backStackEntry ->
-                    val dayFullName =
-                        backStackEntry.arguments?.getString(Route.ReorderExercise.parameterName)
+                    val dayIndex =
+                        backStackEntry.arguments?.getInt(Route.ReorderExercise.parameterName)
                             ?: return@composable
-                    val workouts by workoutViewModel.workoutsForDay(dayFullName).collectAsState()
+                    val dayOfWeek = WEEK[dayIndex]
+                    val workouts by workoutViewModel.workoutsForDay(dayOfWeek).collectAsState()
                     ReorderExerciseScreen(
                         navigate = navigate,
-                        day = dayFullName,
+                        dayOfWeek = dayOfWeek,
                         workouts = workouts,
                         updateWorkoutOrder = workoutViewModel::updateWorkoutOrder
                     )

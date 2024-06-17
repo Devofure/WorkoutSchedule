@@ -26,12 +26,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.devofure.workoutschedule.data.FirstDayOfWeek
 import com.devofure.workoutschedule.ui.calculateDayOfWeekOffset
 import com.devofure.workoutschedule.ui.getFirstDayOfMonthWeekIndex
 import com.devofure.workoutschedule.ui.getTotalCells
 import com.devofure.workoutschedule.ui.getWeekStartDate
 import com.devofure.workoutschedule.ui.isSameDay
-import com.devofure.workoutschedule.ui.settings.FirstDayOfWeek
 import com.devofure.workoutschedule.ui.theme.Colors.GreenAccent
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 import java.time.LocalDate

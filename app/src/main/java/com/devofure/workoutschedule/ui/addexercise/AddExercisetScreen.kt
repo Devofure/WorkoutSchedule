@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 
 package com.devofure.workoutschedule.ui.addexercise
 
@@ -59,12 +59,13 @@ import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 
 @Composable
 fun AddExerciseScreen(
-    day: String,
+    subTitle: String,
+    dayIndex: Int,
     searchQuery: String,
     filteredExercises: List<Exercise>,
     isLoading: Boolean,
     onSearchQueryChange: (String) -> Unit,
-    onAddWorkouts: (String, List<Exercise>) -> Unit,
+    onAddWorkouts: (Int, List<Exercise>) -> Unit,
     navigate: Navigate,
 ) {
     var selectedExercises by remember { mutableStateOf<List<Exercise>>(emptyList()) }
@@ -123,7 +124,7 @@ fun AddExerciseScreen(
                     } else {
                         Column {
                             Text("Add Exercises")
-                            Text(day, style = MaterialTheme.typography.titleMedium)
+                            Text(subTitle, style = MaterialTheme.typography.titleMedium)
                         }
                     }
                 },
@@ -163,7 +164,7 @@ fun AddExerciseScreen(
                 Spacer(modifier = Modifier.height(8.dp))
                 Button(
                     onClick = {
-                        onAddWorkouts(day, selectedExercises)
+                        onAddWorkouts(dayIndex, selectedExercises)
                         navigate.back()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
@@ -313,7 +314,8 @@ fun AddExerciseScreenPreview() {
 
     MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
         AddExerciseScreen(
-            day = "Monday",
+            subTitle = "Monday",
+            dayIndex = 1,
             searchQuery = "",
             filteredExercises = sampleExercises,
             isLoading = false,

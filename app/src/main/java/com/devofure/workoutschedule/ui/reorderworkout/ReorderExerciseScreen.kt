@@ -42,6 +42,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
+import com.devofure.workoutschedule.data.DayOfWeek
 import com.devofure.workoutschedule.data.Exercise
 import com.devofure.workoutschedule.data.SetDetails
 import com.devofure.workoutschedule.data.Workout
@@ -55,9 +56,9 @@ import sh.calvin.reorderable.rememberReorderableLazyListState
 @Composable
 fun ReorderExerciseScreen(
     navigate: Navigate,
-    day: String,
+    dayOfWeek: DayOfWeek,
     workouts: List<Workout>,
-    updateWorkoutOrder: (String, List<Workout>) -> Unit,
+    updateWorkoutOrder: (Int, List<Workout>) -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -70,7 +71,7 @@ fun ReorderExerciseScreen(
                 },
                 actions = {
                     TextButton(onClick = {
-                        updateWorkoutOrder(day, workouts)
+                        updateWorkoutOrder(dayOfWeek.dayIndex, workouts)
                         navigate.back()
                     }) {
                         Text("Save")
@@ -93,7 +94,7 @@ fun ReorderExerciseScreen(
                 ReorderableExerciseList(
                     exercises = workouts,
                     onReorder = { updatedList ->
-                        updateWorkoutOrder(day, updatedList)
+                        updateWorkoutOrder(dayOfWeek.dayIndex, updatedList)
                     }
                 )
             }
@@ -137,9 +138,11 @@ fun ReorderableExerciseList(
                                     label = "Move Up",
                                     action = {
                                         if (index > 0) {
-                                            list = list.toMutableList().apply {
-                                                add(index - 1, removeAt(index))
-                                            }
+                                            list = list
+                                                .toMutableList()
+                                                .apply {
+                                                    add(index - 1, removeAt(index))
+                                                }
                                             true
                                         } else {
                                             false
@@ -150,9 +153,11 @@ fun ReorderableExerciseList(
                                     label = "Move Down",
                                     action = {
                                         if (index < list.size - 1) {
-                                            list = list.toMutableList().apply {
-                                                add(index + 1, removeAt(index))
-                                            }
+                                            list = list
+                                                .toMutableList()
+                                                .apply {
+                                                    add(index + 1, removeAt(index))
+                                                }
                                             true
                                         } else {
                                             false
@@ -216,7 +221,7 @@ fun ReorderExerciseScreenPreview() {
     MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
         ReorderExerciseScreen(
             navigate = Navigate(rememberNavController()),
-            day = "Monday",
+            dayOfWeek = DayOfWeek.Monday,
             workouts = listOf(
                 mockWorkout,
                 mockWorkout,

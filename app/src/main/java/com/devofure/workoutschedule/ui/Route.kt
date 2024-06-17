@@ -14,24 +14,25 @@ class Navigate(private val navController: NavController) {
 
 sealed class Route(val route: String) {
     data object Main : Route("main")
-    data class AddExercise(val dayName: String) :
-        Route("add_exercise/${dayName}") {
+    data class AddExercise(val dayIndex: Int) :
+        Route("add_exercise/${dayIndex}") {
         companion object {
-            const val parameterName = "dayFullName"
+            const val parameterName = "dayIndex"
             const val route = "add_exercise/{$parameterName}"
         }
     }
 
-    data class EditWorkout(val dayName: String) : Route("edit_workout/${dayName}") {
+    data class EditWorkout(val dayName: String) : Route("edit_workout/$dayName") {
         companion object {
-            const val parameterName = "dayFullName"
+            const val parameterName = "dayIndex"
             const val route = "edit_workout/{$parameterName}"
         }
     }
 
-    data class ReorderExercise(val dayName: String) : Route("reorder_exercise/${dayName}") {
+    data class ReorderExercise(val dayIndex: Int) :
+        Route("reorder_exercise/$dayIndex") {
         companion object {
-            const val parameterName = "dayFullName"
+            const val parameterName = "dayIndex"
             const val route = "reorder_exercise/{$parameterName}"
         }
     }
