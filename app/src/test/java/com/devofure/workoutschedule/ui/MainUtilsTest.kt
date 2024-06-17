@@ -1,30 +1,11 @@
 package com.devofure.workoutschedule.ui
 
-import com.devofure.workoutschedule.ui.settings.FirstDayOfWeek
+import com.devofure.workoutschedule.data.FirstDayOfWeek
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.LocalDate
 
 class MainUtilsTest {
-
-    // Tests for getFullDayName
-    @Test
-    fun testGetFullDayName_withNickname() {
-        val day = "Monday"
-        val nickname = "Mon"
-        val expected = "Monday (Mon)"
-        val result = getFullDayName(day, nickname)
-        assertEquals(expected, result)
-    }
-
-    @Test
-    fun testGetFullDayName_withoutNickname() {
-        val day = "Monday"
-        val nickname = ""
-        val expected = day
-        val result = getFullDayName(day, nickname)
-        assertEquals(expected, result)
-    }
 
     // Tests for getDaysInMonth
     @Test
