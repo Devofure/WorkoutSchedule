@@ -41,4 +41,5 @@ sealed class Route(val route: String) {
     data object Calendar : Route("calendar")
     data object Settings : Route("settings")
     data object WorkoutDetail : Route("workout_detail")
+    data object FilterExercise : Route("filterExercise")
 }

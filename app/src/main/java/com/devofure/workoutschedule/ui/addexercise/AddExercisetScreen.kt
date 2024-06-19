@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class)
 
 package com.devofure.workoutschedule.ui.addexercise
 
@@ -10,12 +10,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -65,8 +67,17 @@ fun AddExerciseScreen(
     navigate: Navigate,
 ) {
     var selectedExercises by remember { mutableStateOf<List<Exercise>>(emptyList()) }
-    var isSearchExpanded by remember { mutableStateOf(false) }
+    val isSearchExpanded by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
+    var selectedFilters by remember {
+        mutableStateOf<List<String>>(
+            listOf(
+                "test",
+                "sdfds",
+                "dsfdf"
+            )
+        )
+    }
 
     LaunchedEffect(isSearchExpanded) {
         if (isSearchExpanded) {
@@ -123,15 +134,53 @@ fun AddExerciseScreen(
                 modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.CenterEnd
             ) {
-                TextField(
-                    value = searchQuery,
-                    onValueChange = { onSearchQueryChange(it) },
-                    placeholder = { Text("Search Exercises") },
-                    singleLine = true,
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    TextField(
+                        value = searchQuery,
+                        onValueChange = { onSearchQueryChange(it) },
+                        placeholder = { Text("Search Exercises") },
+                        singleLine = true,
+                        modifier = Modifier
+                            .weight(1f)
+                            .focusRequester(focusRequester)
+                    )
+                    IconButton(onClick = { navigate.to(Route.FilterExercise) }) {
+                        Icon(Icons.Filled.FilterList, contentDescription = "Filter")
+                    }
+                }
+            }
+            if (selectedFilters.isNotEmpty()) {
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .focusRequester(focusRequester)
-                )
+                        .padding(8.dp)
+                ) {
+                    selectedFilters.forEach { filter ->
+                        Card(
+                            modifier = Modifier.padding(end = 8.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(8.dp)
+                            ) {
+                                Text(text = filter)
+                                Icon(
+                                    imageVector = Icons.Filled.Close,
+                                    contentDescription = "Remove Filter",
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .clickable {
+                                            selectedFilters = selectedFilters - filter
+                                        }
+                                )
+                            }
+                        }
+                    }
+                }
             }
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -228,6 +277,61 @@ fun ExerciseItem(
 @OrientationPreviews
 @Composable
 fun AddExerciseScreenPreview() {
+    val navController = rememberNavController()
+    val sampleExercises = listOf(
+        Exercise(
+            "Push Up",
+            "None",
+            "Beginner",
+            "Compound",
+            "None",
+            listOf("Chest"),
+            listOf("Triceps"),
+            listOf(),
+            "Strength"
+        ),
+        Exercise(
+            "Squat",
+            "None",
+            "Intermediate",
+            "Compound",
+            "None",
+            listOf("Legs"),
+            listOf("Glutes"),
+            listOf(),
+            "Strength"
+        ),
+        Exercise(
+            "Bicep Curl",
+            "None",
+            "Beginner",
+            "Isolation",
+            "Dumbbell",
+            listOf("Biceps"),
+            listOf("Forearms"),
+            listOf(),
+            "Strength"
+        )
+    )
+
+    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+        AddExerciseScreen(
+            subTitle = "Monday",
+            dayIndex = 1,
+            searchQuery = "",
+            filteredExercises = sampleExercises,
+            isLoading = false,
+            onSearchQueryChange = {},
+            onAddWorkouts = { _, _ -> },
+            navigate = Navigate(navController)
+        )
+    }
+}
+
+@PreviewLightDark
+@OrientationPreviews
+@Composable
+fun AddExerciseScreenPreviewWithFilter() {
     val navController = rememberNavController()
     val sampleExercises = listOf(
         Exercise(

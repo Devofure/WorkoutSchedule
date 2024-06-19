@@ -25,8 +25,10 @@ import com.devofure.workoutschedule.ui.Route
 import com.devofure.workoutschedule.ui.SharedViewModel
 import com.devofure.workoutschedule.ui.WorkoutViewModel
 import com.devofure.workoutschedule.ui.addexercise.AddExerciseScreen
+import com.devofure.workoutschedule.ui.addexercise.ExerciseFilterScreen
 import com.devofure.workoutschedule.ui.calendar.CalendarScreen
 import com.devofure.workoutschedule.ui.calendar.CalendarViewModel
+import com.devofure.workoutschedule.ui.createexercise.CreateExerciseScreen
 import com.devofure.workoutschedule.ui.editworkout.EditWorkoutScreen
 import com.devofure.workoutschedule.ui.main.MainScreen
 import com.devofure.workoutschedule.ui.reorderworkout.ReorderExerciseScreen
@@ -142,6 +144,18 @@ class MainActivity : ComponentActivity() {
                             navigate = navigate,
                         )
                     }
+                }
+                composable(Route.FilterExercise.route) {
+                    ExerciseFilterScreen(
+                        onFiltersSelected = {},
+                        navigate = navigate
+                    )
+                }
+                composable(Route.CreateExercise.route) {
+                    CreateExerciseScreen(
+                        navigate = navigate,
+                        onAddExercise = {}
+                    )
                 }
                 composable(Route.EditWorkout.route) { backStackEntry ->
                     val dayIndex =
