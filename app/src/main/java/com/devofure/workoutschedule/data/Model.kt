@@ -19,7 +19,6 @@ data class SetDetails(
     val duration: Int? = null
 )
 
-
 val WEEK = listOf(
     DayOfWeek.Monday,
     DayOfWeek.Tuesday,
