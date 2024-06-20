@@ -28,9 +28,7 @@ import java.util.Locale
 class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val exerciseRepository = ExerciseRepository(application.applicationContext)
     val equipmentOptions: StateFlow<List<String>> = exerciseRepository.equipmentOptions
-    val primaryMusclesOptions: StateFlow<List<String>> = exerciseRepository.primaryMusclesOptions
-    val secondaryMusclesOptions: StateFlow<List<String>> =
-        exerciseRepository.secondaryMusclesOptions
+    val muscleOptions: StateFlow<List<String>> = exerciseRepository.primaryMusclesOptions
     val categoryOptions: StateFlow<List<String>> = exerciseRepository.categoryOptions
 
     private val _workouts = MutableStateFlow<Map<Int, List<Workout>>>(emptyMap())

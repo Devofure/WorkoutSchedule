@@ -27,26 +27,22 @@ data class Exercise(
 
 class ExerciseRepository(
     private val context: Context,
-    coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
 ) {
     private val _exercises = MutableStateFlow<List<Exercise>>(emptyList())
     val exercises: StateFlow<List<Exercise>> = _exercises.asStateFlow()
 
-    // Preloaded data
     private val _equipmentOptions = MutableStateFlow<List<String>>(emptyList())
     val equipmentOptions: StateFlow<List<String>> = _equipmentOptions.asStateFlow()
 
-    private val _primaryMusclesOptions = MutableStateFlow<List<String>>(emptyList())
-    val primaryMusclesOptions: StateFlow<List<String>> = _primaryMusclesOptions.asStateFlow()
-
-    private val _secondaryMusclesOptions = MutableStateFlow<List<String>>(emptyList())
-    val secondaryMusclesOptions: StateFlow<List<String>> = _secondaryMusclesOptions.asStateFlow()
+    private val _muscleOptions = MutableStateFlow<List<String>>(emptyList())
+    val primaryMusclesOptions: StateFlow<List<String>> = _muscleOptions.asStateFlow()
 
     private val _categoryOptions = MutableStateFlow<List<String>>(emptyList())
     val categoryOptions: StateFlow<List<String>> = _categoryOptions.asStateFlow()
 
     init {
-        coroutineScope.launch(Dispatchers.IO) {
+        coroutineScope.launch {
             prepareData()
         }
     }
@@ -93,9 +89,11 @@ class ExerciseRepository(
     private fun preloadOptions() {
         val exercises = _exercises.value
         _equipmentOptions.value = exercises.mapNotNull { it.equipment }.distinct()
-        _primaryMusclesOptions.value = exercises.flatMap { it.primaryMuscles }.distinct()
-        _secondaryMusclesOptions.value = exercises.flatMap { it.secondaryMuscles }.distinct()
         _categoryOptions.value = exercises.map { it.category }.distinct()
+        val primaryMuscleOptions = exercises.flatMap { it.primaryMuscles }
+        val secondaryMuscleOptions = exercises.flatMap { it.secondaryMuscles }
+        val distinctMuscleOptions = (primaryMuscleOptions + secondaryMuscleOptions).distinct()
+        _muscleOptions.value = distinctMuscleOptions
     }
 
     private data class ExerciseWrapper(

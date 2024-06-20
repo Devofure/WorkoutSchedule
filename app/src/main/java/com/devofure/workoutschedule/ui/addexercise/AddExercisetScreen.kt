@@ -3,7 +3,6 @@
 package com.devofure.workoutschedule.ui.addexercise
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -17,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -50,12 +50,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.compose.rememberNavController
 import com.devofure.workoutschedule.data.Exercise
 import com.devofure.workoutschedule.ui.Navigate
-import com.devofure.workoutschedule.ui.OrientationPreviews
 import com.devofure.workoutschedule.ui.Route
 import com.devofure.workoutschedule.ui.WorkoutViewModel
 import com.devofure.workoutschedule.ui.theme.Colors
@@ -72,6 +72,10 @@ fun AddExerciseScreen(
     val filteredExercises by workoutViewModel.filteredExercises.collectAsState()
     val searchQuery by workoutViewModel.filterQuery.collectAsState()
 
+    val equipmentOptions by workoutViewModel.equipmentOptions.collectAsState()
+    val musclesOptions by workoutViewModel.muscleOptions.collectAsState()
+    val categoryOptions by workoutViewModel.categoryOptions.collectAsState()
+
     AddExerciseScreen(
         dayIndex = dayIndex,
         subTitle = subTitle,
@@ -80,9 +84,10 @@ fun AddExerciseScreen(
         isLoading = isLoading,
         onSearchQueryChange = { workoutViewModel.filterQuery.value = it },
         onAddWorkouts = workoutViewModel::addWorkouts,
-        selectedFilters = listOf("Category" to "Strength", "Level" to "Beginner"),
-        onFilterClick = {},
         navigate = navigate,
+        equipmentOptions = equipmentOptions,
+        musclesOptions = musclesOptions,
+        categoryOptions = categoryOptions,
     )
 }
 
@@ -95,13 +100,16 @@ fun AddExerciseScreen(
     isLoading: Boolean,
     onSearchQueryChange: (String) -> Unit,
     onAddWorkouts: (Int, List<Exercise>) -> Unit,
-    onFilterClick: () -> Unit,
-    selectedFilters: List<Pair<String, String>>,
     navigate: Navigate,
+    equipmentOptions: List<String>,
+    musclesOptions: List<String>,
+    categoryOptions: List<String>,
 ) {
+    var selectedFilters by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
     var selectedExercises by remember { mutableStateOf<List<Exercise>>(emptyList()) }
     val isSearchExpanded by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
+    var showDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(isSearchExpanded) {
         if (isSearchExpanded) {
@@ -173,13 +181,13 @@ fun AddExerciseScreen(
                             .focusRequester(focusRequester)
                     )
                 }
-                IconButton(onClick = { navigate.to(Route.FilterExercise) }) {
+                IconButton(onClick = { showDialog = true }) {
                     Icon(Icons.Filled.FilterList, contentDescription = "Filter")
                 }
             }
 
             if (selectedFilters.isNotEmpty()) {
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                FlowRow(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
                     selectedFilters.forEach { (attribute, value) ->
                         InputChip(
                             label = { Text("$attribute: $value") },
@@ -221,6 +229,54 @@ fun AddExerciseScreen(
                             }
                         )
                     }
+                }
+            }
+        }
+        if (showDialog) {
+            FilterDialog(
+                showDialog = { showDialog = it },
+                selectedFilters = { selectedFilters = it },
+                equipmentOptions = equipmentOptions,
+                musclesOptions = musclesOptions,
+                categoryOptions = categoryOptions,
+            )
+        }
+    }
+}
+
+@Composable
+private fun FilterDialog(
+    showDialog: (Boolean) -> Unit,
+    selectedFilters: (List<Pair<String, String>>) -> Unit,
+    equipmentOptions: List<String>,
+    musclesOptions: List<String>,
+    categoryOptions: List<String>
+) {
+    Dialog(onDismissRequest = { showDialog(false) }) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    style = MaterialTheme.typography.titleMedium,
+                    text = "Filter Exercises",
+                )
+                FilterExerciseScreen(
+                    onFiltersSelected = { filters ->
+                        selectedFilters(filters)
+                        showDialog(false)
+                    },
+                    equipmentOptions = equipmentOptions,
+                    musclesOptions = musclesOptions,
+                    categoryOptions = categoryOptions,
+                )
+                Spacer(modifier = Modifier.padding(24.dp))
+                TextButton(
+                    onClick = { showDialog(false) },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Text(text = "Close")
                 }
             }
         }
@@ -289,8 +345,7 @@ fun ExerciseItem(
     }
 }
 
-@PreviewLightDark
-@OrientationPreviews
+@Preview
 @Composable
 fun AddExerciseScreenPreview() {
     val navController = rememberNavController()
@@ -339,15 +394,15 @@ fun AddExerciseScreenPreview() {
             isLoading = false,
             onSearchQueryChange = {},
             onAddWorkouts = { _, _ -> },
-            onFilterClick = {},
-            selectedFilters = listOf(),
-            navigate = Navigate(navController)
+            navigate = Navigate(navController),
+            equipmentOptions = emptyList(),
+            musclesOptions = emptyList(),
+            categoryOptions = emptyList(),
         )
     }
 }
 
-@PreviewLightDark
-@OrientationPreviews
+@Preview
 @Composable
 fun AddExerciseScreenPreviewWithFilter() {
     val navController = rememberNavController()
@@ -396,22 +451,15 @@ fun AddExerciseScreenPreviewWithFilter() {
             isLoading = false,
             onSearchQueryChange = {},
             onAddWorkouts = { _, _ -> },
-            onFilterClick = {},
-            selectedFilters = listOf(
-                "Category" to "Strength",
-                "Category" to "Strength",
-                "Category" to "Strength",
-                "Category" to "Strength",
-                "Category" to "Strength",
-                "Level" to "Beginner"
-            ),
-            navigate = Navigate(navController)
+            navigate = Navigate(navController),
+            equipmentOptions = emptyList(),
+            musclesOptions = emptyList(),
+            categoryOptions = emptyList(),
         )
     }
 }
 
-@PreviewLightDark
-@OrientationPreviews
+@Preview
 @Composable
 fun ExerciseItemPreview() {
     MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
@@ -432,6 +480,20 @@ fun ExerciseItemPreview() {
             ),
             isSelected = false,
             onSelected = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun ExerciseFilterPreview() {
+    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+        FilterDialog(
+            showDialog = {},
+            selectedFilters = {},
+            equipmentOptions = emptyList(),
+            musclesOptions = emptyList(),
+            categoryOptions = emptyList(),
         )
     }
 }

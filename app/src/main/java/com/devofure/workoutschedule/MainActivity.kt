@@ -25,7 +25,6 @@ import com.devofure.workoutschedule.ui.Route
 import com.devofure.workoutschedule.ui.SharedViewModel
 import com.devofure.workoutschedule.ui.WorkoutViewModel
 import com.devofure.workoutschedule.ui.addexercise.AddExerciseScreen
-import com.devofure.workoutschedule.ui.addexercise.FilterExerciseScreen
 import com.devofure.workoutschedule.ui.calendar.CalendarScreen
 import com.devofure.workoutschedule.ui.calendar.CalendarViewModel
 import com.devofure.workoutschedule.ui.createexercise.CreateExerciseScreen
@@ -134,20 +133,6 @@ class MainActivity : ComponentActivity() {
                             navigate = navigate,
                         )
                     }
-                }
-                composable(Route.FilterExercise.route) {
-                    val equipmentOptions by workoutViewModel.equipmentOptions.collectAsState()
-                    val primaryMusclesOptions by workoutViewModel.primaryMusclesOptions.collectAsState()
-                    val secondaryMusclesOptions by workoutViewModel.secondaryMusclesOptions.collectAsState()
-                    val categoryOptions by workoutViewModel.categoryOptions.collectAsState()
-                    FilterExerciseScreen(
-                        equipmentOptions = equipmentOptions,
-                        primaryMusclesOptions = primaryMusclesOptions,
-                        secondaryMusclesOptions = secondaryMusclesOptions,
-                        categoryOptions = categoryOptions,
-                        onFiltersSelected = {},
-                        navigate = navigate
-                    )
                 }
                 composable(Route.CreateExercise.route) {
                     CreateExerciseScreen(

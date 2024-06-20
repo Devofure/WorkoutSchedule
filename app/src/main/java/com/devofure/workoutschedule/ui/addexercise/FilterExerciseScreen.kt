@@ -24,12 +24,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -42,86 +39,56 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.navigation.compose.rememberNavController
-import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.theme.Colors
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 
 @Composable
 fun FilterExerciseScreen(
     onFiltersSelected: (List<Pair<String, String>>) -> Unit,
-    navigate: Navigate,
     equipmentOptions: List<String>,
-    primaryMusclesOptions: List<String>,
-    secondaryMusclesOptions: List<String>,
+    musclesOptions: List<String>,
     categoryOptions: List<String>,
 ) {
     val selectedAttributes = remember { mutableStateListOf<Pair<String, String>>() }
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 8.dp)
+            .fillMaxWidth()
+    ) {
+        FilterComponent(
+            attributeName = "Equipment",
+            options = equipmentOptions,
+            selectedAttributes = selectedAttributes,
+            onFiltersSelected = onFiltersSelected,
+        )
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Filter Exercises") },
-                navigationIcon = {
-                    IconButton(onClick = navigate::back) {
-                        Icon(Icons.Filled.Close, contentDescription = "Close")
-                    }
-                },
-                actions = {
-                    TextButton(onClick = {
-                        onFiltersSelected(selectedAttributes)
-                        navigate.back()
-                    }) {
-                        Text(text = "Filter")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            )
-        },
-        content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .padding(16.dp)
-                    .fillMaxWidth()
-            ) {
-                FilterComponent(
-                    attributeName = "Equipment",
-                    options = equipmentOptions,
-                    selectedAttributes = selectedAttributes
-                )
+        FilterComponent(
+            attributeName = "Primary Muscles",
+            options = musclesOptions,
+            selectedAttributes = selectedAttributes,
+            onFiltersSelected = onFiltersSelected
+        )
 
-                FilterComponent(
-                    attributeName = "Primary Muscles",
-                    options = primaryMusclesOptions,
-                    selectedAttributes = selectedAttributes
-                )
+        FilterComponent(
+            attributeName = "Secondary Muscles",
+            options = musclesOptions,
+            selectedAttributes = selectedAttributes,
+            onFiltersSelected = onFiltersSelected
+        )
 
-                FilterComponent(
-                    attributeName = "Secondary Muscles",
-                    options = secondaryMusclesOptions,
-                    selectedAttributes = selectedAttributes
-                )
+        FilterComponent(
+            attributeName = "Category",
+            options = categoryOptions,
+            selectedAttributes = selectedAttributes,
+            onFiltersSelected = onFiltersSelected
+        )
 
-                FilterComponent(
-                    attributeName = "Category",
-                    options = categoryOptions,
-                    selectedAttributes = selectedAttributes
-                )
-
-                if (selectedAttributes.isNotEmpty()) {
-                    TextButton(onClick = { selectedAttributes.clear() }) {
-                        Text(text = "Clear Filters", color = MaterialTheme.colorScheme.error)
-                    }
-                }
+        if (selectedAttributes.isNotEmpty()) {
+            TextButton(onClick = { selectedAttributes.clear() }) {
+                Text(text = "Clear Filters", color = MaterialTheme.colorScheme.error)
             }
         }
-    )
+    }
 }
 
 
@@ -129,14 +96,15 @@ fun FilterExerciseScreen(
 fun FilterComponent(
     attributeName: String,
     options: List<String>,
-    selectedAttributes: SnapshotStateList<Pair<String, String>>
+    selectedAttributes: SnapshotStateList<Pair<String, String>>,
+    onFiltersSelected: (List<Pair<String, String>>) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var filteredOptions by remember { mutableStateOf<List<String>>(emptyList()) }
     var showOptions by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
-        Text(text = attributeName, style = MaterialTheme.typography.titleMedium)
+        Text(text = attributeName, style = MaterialTheme.typography.titleSmall)
         if (selectedAttributes.any { it.first == attributeName }) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 selectedAttributes.filter { it.first == attributeName }.forEach { attribute ->
@@ -197,6 +165,7 @@ fun FilterComponent(
                             } else {
                                 selectedAttributes.add(pair)
                             }
+                            onFiltersSelected(selectedAttributes)
                         }
                     )
                 }
@@ -258,10 +227,8 @@ fun ExerciseFilterScreenPreview() {
     MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
         FilterExerciseScreen(
             onFiltersSelected = {},
-            navigate = Navigate(rememberNavController()),
             equipmentOptions = emptyList(),
-            primaryMusclesOptions = emptyList(),
-            secondaryMusclesOptions = emptyList(),
+            musclesOptions = emptyList(),
             categoryOptions = emptyList(),
         )
     }
