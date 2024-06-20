@@ -16,7 +16,9 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -25,6 +27,12 @@ import java.util.Locale
 
 class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
     private val exerciseRepository = ExerciseRepository(application.applicationContext)
+    val equipmentOptions: StateFlow<List<String>> = exerciseRepository.equipmentOptions
+    val primaryMusclesOptions: StateFlow<List<String>> = exerciseRepository.primaryMusclesOptions
+    val secondaryMusclesOptions: StateFlow<List<String>> =
+        exerciseRepository.secondaryMusclesOptions
+    val categoryOptions: StateFlow<List<String>> = exerciseRepository.categoryOptions
+
     private val _workouts = MutableStateFlow<Map<Int, List<Workout>>>(emptyMap())
     private val sharedPreferences =
         application.applicationContext.getSharedPreferences("WorkoutApp", Context.MODE_PRIVATE)
@@ -41,8 +49,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
-
-    val searchQuery = MutableStateFlow("")
+    val filterQuery = MutableStateFlow("")
 
     init {
         viewModelScope.launch {
@@ -52,12 +59,21 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 loadUserSchedule()
             }
         }
+        setupFilter()
+    }
 
-        viewModelScope.launch {
-            searchQuery.collect { query ->
-                searchExercises(query)
-            }
-        }
+    private fun setupFilter() {
+        exerciseRepository.exercises.onEach {
+            _isLoading.value = true
+            _filteredExercises.value = exerciseRepository.filterExercises(filterQuery.value)
+            _isLoading.value = false
+        }.launchIn(viewModelScope)
+
+        filterQuery.onEach { query ->
+            _isLoading.value = true
+            _filteredExercises.value = exerciseRepository.filterExercises(query)
+            _isLoading.value = false
+        }.launchIn(viewModelScope)
     }
 
     fun logWorkout(workout: Workout, date: LocalDate) {
@@ -199,12 +215,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
     private fun getNextWorkoutId(): Int {
         return nextWorkoutId++
-    }
-
-    private fun searchExercises(query: String) {
-        _isLoading.value = true
-        _filteredExercises.value = exerciseRepository.searchExercises(query)
-        _isLoading.value = false
     }
 
     fun updateWorkoutOrder(dayIndex: Int, updatedList: List<Workout>) {

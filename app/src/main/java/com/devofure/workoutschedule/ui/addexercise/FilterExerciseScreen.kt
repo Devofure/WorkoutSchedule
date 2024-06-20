@@ -22,6 +22,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -49,7 +50,11 @@ import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 @Composable
 fun FilterExerciseScreen(
     onFiltersSelected: (List<Pair<String, String>>) -> Unit,
-    navigate: Navigate
+    navigate: Navigate,
+    equipmentOptions: List<String>,
+    primaryMusclesOptions: List<String>,
+    secondaryMusclesOptions: List<String>,
+    categoryOptions: List<String>,
 ) {
     val selectedAttributes = remember { mutableStateListOf<Pair<String, String>>() }
 
@@ -87,16 +92,25 @@ fun FilterExerciseScreen(
             ) {
                 FilterComponent(
                     attributeName = "Equipment",
+                    options = equipmentOptions,
                     selectedAttributes = selectedAttributes
                 )
 
                 FilterComponent(
-                    attributeName = "Muscles (Primary and Secondary)",
+                    attributeName = "Primary Muscles",
+                    options = primaryMusclesOptions,
+                    selectedAttributes = selectedAttributes
+                )
+
+                FilterComponent(
+                    attributeName = "Secondary Muscles",
+                    options = secondaryMusclesOptions,
                     selectedAttributes = selectedAttributes
                 )
 
                 FilterComponent(
                     attributeName = "Category",
+                    options = categoryOptions,
                     selectedAttributes = selectedAttributes
                 )
 
@@ -110,9 +124,11 @@ fun FilterExerciseScreen(
     )
 }
 
+
 @Composable
 fun FilterComponent(
     attributeName: String,
+    options: List<String>,
     selectedAttributes: SnapshotStateList<Pair<String, String>>
 ) {
     var searchQuery by remember { mutableStateOf("") }
@@ -122,13 +138,22 @@ fun FilterComponent(
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         Text(text = attributeName, style = MaterialTheme.typography.titleMedium)
         if (selectedAttributes.any { it.first == attributeName }) {
-            FlowRow(
-                verticalArrangement = Arrangement.spacedBy(4.dp) // Add spacing between rows
-            ) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 selectedAttributes.filter { it.first == attributeName }.forEach { attribute ->
-                    Chip(
-                        text = attribute.second,
-                        onRemove = { selectedAttributes.remove(attribute) },
+                    InputChip(
+                        label = { Text(attribute.second) },
+                        onClick = {},
+                        selected = false,
+                        trailingIcon = {
+                            IconButton(
+                                modifier = Modifier.size(24.dp),
+                                onClick = {
+                                    selectedAttributes.remove(attribute)
+                                },
+                            ) {
+                                Icon(Icons.Filled.Close, contentDescription = "Remove")
+                            }
+                        },
                     )
                 }
             }
@@ -138,7 +163,8 @@ fun FilterComponent(
             value = searchQuery,
             onValueChange = {
                 searchQuery = it
-                filteredOptions = filterOptions(attributeName, it)
+                filteredOptions =
+                    options.filter { option -> option.contains(it, ignoreCase = true) }
                 showOptions = it.isNotEmpty()
             },
             singleLine = true,
@@ -186,9 +212,12 @@ fun AttributeItem(
     onSelected: () -> Unit
 ) {
     val backgroundColor =
-        if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+        if (isSelected) MaterialTheme.colorScheme.primary
+        else MaterialTheme.colorScheme.surface
+
     val contentColor =
-        if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+        if (isSelected) MaterialTheme.colorScheme.onPrimary
+        else MaterialTheme.colorScheme.onSurface
 
     Card(
         modifier = Modifier
@@ -223,55 +252,17 @@ fun AttributeItem(
     }
 }
 
-@Composable
-fun Chip(text: String, onRemove: () -> Unit) {
-    Card(
-        shape = MaterialTheme.shapes.small,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
-        ),
-        modifier = Modifier.padding(end = 8.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-        ) {
-            Text(text = text, style = MaterialTheme.typography.bodyMedium)
-            Spacer(modifier = Modifier.size(4.dp))
-            Icon(
-                imageVector = Icons.Filled.Close,
-                contentDescription = "Remove",
-                modifier = Modifier
-                    .size(16.dp)
-                    .clickable { onRemove() }
-            )
-        }
-    }
-}
-
-fun filterOptions(attributeName: String, query: String): List<String> {
-    val allOptions = when (attributeName) {
-        "Equipment" -> listOf("Dumbbell", "Barbell", "Machine", "Bodyweight")
-        "Primary Muscles" -> listOf("Chest", "Back", "Legs", "Arms")
-        "Secondary Muscles" -> listOf("Shoulders", "Triceps", "Biceps", "Calves")
-        "Category" -> listOf("Strength", "Cardio", "Flexibility")
-        else -> emptyList()
-    }
-    return if (query.isBlank()) {
-        emptyList()
-    } else {
-        allOptions.filter { it.contains(query, ignoreCase = true) }
-    }
-}
-
 @PreviewLightDark
 @Composable
 fun ExerciseFilterScreenPreview() {
     MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
         FilterExerciseScreen(
             onFiltersSelected = {},
-            navigate = Navigate(rememberNavController())
+            navigate = Navigate(rememberNavController()),
+            equipmentOptions = emptyList(),
+            primaryMusclesOptions = emptyList(),
+            secondaryMusclesOptions = emptyList(),
+            categoryOptions = emptyList(),
         )
     }
 }

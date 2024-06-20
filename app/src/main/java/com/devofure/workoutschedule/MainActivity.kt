@@ -98,20 +98,10 @@ class MainActivity : ComponentActivity() {
                     val dayIndexParam =
                         backStackEntry.arguments?.getInt(Route.AddExercise.parameterName)
                             ?: return@composable
-                    val isLoading by workoutViewModel.isLoading.collectAsState()
-                    val filteredExercises by workoutViewModel.filteredExercises.collectAsState()
-                    val searchQuery by workoutViewModel.searchQuery.collectAsState()
-
                     AddExerciseScreen(
                         dayIndex = dayIndexParam,
                         subTitle = WEEK[dayIndexParam].getFullName(dayNamingPreference),
-                        searchQuery = searchQuery,
-                        filteredExercises = filteredExercises,
-                        isLoading = isLoading,
-                        onSearchQueryChange = { workoutViewModel.searchQuery.value = it },
-                        onAddWorkouts = workoutViewModel::addWorkouts,
-                        selectedFilters = listOf("Category" to "Strength", "Level" to "Beginner"),
-                        onFilterClick = {},
+                        workoutViewModel = workoutViewModel,
                         navigate = navigate,
                     )
                 }
@@ -146,7 +136,15 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 composable(Route.FilterExercise.route) {
+                    val equipmentOptions by workoutViewModel.equipmentOptions.collectAsState()
+                    val primaryMusclesOptions by workoutViewModel.primaryMusclesOptions.collectAsState()
+                    val secondaryMusclesOptions by workoutViewModel.secondaryMusclesOptions.collectAsState()
+                    val categoryOptions by workoutViewModel.categoryOptions.collectAsState()
                     FilterExerciseScreen(
+                        equipmentOptions = equipmentOptions,
+                        primaryMusclesOptions = primaryMusclesOptions,
+                        secondaryMusclesOptions = secondaryMusclesOptions,
+                        categoryOptions = categoryOptions,
                         onFiltersSelected = {},
                         navigate = navigate
                     )

@@ -1,11 +1,13 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 
 package com.devofure.workoutschedule.ui.addexercise
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,6 +30,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -37,6 +40,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,8 +57,34 @@ import com.devofure.workoutschedule.data.Exercise
 import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.OrientationPreviews
 import com.devofure.workoutschedule.ui.Route
+import com.devofure.workoutschedule.ui.WorkoutViewModel
 import com.devofure.workoutschedule.ui.theme.Colors
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
+
+@Composable
+fun AddExerciseScreen(
+    subTitle: String,
+    dayIndex: Int,
+    workoutViewModel: WorkoutViewModel,
+    navigate: Navigate,
+) {
+    val isLoading by workoutViewModel.isLoading.collectAsState()
+    val filteredExercises by workoutViewModel.filteredExercises.collectAsState()
+    val searchQuery by workoutViewModel.filterQuery.collectAsState()
+
+    AddExerciseScreen(
+        dayIndex = dayIndex,
+        subTitle = subTitle,
+        searchQuery = searchQuery,
+        filteredExercises = filteredExercises,
+        isLoading = isLoading,
+        onSearchQueryChange = { workoutViewModel.filterQuery.value = it },
+        onAddWorkouts = workoutViewModel::addWorkouts,
+        selectedFilters = listOf("Category" to "Strength", "Level" to "Beginner"),
+        onFilterClick = {},
+        navigate = navigate,
+    )
+}
 
 @Composable
 fun AddExerciseScreen(
@@ -148,9 +178,23 @@ fun AddExerciseScreen(
                 }
             }
 
-            selectedFilters.forEach { (attribute, value) ->
-                FilterTag(attribute, value) {
-                    onFilterClick()
+            if (selectedFilters.isNotEmpty()) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    selectedFilters.forEach { (attribute, value) ->
+                        InputChip(
+                            label = { Text("$attribute: $value") },
+                            onClick = {},
+                            selected = false,
+                            trailingIcon = {
+                                IconButton(
+                                    onClick = {},
+                                    modifier = Modifier.size(24.dp)
+                                ) {
+                                    Icon(Icons.Filled.Close, contentDescription = "Remove")
+                                }
+                            },
+                        )
+                    }
                 }
             }
 
@@ -180,31 +224,6 @@ fun AddExerciseScreen(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun FilterTag(attribute: String, value: String, onRemove: () -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .background(MaterialTheme.colorScheme.primary, MaterialTheme.shapes.small)
-            .clickable(onClick = onRemove)
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-    ) {
-        Text(
-            text = "$attribute: $value",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onPrimary
-        )
-        Spacer(modifier = Modifier.size(8.dp))
-        Icon(
-            imageVector = Icons.Filled.Close,
-            contentDescription = "Remove Filter",
-            modifier = Modifier.size(16.dp),
-            tint = MaterialTheme.colorScheme.onPrimary
-        )
     }
 }
 
@@ -378,7 +397,14 @@ fun AddExerciseScreenPreviewWithFilter() {
             onSearchQueryChange = {},
             onAddWorkouts = { _, _ -> },
             onFilterClick = {},
-            selectedFilters = listOf("Category" to "Strength", "Level" to "Beginner"),
+            selectedFilters = listOf(
+                "Category" to "Strength",
+                "Category" to "Strength",
+                "Category" to "Strength",
+                "Category" to "Strength",
+                "Category" to "Strength",
+                "Level" to "Beginner"
+            ),
             navigate = Navigate(navController)
         )
     }

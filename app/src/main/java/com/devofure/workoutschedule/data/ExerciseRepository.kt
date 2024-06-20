@@ -3,10 +3,14 @@ package com.devofure.workoutschedule.data
 import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.io.IOException
 
 data class Exercise(
@@ -21,12 +25,35 @@ data class Exercise(
     val category: String,
 )
 
-class ExerciseRepository(private val context: Context) {
+class ExerciseRepository(
+    private val context: Context,
+    coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+) {
     private val _exercises = MutableStateFlow<List<Exercise>>(emptyList())
     val exercises: StateFlow<List<Exercise>> = _exercises.asStateFlow()
 
+    // Preloaded data
+    private val _equipmentOptions = MutableStateFlow<List<String>>(emptyList())
+    val equipmentOptions: StateFlow<List<String>> = _equipmentOptions.asStateFlow()
+
+    private val _primaryMusclesOptions = MutableStateFlow<List<String>>(emptyList())
+    val primaryMusclesOptions: StateFlow<List<String>> = _primaryMusclesOptions.asStateFlow()
+
+    private val _secondaryMusclesOptions = MutableStateFlow<List<String>>(emptyList())
+    val secondaryMusclesOptions: StateFlow<List<String>> = _secondaryMusclesOptions.asStateFlow()
+
+    private val _categoryOptions = MutableStateFlow<List<String>>(emptyList())
+    val categoryOptions: StateFlow<List<String>> = _categoryOptions.asStateFlow()
+
     init {
+        coroutineScope.launch(Dispatchers.IO) {
+            prepareData()
+        }
+    }
+
+    private fun prepareData() {
         loadExercises()
+        preloadOptions()
     }
 
     private fun loadExercises() {
@@ -44,8 +71,8 @@ class ExerciseRepository(private val context: Context) {
             inputStream.read(buffer)
             inputStream.close()
             String(buffer, Charsets.UTF_8)
-        } catch (ex: IOException) {
-            ex.printStackTrace()
+        } catch (e: IOException) {
+            Timber.e(e)
             null
         }
     }
@@ -54,7 +81,7 @@ class ExerciseRepository(private val context: Context) {
         return exercises.value.find { it.name == name }
     }
 
-    fun searchExercises(query: String): List<Exercise> {
+    fun filterExercises(query: String): List<Exercise> {
         return exercises.value.filter {
             it.name.contains(query, ignoreCase = true) ||
                     it.equipment?.contains(query, ignoreCase = true) == true ||
@@ -63,6 +90,13 @@ class ExerciseRepository(private val context: Context) {
         }
     }
 
+    private fun preloadOptions() {
+        val exercises = _exercises.value
+        _equipmentOptions.value = exercises.mapNotNull { it.equipment }.distinct()
+        _primaryMusclesOptions.value = exercises.flatMap { it.primaryMuscles }.distinct()
+        _secondaryMusclesOptions.value = exercises.flatMap { it.secondaryMuscles }.distinct()
+        _categoryOptions.value = exercises.map { it.category }.distinct()
+    }
 
     private data class ExerciseWrapper(
         val exercises: List<Exercise>
