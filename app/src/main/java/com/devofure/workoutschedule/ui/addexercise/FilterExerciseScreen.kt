@@ -3,6 +3,7 @@
 package com.devofure.workoutschedule.ui.addexercise
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -115,16 +116,18 @@ fun FilterComponent(
 ) {
     var searchQuery by remember { mutableStateOf("") }
     var filteredOptions by remember { mutableStateOf<List<String>>(emptyList()) }
-    var showOptions by remember { mutableStateOf(true) }
+    var showOptions by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         Text(text = attributeName, style = MaterialTheme.typography.titleMedium)
-        if (selectedAttributes.isNotEmpty()) {
-            FlowRow {
+        if (selectedAttributes.any { it.first == attributeName }) {
+            FlowRow(
+                verticalArrangement = Arrangement.spacedBy(4.dp) // Add spacing between rows
+            ) {
                 selectedAttributes.filter { it.first == attributeName }.forEach { attribute ->
                     Chip(
                         text = attribute.second,
-                        onRemove = { selectedAttributes.remove(attribute) }
+                        onRemove = { selectedAttributes.remove(attribute) },
                     )
                 }
             }
@@ -135,7 +138,7 @@ fun FilterComponent(
             onValueChange = {
                 searchQuery = it
                 filteredOptions = filterOptions(attributeName, it)
-                showOptions = true
+                showOptions = it.isNotEmpty()
             },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
@@ -167,7 +170,6 @@ fun FilterComponent(
                             } else {
                                 selectedAttributes.add(pair)
                             }
-                            showOptions = false
                         }
                     )
                 }
@@ -250,7 +252,7 @@ fun filterOptions(attributeName: String, query: String): List<String> {
         else -> emptyList()
     }
     return if (query.isBlank()) {
-        allOptions
+        emptyList()
     } else {
         allOptions.filter { it.contains(query, ignoreCase = true) }
     }
