@@ -2,6 +2,7 @@
 
 package com.devofure.workoutschedule.ui.addexercise
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,20 +65,13 @@ fun AddExerciseScreen(
     isLoading: Boolean,
     onSearchQueryChange: (String) -> Unit,
     onAddWorkouts: (Int, List<Exercise>) -> Unit,
+    onFilterClick: () -> Unit,
+    selectedFilters: List<Pair<String, String>>,
     navigate: Navigate,
 ) {
     var selectedExercises by remember { mutableStateOf<List<Exercise>>(emptyList()) }
     val isSearchExpanded by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
-    var selectedFilters by remember {
-        mutableStateOf<List<String>>(
-            listOf(
-                "test",
-                "sdfds",
-                "dsfdf"
-            )
-        )
-    }
 
     LaunchedEffect(isSearchExpanded) {
         if (isSearchExpanded) {
@@ -130,58 +124,36 @@ fun AddExerciseScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.CenterEnd
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier.weight(1f)
+                ) {
                     TextField(
                         value = searchQuery,
                         onValueChange = { onSearchQueryChange(it) },
                         placeholder = { Text("Search Exercises") },
                         singleLine = true,
                         modifier = Modifier
-                            .weight(1f)
+                            .fillMaxWidth()
                             .focusRequester(focusRequester)
                     )
-                    IconButton(onClick = { navigate.to(Route.FilterExercise) }) {
-                        Icon(Icons.Filled.FilterList, contentDescription = "Filter")
-                    }
+                }
+                IconButton(onClick = { navigate.to(Route.FilterExercise) }) {
+                    Icon(Icons.Filled.FilterList, contentDescription = "Filter")
                 }
             }
-            if (selectedFilters.isNotEmpty()) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
-                    selectedFilters.forEach { filter ->
-                        Card(
-                            modifier = Modifier.padding(end = 8.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary
-                            )
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(8.dp)
-                            ) {
-                                Text(text = filter)
-                                Icon(
-                                    imageVector = Icons.Filled.Close,
-                                    contentDescription = "Remove Filter",
-                                    modifier = Modifier
-                                        .size(16.dp)
-                                        .clickable {
-                                            selectedFilters = selectedFilters - filter
-                                        }
-                                )
-                            }
-                        }
-                    }
+
+            selectedFilters.forEach { (attribute, value) ->
+                FilterTag(attribute, value) {
+                    onFilterClick()
                 }
             }
+
             if (isLoading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
@@ -208,6 +180,31 @@ fun AddExerciseScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun FilterTag(attribute: String, value: String, onRemove: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .background(MaterialTheme.colorScheme.primary, MaterialTheme.shapes.small)
+            .clickable(onClick = onRemove)
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+    ) {
+        Text(
+            text = "$attribute: $value",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onPrimary
+        )
+        Spacer(modifier = Modifier.size(8.dp))
+        Icon(
+            imageVector = Icons.Filled.Close,
+            contentDescription = "Remove Filter",
+            modifier = Modifier.size(16.dp),
+            tint = MaterialTheme.colorScheme.onPrimary
+        )
     }
 }
 
@@ -323,6 +320,8 @@ fun AddExerciseScreenPreview() {
             isLoading = false,
             onSearchQueryChange = {},
             onAddWorkouts = { _, _ -> },
+            onFilterClick = {},
+            selectedFilters = listOf(),
             navigate = Navigate(navController)
         )
     }
@@ -378,6 +377,8 @@ fun AddExerciseScreenPreviewWithFilter() {
             isLoading = false,
             onSearchQueryChange = {},
             onAddWorkouts = { _, _ -> },
+            onFilterClick = {},
+            selectedFilters = listOf("Category" to "Strength", "Level" to "Beginner"),
             navigate = Navigate(navController)
         )
     }

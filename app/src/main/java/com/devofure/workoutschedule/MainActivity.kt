@@ -25,7 +25,7 @@ import com.devofure.workoutschedule.ui.Route
 import com.devofure.workoutschedule.ui.SharedViewModel
 import com.devofure.workoutschedule.ui.WorkoutViewModel
 import com.devofure.workoutschedule.ui.addexercise.AddExerciseScreen
-import com.devofure.workoutschedule.ui.addexercise.ExerciseFilterScreen
+import com.devofure.workoutschedule.ui.addexercise.FilterExerciseScreen
 import com.devofure.workoutschedule.ui.calendar.CalendarScreen
 import com.devofure.workoutschedule.ui.calendar.CalendarViewModel
 import com.devofure.workoutschedule.ui.createexercise.CreateExerciseScreen
@@ -109,9 +109,9 @@ class MainActivity : ComponentActivity() {
                         filteredExercises = filteredExercises,
                         isLoading = isLoading,
                         onSearchQueryChange = { workoutViewModel.searchQuery.value = it },
-                        onAddWorkouts = { dayIndex, exercises ->
-                            workoutViewModel.addWorkouts(dayIndex, exercises)
-                        },
+                        onAddWorkouts = workoutViewModel::addWorkouts,
+                        selectedFilters = listOf("Category" to "Strength", "Level" to "Beginner"),
+                        onFilterClick = {},
                         navigate = navigate,
                     )
                 }
@@ -146,7 +146,7 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 composable(Route.FilterExercise.route) {
-                    ExerciseFilterScreen(
+                    FilterExerciseScreen(
                         onFiltersSelected = {},
                         navigate = navigate
                     )
