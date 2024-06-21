@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -50,9 +50,11 @@ fun FilterExerciseScreen(
     categoryOptions: List<String>,
 ) {
     val selectedAttributes = remember { mutableStateListOf<Pair<String, String>>() }
+    val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
             .padding(horizontal = 8.dp)
+            .verticalScroll(state = scrollState)
             .fillMaxWidth()
     ) {
         FilterComponent(
@@ -63,18 +65,12 @@ fun FilterExerciseScreen(
         )
 
         FilterComponent(
-            attributeName = "Primary Muscles",
+            attributeName = "Muscles",
             options = musclesOptions,
             selectedAttributes = selectedAttributes,
             onFiltersSelected = onFiltersSelected
         )
 
-        FilterComponent(
-            attributeName = "Secondary Muscles",
-            options = musclesOptions,
-            selectedAttributes = selectedAttributes,
-            onFiltersSelected = onFiltersSelected
-        )
 
         FilterComponent(
             attributeName = "Category",
@@ -90,7 +86,6 @@ fun FilterExerciseScreen(
         }
     }
 }
-
 
 @Composable
 fun FilterComponent(
@@ -117,6 +112,7 @@ fun FilterComponent(
                                 modifier = Modifier.size(24.dp),
                                 onClick = {
                                     selectedAttributes.remove(attribute)
+                                    onFiltersSelected(selectedAttributes) // Update the selected filters
                                 },
                             ) {
                                 Icon(Icons.Filled.Close, contentDescription = "Remove")
@@ -153,8 +149,8 @@ fun FilterComponent(
         Spacer(modifier = Modifier.size(8.dp))
 
         if (showOptions) {
-            LazyColumn {
-                items(filteredOptions) { option ->
+            Column {
+                filteredOptions.take(5).forEach { option ->
                     AttributeItem(
                         attribute = option,
                         isSelected = selectedAttributes.contains(Pair(attributeName, option)),
@@ -165,7 +161,7 @@ fun FilterComponent(
                             } else {
                                 selectedAttributes.add(pair)
                             }
-                            onFiltersSelected(selectedAttributes)
+                            onFiltersSelected(selectedAttributes) // Update the selected filters
                         }
                     )
                 }

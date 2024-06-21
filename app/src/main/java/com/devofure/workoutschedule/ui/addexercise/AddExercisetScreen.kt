@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -254,24 +255,27 @@ private fun FilterDialog(
 ) {
     Dialog(onDismissRequest = { showDialog(false) }) {
         Card(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 100.dp, max = 600.dp), // Set a maximum height for the dialog
             shape = RoundedCornerShape(16.dp),
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                     style = MaterialTheme.typography.titleMedium,
-                    text = "Filter Exercises",
+                    text = "Filter",
                 )
-                FilterExerciseScreen(
-                    onFiltersSelected = { filters ->
-                        selectedFilters(filters)
-                        showDialog(false)
-                    },
-                    equipmentOptions = equipmentOptions,
-                    musclesOptions = musclesOptions,
-                    categoryOptions = categoryOptions,
-                )
-                Spacer(modifier = Modifier.padding(24.dp))
+                Box(modifier = Modifier.weight(1f)) {
+                    FilterExerciseScreen(
+                        onFiltersSelected = { filters ->
+                            selectedFilters(filters)
+                        },
+                        equipmentOptions = equipmentOptions,
+                        musclesOptions = musclesOptions,
+                        categoryOptions = categoryOptions,
+                    )
+                }
+                Spacer(modifier = Modifier.padding(8.dp))
                 TextButton(
                     onClick = { showDialog(false) },
                     modifier = Modifier.align(Alignment.CenterHorizontally)
@@ -282,6 +286,7 @@ private fun FilterDialog(
         }
     }
 }
+
 
 @Composable
 fun ExerciseItem(
