@@ -72,6 +72,7 @@ fun AddExerciseScreen(
     val isLoading by workoutViewModel.isLoading.collectAsState()
     val filteredExercises by workoutViewModel.filteredExercises.collectAsState()
     val searchQuery by workoutViewModel.filterQuery.collectAsState()
+    val selectedFilters by workoutViewModel.selectedFilters.collectAsState()
 
     val equipmentOptions by workoutViewModel.equipmentOptions.collectAsState()
     val musclesOptions by workoutViewModel.muscleOptions.collectAsState()
@@ -89,6 +90,8 @@ fun AddExerciseScreen(
         equipmentOptions = equipmentOptions,
         musclesOptions = musclesOptions,
         categoryOptions = categoryOptions,
+        selectedFilters = selectedFilters,
+        onFiltersSelected = { workoutViewModel.selectedFilters.value = it }
     )
 }
 
@@ -105,8 +108,9 @@ fun AddExerciseScreen(
     equipmentOptions: List<String>,
     musclesOptions: List<String>,
     categoryOptions: List<String>,
+    selectedFilters: List<Pair<String, String>>,
+    onFiltersSelected: (List<Pair<String, String>>) -> Unit
 ) {
-    var selectedFilters by remember { mutableStateOf<List<Pair<String, String>>>(emptyList()) }
     var selectedExercises by remember { mutableStateOf<List<Exercise>>(emptyList()) }
     val isSearchExpanded by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
@@ -236,7 +240,8 @@ fun AddExerciseScreen(
         if (showDialog) {
             FilterDialog(
                 showDialog = { showDialog = it },
-                selectedFilters = { selectedFilters = it },
+                selectedFilters = onFiltersSelected,
+                currentFilters = selectedFilters,
                 equipmentOptions = equipmentOptions,
                 musclesOptions = musclesOptions,
                 categoryOptions = categoryOptions,
@@ -249,6 +254,7 @@ fun AddExerciseScreen(
 private fun FilterDialog(
     showDialog: (Boolean) -> Unit,
     selectedFilters: (List<Pair<String, String>>) -> Unit,
+    currentFilters: List<Pair<String, String>>,
     equipmentOptions: List<String>,
     musclesOptions: List<String>,
     categoryOptions: List<String>
@@ -267,6 +273,7 @@ private fun FilterDialog(
                 )
                 Box(modifier = Modifier.weight(1f)) {
                     FilterExerciseScreen(
+                        currentFilters = currentFilters,
                         onFiltersSelected = { filters ->
                             selectedFilters(filters)
                         },
@@ -403,6 +410,8 @@ fun AddExerciseScreenPreview() {
             equipmentOptions = emptyList(),
             musclesOptions = emptyList(),
             categoryOptions = emptyList(),
+            selectedFilters = emptyList(),
+            onFiltersSelected = {},
         )
     }
 }
@@ -460,6 +469,8 @@ fun AddExerciseScreenPreviewWithFilter() {
             equipmentOptions = emptyList(),
             musclesOptions = emptyList(),
             categoryOptions = emptyList(),
+            selectedFilters = emptyList(),
+            onFiltersSelected = {},
         )
     }
 }
@@ -499,6 +510,7 @@ fun ExerciseFilterPreview() {
             equipmentOptions = emptyList(),
             musclesOptions = emptyList(),
             categoryOptions = emptyList(),
+            currentFilters = emptyList(),
         )
     }
 }

@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -44,17 +45,23 @@ import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 
 @Composable
 fun FilterExerciseScreen(
+    currentFilters: List<Pair<String, String>>,
     onFiltersSelected: (List<Pair<String, String>>) -> Unit,
     equipmentOptions: List<String>,
     musclesOptions: List<String>,
     categoryOptions: List<String>,
 ) {
     val selectedAttributes = remember { mutableStateListOf<Pair<String, String>>() }
+
+    LaunchedEffect(currentFilters) {
+        selectedAttributes.clear()
+        selectedAttributes.addAll(currentFilters)
+    }
     val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
             .padding(horizontal = 8.dp)
-            .verticalScroll(state = scrollState)
+            .verticalScroll(scrollState)
             .fillMaxWidth()
     ) {
         FilterComponent(
@@ -70,7 +77,6 @@ fun FilterExerciseScreen(
             selectedAttributes = selectedAttributes,
             onFiltersSelected = onFiltersSelected
         )
-
 
         FilterComponent(
             attributeName = "Category",
@@ -102,24 +108,26 @@ fun FilterComponent(
         Text(text = attributeName, style = MaterialTheme.typography.titleSmall)
         if (selectedAttributes.any { it.first == attributeName }) {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                selectedAttributes.filter { it.first == attributeName }.forEach { attribute ->
-                    InputChip(
-                        label = { Text(attribute.second) },
-                        onClick = {},
-                        selected = false,
-                        trailingIcon = {
-                            IconButton(
-                                modifier = Modifier.size(24.dp),
-                                onClick = {
-                                    selectedAttributes.remove(attribute)
-                                    onFiltersSelected(selectedAttributes) // Update the selected filters
-                                },
-                            ) {
-                                Icon(Icons.Filled.Close, contentDescription = "Remove")
-                            }
-                        },
-                    )
-                }
+                selectedAttributes
+                    .filter { it.first == attributeName }
+                    .forEach { attribute ->
+                        InputChip(
+                            label = { Text(attribute.second) },
+                            onClick = {},
+                            selected = false,
+                            trailingIcon = {
+                                IconButton(
+                                    modifier = Modifier.size(24.dp),
+                                    onClick = {
+                                        selectedAttributes.remove(attribute)
+                                        onFiltersSelected(selectedAttributes)
+                                    },
+                                ) {
+                                    Icon(Icons.Filled.Close, contentDescription = "Remove")
+                                }
+                            },
+                        )
+                    }
             }
         }
 
@@ -150,7 +158,7 @@ fun FilterComponent(
 
         if (showOptions) {
             Column {
-                filteredOptions.take(5).forEach { option ->
+                filteredOptions.take(10).forEach { option ->
                     AttributeItem(
                         attribute = option,
                         isSelected = selectedAttributes.contains(Pair(attributeName, option)),
@@ -161,7 +169,7 @@ fun FilterComponent(
                             } else {
                                 selectedAttributes.add(pair)
                             }
-                            onFiltersSelected(selectedAttributes) // Update the selected filters
+                            onFiltersSelected(selectedAttributes)
                         }
                     )
                 }
@@ -222,6 +230,7 @@ fun AttributeItem(
 fun ExerciseFilterScreenPreview() {
     MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
         FilterExerciseScreen(
+            currentFilters = emptyList(),
             onFiltersSelected = {},
             equipmentOptions = emptyList(),
             musclesOptions = emptyList(),

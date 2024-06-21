@@ -48,6 +48,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
     val filterQuery = MutableStateFlow("")
+    val selectedFilters = MutableStateFlow<List<Pair<String, String>>>(emptyList())
 
     init {
         viewModelScope.launch {
@@ -63,16 +64,53 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     private fun setupFilter() {
         exerciseRepository.exercises.onEach {
             _isLoading.value = true
-            _filteredExercises.value = exerciseRepository.filterExercises(filterQuery.value)
+            _filteredExercises.value = filterExercises(filterQuery.value, selectedFilters.value)
             _isLoading.value = false
         }.launchIn(viewModelScope)
 
         filterQuery.onEach { query ->
             _isLoading.value = true
-            _filteredExercises.value = exerciseRepository.filterExercises(query)
+            _filteredExercises.value = filterExercises(query, selectedFilters.value)
+            _isLoading.value = false
+        }.launchIn(viewModelScope)
+
+        selectedFilters.onEach { filters ->
+            _isLoading.value = true
+            _filteredExercises.value = filterExercises(filterQuery.value, filters)
             _isLoading.value = false
         }.launchIn(viewModelScope)
     }
+
+    private fun filterExercises(
+        query: String,
+        filters: List<Pair<String, String>>
+    ): List<Exercise> {
+        val trimmedQuery = query.trim()
+        val queryIsBlank = trimmedQuery.isBlank()
+
+        return exerciseRepository.exercises.value.filter { exercise ->
+            val matchesQuery = queryIsBlank || run {
+                val lowerCaseQuery = trimmedQuery.lowercase()
+                exercise.name.contains(lowerCaseQuery, ignoreCase = true) ||
+                        exercise.equipment?.contains(lowerCaseQuery, ignoreCase = true) == true ||
+                        exercise.primaryMuscles.any { it.contains(lowerCaseQuery, ignoreCase = true) } ||
+                        exercise.secondaryMuscles.any { it.contains(lowerCaseQuery, ignoreCase = true) }
+            }
+
+            val matchesFilters = filters.isEmpty() || filters.any { (attribute, value) ->
+                when (attribute) {
+                    "Equipment" -> exercise.equipment == value
+                    "Primary Muscles" -> exercise.primaryMuscles.contains(value)
+                    "Secondary Muscles" -> exercise.secondaryMuscles.contains(value)
+                    "Category" -> exercise.category == value
+                    else -> false
+                }
+            }
+
+            matchesQuery && matchesFilters
+        }
+    }
+
 
     fun logWorkout(workout: Workout, date: LocalDate) {
         viewModelScope.launch {
