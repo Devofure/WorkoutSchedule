@@ -120,7 +120,7 @@ fun FilterComponent(
                                     modifier = Modifier.size(24.dp),
                                     onClick = {
                                         selectedAttributes.remove(attribute)
-                                        onFiltersSelected(selectedAttributes)
+                                        onFiltersSelected(selectedAttributes.toList())
                                     },
                                 ) {
                                     Icon(Icons.Filled.Close, contentDescription = "Remove")
@@ -169,7 +169,7 @@ fun FilterComponent(
                             } else {
                                 selectedAttributes.add(pair)
                             }
-                            onFiltersSelected(selectedAttributes)
+                            onFiltersSelected(selectedAttributes.toList())
                         }
                     )
                 }
