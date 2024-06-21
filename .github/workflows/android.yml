@@ -38,6 +38,13 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
+      - name: Set up environment variables for signing
+        run: |
+          echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
+          echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
+          echo "STORE_FILE=keystore.jks" >> $GITHUB_ENV
+          echo "STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}" >> $GITHUB_ENV
+
       - name: Run Instrumented Tests
         uses: reactivecircus/android-emulator-runner@v2.31.0
         with:
@@ -56,13 +63,6 @@ jobs:
         run: |
           echo ${{ secrets.ENC_STORE_FILE }} | base64 --decode > keystore.jks.enc
           openssl enc -aes-256-cbc -d -pbkdf2 -in keystore.jks.enc -out keystore.jks -pass pass:$ENC_STORE_PASSWORD
-
-      - name: Set up environment variables for signing
-        run: |
-          echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
-          echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
-          echo "STORE_FILE=app/keystore.jks" >> $GITHUB_ENV
-          echo "STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}" >> $GITHUB_ENV
 
       - name: Build Release APK
         run: ./gradlew assembleRelease
