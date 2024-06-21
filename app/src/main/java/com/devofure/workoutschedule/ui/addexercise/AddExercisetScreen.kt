@@ -200,7 +200,12 @@ fun AddExerciseScreen(
                             selected = false,
                             trailingIcon = {
                                 IconButton(
-                                    onClick = {},
+                                    onClick = {
+                                        val newFilters = selectedFilters.toMutableList().apply {
+                                            remove(Pair(attribute, value))
+                                        }
+                                        onFiltersSelected(newFilters)
+                                    },
                                     modifier = Modifier.size(24.dp)
                                 ) {
                                     Icon(Icons.Filled.Close, contentDescription = "Remove")
@@ -293,7 +298,6 @@ private fun FilterDialog(
         }
     }
 }
-
 
 @Composable
 fun ExerciseItem(
@@ -411,7 +415,7 @@ fun AddExerciseScreenPreview() {
             musclesOptions = emptyList(),
             categoryOptions = emptyList(),
             selectedFilters = emptyList(),
-            onFiltersSelected = {},
+            onFiltersSelected = {}
         )
     }
 }
@@ -470,7 +474,7 @@ fun AddExerciseScreenPreviewWithFilter() {
             musclesOptions = emptyList(),
             categoryOptions = emptyList(),
             selectedFilters = emptyList(),
-            onFiltersSelected = {},
+            onFiltersSelected = {}
         )
     }
 }
