@@ -15,6 +15,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4.1.6
 
+      - name: Decode and decrypt the keystore file
+        env:
+          ENC_STORE_PASSWORD: ${{ secrets.ENC_STORE_PASSWORD }}
+        run: |
+          echo ${{ secrets.ENC_STORE_FILE }} | base64 --decode > keystore.jks.enc
+          openssl enc -aes-256-cbc -d -pbkdf2 -in keystore.jks.enc -out keystore.jks -pass pass:$ENC_STORE_PASSWORD
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4.2.1
         with:
@@ -56,13 +63,6 @@ jobs:
 
       - name: Run Lint
         run: ./gradlew lint
-
-      - name: Decode and decrypt the keystore file
-        env:
-          ENC_STORE_PASSWORD: ${{ secrets.ENC_STORE_PASSWORD }}
-        run: |
-          echo ${{ secrets.ENC_STORE_FILE }} | base64 --decode > keystore.jks.enc
-          openssl enc -aes-256-cbc -d -pbkdf2 -in keystore.jks.enc -out keystore.jks -pass pass:$ENC_STORE_PASSWORD
 
       - name: Build Release APK
         run: ./gradlew assembleRelease
