@@ -61,7 +61,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -89,7 +89,8 @@ composeCompiler {
 }
 
 firebaseAppDistribution {
-    //releaseNotesFile = "release-notes.txt"
+//    releaseNotesFile = "release-notes.txt"
+//    artifactType = "AAB"
     groups = "testers"
     serviceCredentialsFile = "app/service-account.json"
 }

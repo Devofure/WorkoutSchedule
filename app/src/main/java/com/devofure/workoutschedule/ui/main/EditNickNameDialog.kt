@@ -33,8 +33,11 @@ fun EditNicknameDialog(
                 value = editedNickname,
                 onValueChange = onNicknameChange,
                 label = { Text("Day Name") },
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.Transparent
+                colors = TextFieldDefaults.colors(
+                    disabledContainerColor = Color.Transparent,
+                    errorContainerColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
                 )
             )
         },

@@ -53,9 +53,6 @@ jobs:
           echo "STORE_FILE=../keystore.jks" >> $GITHUB_ENV
           echo "STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}" >> $GITHUB_ENV
 
-      - name: Build Release APK
-        run: ./gradlew assembleRelease
-
       - name: Run Instrumented Tests
         uses: reactivecircus/android-emulator-runner@v2.31.0
         with:
@@ -73,7 +70,7 @@ jobs:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: |
           echo $FIREBASE_SERVICE_ACCOUNT > app/service-account.json
-          ./gradlew appDistributionUploadRelease -PfirebaseServiceCredentials=app/service-account.json
+          ./gradlew assembleRelease appDistributionUploadRelease -PfirebaseServiceCredentials=app/service-account.json
 
       - name: Clean up
         run: rm app/service-account.json
