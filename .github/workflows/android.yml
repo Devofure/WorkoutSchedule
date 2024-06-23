@@ -18,17 +18,12 @@ jobs:
       - name: Decode the keystore file
         run: |
           base64 --decode > ./keystore.jks.enc.base64
-
-      - name: Decode the keystore file
-        run: |
-          echo ./keystore.jks.enc.base64 | base64 --decode > ./keystore.jks.enc
-
           
       - name: Decrypt the keystore file
         env:
           ENC_STORE_PASSWORD: ${{ secrets.ENC_STORE_PASSWORD }}
         run: |
-          openssl enc -aes-256-cbc -d -pbkdf2 -in keystore.jks.enc -out keystore.jks -pass pass:$ENC_STORE_PASSWORD
+          openssl enc -aes-256-cbc -d -pbkdf2 -in ./keystore.jks.enc -out ./keystore.jks -pass pass:$ENC_STORE_PASSWORD
           
       - name: Set up JDK 17
         uses: actions/setup-java@v4.2.1
