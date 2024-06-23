@@ -17,7 +17,7 @@ jobs:
 
       - name: Decode the keystore file
         run: |
-          echo base64 --decode > ./keystore.jks.enc.base64
+          base64 --decode > ./keystore.jks.enc.base64
 
       - name: Decode the keystore file
         run: |
