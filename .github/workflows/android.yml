@@ -15,16 +15,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4.1.6
 
-      - name: Decode the keystore file
-        run: |
-          base64 --decode > ./keystore.jks.enc.base64
-          
-      - name: Decrypt the keystore file
-        env:
-          ENC_STORE_PASSWORD: ${{ secrets.ENC_STORE_PASSWORD }}
-        run: |
-          openssl enc -aes-256-cbc -d -pbkdf2 -in ./keystore.jks.enc -out ./keystore.jks -pass pass:$ENC_STORE_PASSWORD
-          
       - name: Set up JDK 17
         uses: actions/setup-java@v4.2.1
         with:
@@ -48,12 +38,13 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
-      - name: Set up environment variables for signing
+      - name: Print root directory files
+        run: ls -la
+
+      - name: Decode the keystore file
         run: |
-          echo "KEY_ALIAS=${{ secrets.KEY_ALIAS }}" >> $GITHUB_ENV
-          echo "KEY_PASSWORD=${{ secrets.KEY_PASSWORD }}" >> $GITHUB_ENV
-          echo "STORE_FILE=keystore.jks" >> $GITHUB_ENV
-          echo "STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}" >> $GITHUB_ENV
+          echo ${{ secrets.ENC_STORE_FILE }} | base64 --decode > ./keystore.jks.enc
+          openssl enc -d -aes-256-cbc -pbkdf2 -in ./keystore.jks.enc -out ./keystore.jks -pass pass:${{ secrets.ENC_STORE_PASSWORD }}
 
       - name: Run Instrumented Tests
         uses: reactivecircus/android-emulator-runner@v2.31.0
@@ -78,4 +69,4 @@ jobs:
           ./gradlew appDistributionUploadRelease -PfirebaseServiceCredentials=app/service-account.json
 
       - name: Clean up
-        run: rm app/service-account.json keystore.jks.enc keystore.jks
+        run: rm app/service-account.json
