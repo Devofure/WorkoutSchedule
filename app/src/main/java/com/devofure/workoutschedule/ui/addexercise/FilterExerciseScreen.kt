@@ -101,7 +101,7 @@ fun FilterComponent(
     onFiltersSelected: (List<Pair<String, String>>) -> Unit
 ) {
     var searchQuery by remember { mutableStateOf("") }
-    var filteredOptions by remember { mutableStateOf<List<String>>(emptyList()) }
+    var filteredOptions by remember { mutableStateOf(options) }
     var showOptions by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
@@ -135,8 +135,7 @@ fun FilterComponent(
             value = searchQuery,
             onValueChange = {
                 searchQuery = it
-                filteredOptions =
-                    options.filter { option -> option.contains(it, ignoreCase = true) }
+                filteredOptions = options.filter { option -> option.contains(it, ignoreCase = true) }
                 showOptions = it.isNotEmpty()
             },
             singleLine = true,
@@ -145,7 +144,7 @@ fun FilterComponent(
                 if (searchQuery.isNotEmpty()) {
                     IconButton(onClick = {
                         searchQuery = ""
-                        filteredOptions = emptyList()
+                        filteredOptions = options
                         showOptions = false
                     }) {
                         Icon(Icons.Filled.Close, contentDescription = "Clear")
@@ -158,7 +157,7 @@ fun FilterComponent(
 
         if (showOptions) {
             Column {
-                filteredOptions.take(10).forEach { option ->
+                filteredOptions.forEach { option ->
                     AttributeItem(
                         attribute = option,
                         isSelected = selectedAttributes.contains(Pair(attributeName, option)),
@@ -232,9 +231,9 @@ fun ExerciseFilterScreenPreview() {
         FilterExerciseScreen(
             currentFilters = emptyList(),
             onFiltersSelected = {},
-            equipmentOptions = emptyList(),
-            musclesOptions = emptyList(),
-            categoryOptions = emptyList(),
+            equipmentOptions = listOf("Dumbbell", "Barbell", "Kettlebell"),
+            musclesOptions = listOf("Chest", "Legs", "Back"),
+            categoryOptions = listOf("Strength", "Cardio"),
         )
     }
 }

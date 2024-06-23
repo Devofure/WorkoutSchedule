@@ -53,6 +53,9 @@ jobs:
           echo "STORE_FILE=../keystore.jks" >> $GITHUB_ENV
           echo "STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}" >> $GITHUB_ENV
 
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
+
       - name: Run Instrumented Tests
         uses: reactivecircus/android-emulator-runner@v2.31.0
         with:
@@ -64,9 +67,6 @@ jobs:
 
       - name: Run Lint
         run: ./gradlew lint
-
-      - name: Build Release APK
-        run: ./gradlew assembleRelease
 
       - name: Upload to Firebase App Distribution
         env:
