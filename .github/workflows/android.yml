@@ -38,22 +38,13 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
-      - name: Print root directory files
-        run: ls
-
       - name: Decode the keystore file
         run: |
           base64 --decode keystore.jks.enc.base64 > keystore.jks.enc
 
-      - name: Print root directory files
-        run: ls
-        
       - name: Decrypt the keystore file
         run: |
           openssl enc -d -aes-256-cbc -pbkdf2 -in keystore.jks.enc -out keystore.jks -pass pass:${{ secrets.ENC_STORE_PASSWORD }}
-
-      - name: Print root directory files
-        run: ls
 
       - name: Set up environment variables for signing
         run: |
