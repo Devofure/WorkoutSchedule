@@ -43,7 +43,7 @@ jobs:
 
       - name: Decode the keystore file
         run: |
-          echo ./keystore.jks.enc.base64 | base64 --decode > ./keystore.jks.enc
+          echo keystore.jks.enc.base64 | base64 --decode > keystore.jks.enc
 
       - name: Print root directory files
         run: ls
