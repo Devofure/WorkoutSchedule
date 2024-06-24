@@ -55,7 +55,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.compose.rememberNavController
-import com.devofure.workoutschedule.data.Exercise
+import com.devofure.workoutschedule.data.exercise.Exercise
 import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.Route
 import com.devofure.workoutschedule.ui.WorkoutViewModel
@@ -367,37 +367,40 @@ fun AddExerciseScreenPreview() {
     val navController = rememberNavController()
     val sampleExercises = listOf(
         Exercise(
-            "Push Up",
-            "None",
-            "Beginner",
-            "Compound",
-            "None",
-            listOf("Chest"),
-            listOf("Triceps"),
-            listOf(),
-            "Strength"
+            rowid = 1,
+            name = "Push Up",
+            force = "None",
+            level = "Beginner",
+            mechanic = "Compound",
+            equipment = "None",
+            primaryMuscles = listOf("Chest"),
+            secondaryMuscles = listOf("Triceps"),
+            instructions = listOf(),
+            category = "Strength"
         ),
         Exercise(
-            "Squat",
-            "None",
-            "Intermediate",
-            "Compound",
-            "None",
-            listOf("Legs"),
-            listOf("Glutes"),
-            listOf(),
-            "Strength"
+            rowid = 2,
+            name = "Squat",
+            force = "None",
+            level = "Intermediate",
+            mechanic = "Compound",
+            equipment = "None",
+            primaryMuscles = listOf("Legs"),
+            secondaryMuscles = listOf("Glutes"),
+            instructions = listOf(),
+            category = "Strength"
         ),
         Exercise(
-            "Bicep Curl",
-            "None",
-            "Beginner",
-            "Isolation",
-            "Dumbbell",
-            listOf("Biceps"),
-            listOf("Forearms"),
-            listOf(),
-            "Strength"
+            rowid = 3,
+            name = "Bicep Curl",
+            force = "None",
+            level = "Beginner",
+            mechanic = "Isolation",
+            equipment = "Dumbbell",
+            primaryMuscles = listOf("Biceps"),
+            secondaryMuscles = listOf("Forearms"),
+            instructions = listOf(),
+            category = "Strength"
         )
     )
 
@@ -426,37 +429,40 @@ fun AddExerciseScreenPreviewWithFilter() {
     val navController = rememberNavController()
     val sampleExercises = listOf(
         Exercise(
-            "Push Up",
-            "None",
-            "Beginner",
-            "Compound",
-            "None",
-            listOf("Chest"),
-            listOf("Triceps"),
-            listOf(),
-            "Strength"
+            rowid = 1,
+            name = "Push Up",
+            force = "None",
+            level = "Beginner",
+            mechanic = "Compound",
+            equipment = "None",
+            primaryMuscles = listOf("Chest"),
+            secondaryMuscles = listOf("Triceps"),
+            instructions = listOf(),
+            category = "Strength"
         ),
         Exercise(
-            "Squat",
-            "None",
-            "Intermediate",
-            "Compound",
-            "None",
-            listOf("Legs"),
-            listOf("Glutes"),
-            listOf(),
-            "Strength"
+            rowid = 2,
+            name = "Squat",
+            force = "None",
+            level = "Intermediate",
+            mechanic = "Compound",
+            equipment = "None",
+            primaryMuscles = listOf("Legs"),
+            secondaryMuscles = listOf("Glutes"),
+            instructions = listOf(),
+            category = "Strength"
         ),
         Exercise(
-            "Bicep Curl",
-            "None",
-            "Beginner",
-            "Isolation",
-            "Dumbbell",
-            listOf("Biceps"),
-            listOf("Forearms"),
-            listOf(),
-            "Strength"
+            rowid = 3,
+            name = "Bicep Curl",
+            force = "None",
+            level = "Beginner",
+            mechanic = "Isolation",
+            equipment = "Dumbbell",
+            primaryMuscles = listOf("Biceps"),
+            secondaryMuscles = listOf("Forearms"),
+            instructions = listOf(),
+            category = "Strength"
         )
     )
 
@@ -485,6 +491,7 @@ fun ExerciseItemPreview() {
     MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
         ExerciseItem(
             exercise = Exercise(
+                rowid = 1,
                 name = "Push Up",
                 force = "Push",
                 level = "Beginner",
@@ -514,7 +521,7 @@ fun ExerciseFilterPreview() {
             equipmentOptions = emptyList(),
             musclesOptions = emptyList(),
             categoryOptions = emptyList(),
-            currentFilters = emptyList(),
+            currentFilters = emptyList()
         )
     }
 }

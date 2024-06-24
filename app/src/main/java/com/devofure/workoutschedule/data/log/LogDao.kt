@@ -1,4 +1,4 @@
-package com.devofure.workoutschedule.data
+package com.devofure.workoutschedule.data.log
 
 import androidx.room.Dao
 import androidx.room.Insert

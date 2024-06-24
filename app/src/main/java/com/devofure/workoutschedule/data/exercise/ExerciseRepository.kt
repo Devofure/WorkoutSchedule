@@ -1,4 +1,4 @@
-package com.devofure.workoutschedule.data
+package com.devofure.workoutschedule.data.exercise
 
 import android.content.Context
 import com.google.gson.Gson
@@ -14,20 +14,22 @@ import timber.log.Timber
 import java.io.IOException
 
 data class Exercise(
+    val rowid: Int,
     val name: String,
-    val force: String,
-    val level: String,
-    val mechanic: String?,
-    val equipment: String?,
+    val level: String? = null,
+    val mechanic: String? = null,
+    val equipment: String? = null,
     val primaryMuscles: List<String>,
     val secondaryMuscles: List<String>,
-    val instructions: List<String>,
+    val force: String? = null,
+    val instructions: List<String>? = null,
     val category: String,
 )
 
 class ExerciseRepository(
     private val context: Context,
-    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+    private val exerciseDao: ExerciseDao,
+    coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
 ) {
     private val _exercises = MutableStateFlow<List<Exercise>>(emptyList())
     val exercises: StateFlow<List<Exercise>> = _exercises.asStateFlow()
@@ -47,16 +49,22 @@ class ExerciseRepository(
         }
     }
 
-    private fun prepareData() {
+    private suspend fun prepareData() {
         loadExercises()
         preloadOptions()
     }
 
-    private fun loadExercises() {
+    private suspend fun loadExercises() {
         val jsonString = loadJSONFromAsset("exercises.json")
         val exerciseListType = object : TypeToken<ExerciseWrapper>() {}.type
         val exerciseWrapper: ExerciseWrapper = Gson().fromJson(jsonString, exerciseListType)
-        _exercises.update { exerciseWrapper.exercises }
+
+        // Insert exercises into the database
+        exerciseDao.insertAll(exerciseWrapper.exercises.map { it.toExerciseEntity() })
+
+        // Load exercises from the database
+        val exercisesFromDb = exerciseDao.getAllExercises().map { it.toExercise() }
+        _exercises.update { exercisesFromDb }
     }
 
     private fun loadJSONFromAsset(fileName: String): String? {
@@ -77,13 +85,9 @@ class ExerciseRepository(
         return exercises.value.find { it.name == name }
     }
 
-    fun filterExercises(query: String): List<Exercise> {
-        return exercises.value.filter {
-            it.name.contains(query, ignoreCase = true) ||
-                    it.equipment?.contains(query, ignoreCase = true) == true ||
-                    it.primaryMuscles.any { muscle -> muscle.contains(query, ignoreCase = true) } ||
-                    it.secondaryMuscles.any { muscle -> muscle.contains(query, ignoreCase = true) }
-        }
+    fun searchExercises(query: String): List<ExerciseFtsEntity> {
+        val list = exerciseDao.searchExercises(query)
+        return list
     }
 
     private fun preloadOptions() {
@@ -98,5 +102,35 @@ class ExerciseRepository(
 
     private data class ExerciseWrapper(
         val exercises: List<Exercise>
+    )
+}
+
+fun Exercise.toExerciseEntity(): ExerciseEntity {
+    return ExerciseEntity(
+        rowid = this.rowid,
+        name = this.name,
+        force = this.force,
+        mechanic = this.mechanic,
+        equipment = this.equipment,
+        primaryMuscles = this.primaryMuscles.joinToString(","),
+        secondaryMuscles = this.secondaryMuscles.joinToString(","),
+        instructions = this.instructions?.joinToString(","),
+        category = this.category,
+        level = this.level,
+    )
+}
+
+fun ExerciseEntity.toExercise(): Exercise {
+    return Exercise(
+        rowid = this.rowid,
+        name = this.name,
+        force = this.force,
+        level = this.level,
+        mechanic = this.mechanic,
+        equipment = this.equipment,
+        primaryMuscles = this.primaryMuscles.split(","),
+        secondaryMuscles = this.secondaryMuscles.split(","),
+        instructions = this.instructions?.split(","),
+        category = this.category
     )
 }

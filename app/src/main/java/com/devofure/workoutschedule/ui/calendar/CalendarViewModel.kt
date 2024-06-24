@@ -3,9 +3,9 @@ package com.devofure.workoutschedule.ui.calendar
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.devofure.workoutschedule.data.AppDatabase
-import com.devofure.workoutschedule.data.ExerciseRepository
-import com.devofure.workoutschedule.data.LogEntity
 import com.devofure.workoutschedule.data.Workout
+import com.devofure.workoutschedule.data.exercise.ExerciseRepository
+import com.devofure.workoutschedule.data.log.LogEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -14,8 +14,10 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class CalendarViewModel(application: Application) : AndroidViewModel(application) {
-    private val logDao = AppDatabase.getDatabase(application).logDao()
-    private val exerciseRepository = ExerciseRepository(application.applicationContext)
+    private val database = AppDatabase.getDatabase(application)
+    private val logDao = database.logDao()
+    private val exerciseRepository =
+        ExerciseRepository(application.applicationContext, database.exerciseDao())
 
     private var cachedLogDatesForMonth = mutableMapOf<String, List<LocalDate>>()
 

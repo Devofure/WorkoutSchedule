@@ -19,10 +19,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
-import com.devofure.workoutschedule.data.Exercise
+import com.devofure.workoutschedule.data.exercise.Exercise
 import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.theme.Colors
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
@@ -58,6 +58,7 @@ fun CreateExerciseScreen(
                 actions = {
                     TextButton(onClick = {
                         val newExercise = Exercise(
+                            rowid = 0,
                             name = name.value,
                             force = force.value,
                             level = level.value,
@@ -151,7 +152,7 @@ fun CreateExerciseScreen(
     )
 }
 
-@PreviewLightDark
+@Preview
 @Composable
 fun CreateExerciseScreenPreview() {
     MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {

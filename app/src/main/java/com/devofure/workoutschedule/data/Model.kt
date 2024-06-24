@@ -1,6 +1,7 @@
 // Model.kt
 package com.devofure.workoutschedule.data
 
+import com.devofure.workoutschedule.data.exercise.Exercise
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale

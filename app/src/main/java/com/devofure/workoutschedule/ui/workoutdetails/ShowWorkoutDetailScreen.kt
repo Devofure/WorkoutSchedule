@@ -31,9 +31,9 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
-import com.devofure.workoutschedule.data.Exercise
 import com.devofure.workoutschedule.data.SetDetails
 import com.devofure.workoutschedule.data.Workout
+import com.devofure.workoutschedule.data.exercise.Exercise
 import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.OrientationPreviews
 import com.devofure.workoutschedule.ui.theme.Colors
@@ -106,7 +106,7 @@ fun WorkoutDetailScreen(workout: Workout, navigate: Navigate) {
                         )
                     }
 
-                workout.exercise.instructions.takeIf { instructions -> instructions.isNotEmpty() }
+                workout.exercise.instructions.takeIf { instructions -> instructions?.isNotEmpty() != null }
                     ?.let { instructions ->
                         SectionHeader(title = "Instructions")
                         instructions.forEachIndexed { _, instruction ->
@@ -176,15 +176,13 @@ fun PreviewWorkoutDetailScreen() {
     val workout = Workout(
         id = 1,
         exercise = Exercise(
-            "Push Up",
-            "None",
-            "Beginner",
-            "Compound",
-            "None",
-            listOf("Chest"),
-            listOf("Triceps"),
-            listOf(),
-            "Strength"
+            rowid = 1,
+            name = "Push Up",
+            level = "None",
+            category = "Beginner",
+            primaryMuscles = listOf("Chest"),
+            secondaryMuscles = listOf("Triceps"),
+            equipment = "None",
         ),
         repsList = listOf(SetDetails(10), SetDetails(10), SetDetails(10)),
         duration = 45,
