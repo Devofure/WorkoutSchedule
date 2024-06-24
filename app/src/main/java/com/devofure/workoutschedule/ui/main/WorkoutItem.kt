@@ -40,9 +40,9 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.devofure.workoutschedule.data.Exercise
 import com.devofure.workoutschedule.data.SetDetails
 import com.devofure.workoutschedule.data.Workout
+import com.devofure.workoutschedule.data.exercise.Exercise
 import com.devofure.workoutschedule.ui.OrientationPreviews
 import com.devofure.workoutschedule.ui.theme.Colors.BlueAccent
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
@@ -161,7 +161,7 @@ fun WorkoutItem(
                         )
                         repsList.forEachIndexed { index, reps ->
                             Text(
-                                text = "Set ${index + 1}: $reps reps",
+                                text = "Set ${index + 1}: ${reps.reps} reps",
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     color = textColor.copy(
                                         alpha = textAlpha
@@ -183,7 +183,7 @@ fun WorkoutItem(
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.Start
                     )
-                    workout.exercise.instructions.forEachIndexed { _, instruction ->
+                    workout.exercise.instructions?.forEachIndexed { _, instruction ->
                         Row(
                             verticalAlignment = Alignment.Top,
                             modifier = Modifier.padding(bottom = 4.dp)
@@ -235,6 +235,7 @@ fun PreviewWorkoutItem() {
             "Hold a dumbbell in each hand.",
             "Push the dumbbells up."
         ),
+        rowid = 1
     )
     val workout = Workout(
         id = 1,

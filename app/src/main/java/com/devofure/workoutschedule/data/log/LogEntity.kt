@@ -1,7 +1,8 @@
-package com.devofure.workoutschedule.data
+package com.devofure.workoutschedule.data.log
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.devofure.workoutschedule.data.SetDetails
 
 @Entity(tableName = "logged_workouts")
 data class LogEntity(

@@ -6,13 +6,15 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.devofure.workoutschedule.data.AppDatabase
 import com.devofure.workoutschedule.data.DayOfWeek
-import com.devofure.workoutschedule.data.Exercise
-import com.devofure.workoutschedule.data.ExerciseRepository
-import com.devofure.workoutschedule.data.LogEntity
 import com.devofure.workoutschedule.data.SetDetails
 import com.devofure.workoutschedule.data.Workout
+import com.devofure.workoutschedule.data.exercise.Exercise
+import com.devofure.workoutschedule.data.exercise.ExerciseRepository
+import com.devofure.workoutschedule.data.exercise.toExercise
+import com.devofure.workoutschedule.data.log.LogEntity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -21,20 +23,23 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
-    private val exerciseRepository = ExerciseRepository(application.applicationContext)
-    val equipmentOptions: StateFlow<List<String>> = exerciseRepository.equipmentOptions
-    val muscleOptions: StateFlow<List<String>> = exerciseRepository.primaryMusclesOptions
-    val categoryOptions: StateFlow<List<String>> = exerciseRepository.categoryOptions
+    private val exerciseRepository: ExerciseRepository
+    val equipmentOptions: StateFlow<List<String>>
+    val muscleOptions: StateFlow<List<String>>
+    val categoryOptions: StateFlow<List<String>>
 
     private val _workouts = MutableStateFlow<Map<Int, List<Workout>>>(emptyMap())
-    private val sharedPreferences =
-        application.applicationContext.getSharedPreferences("WorkoutApp", Context.MODE_PRIVATE)
-    private val logDao by lazy { AppDatabase.getDatabase(application).logDao() }
+    private val sharedPreferences = application.applicationContext
+        .getSharedPreferences("WorkoutApp", Context.MODE_PRIVATE)
+    private val database by lazy { AppDatabase.getDatabase(application) }
+    private val logDao by lazy { database.logDao() }
+    private val exerciseDao by lazy { database.exerciseDao() }
     private val gson = Gson()
 
     private val _isFirstLaunch = MutableStateFlow(true)
@@ -51,6 +56,12 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     val selectedFilters = MutableStateFlow<List<Pair<String, String>>>(emptyList())
 
     init {
+        val context = application.applicationContext
+        exerciseRepository = ExerciseRepository(context, exerciseDao)
+        equipmentOptions = exerciseRepository.equipmentOptions
+        muscleOptions = exerciseRepository.primaryMusclesOptions
+        categoryOptions = exerciseRepository.categoryOptions
+
         viewModelScope.launch {
             val isFirstLaunch = sharedPreferences.getBoolean("isFirstLaunch", true)
             _isFirstLaunch.value = isFirstLaunch
@@ -81,22 +92,16 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         }.launchIn(viewModelScope)
     }
 
-    private fun filterExercises(
+    private suspend fun filterExercises(
         query: String,
         filters: List<Pair<String, String>>
-    ): List<Exercise> {
+    ): List<Exercise> = withContext(Dispatchers.IO) {
         val trimmedQuery = query.trim()
-        val queryIsBlank = trimmedQuery.isBlank()
+        val ftsResults =
+            if (trimmedQuery.isBlank()) exerciseRepository.exercises.value
+            else exerciseRepository.searchExercises(trimmedQuery).map { it.toExercise() }
 
-        return exerciseRepository.exercises.value.filter { exercise ->
-            val matchesQuery = queryIsBlank || run {
-                val lowerCaseQuery = trimmedQuery.lowercase()
-                exercise.name.contains(lowerCaseQuery, ignoreCase = true) ||
-                        exercise.equipment?.contains(lowerCaseQuery, ignoreCase = true) == true ||
-                        exercise.primaryMuscles.any { it.contains(lowerCaseQuery, ignoreCase = true) } ||
-                        exercise.secondaryMuscles.any { it.contains(lowerCaseQuery, ignoreCase = true) }
-            }
-
+        return@withContext ftsResults.filter { exercise ->
             val matchesFilters = filters.isEmpty() || filters.any { (attribute, value) ->
                 when (attribute) {
                     "Equipment" -> exercise.equipment == value
@@ -107,7 +112,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 }
             }
 
-            matchesQuery && matchesFilters
+            matchesFilters
         }
     }
 

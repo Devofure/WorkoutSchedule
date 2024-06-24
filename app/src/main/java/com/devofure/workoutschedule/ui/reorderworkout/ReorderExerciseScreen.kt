@@ -1,4 +1,6 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
+    ExperimentalMaterial3Api::class
+)
 
 package com.devofure.workoutschedule.ui.reorderworkout
 
@@ -43,9 +45,9 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.devofure.workoutschedule.data.DayOfWeek
-import com.devofure.workoutschedule.data.Exercise
 import com.devofure.workoutschedule.data.SetDetails
 import com.devofure.workoutschedule.data.Workout
+import com.devofure.workoutschedule.data.exercise.Exercise
 import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.OrientationPreviews
 import com.devofure.workoutschedule.ui.theme.Colors
@@ -214,6 +216,7 @@ fun ReorderExerciseScreenPreview() {
             secondaryMuscles = listOf("Triceps", "Shoulders"),
             instructions = listOf("Lift weight", "Lower weight"),
             category = "Strength",
+            rowid = 1
         ),
         repsList = listOf(SetDetails(reps = 10), SetDetails(reps = 8)),
         duration = 30
