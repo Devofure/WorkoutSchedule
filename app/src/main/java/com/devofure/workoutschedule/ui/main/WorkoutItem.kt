@@ -161,7 +161,7 @@ fun WorkoutItem(
                         )
                         repsList.forEachIndexed { index, reps ->
                             Text(
-                                text = "Set ${index + 1}: $reps reps",
+                                text = "Set ${index + 1}: ${reps.reps} reps",
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     color = textColor.copy(
                                         alpha = textAlpha
