@@ -88,8 +88,13 @@ class ExerciseRepository(
     }
 
     fun searchExercises(query: String): List<ExerciseFtsEntity> {
-        val list = exerciseDao.searchExercises(query)
+        val normalizedQuery = normalizeQuery(query)
+        val list = exerciseDao.searchExercises(normalizedQuery)
         return list
+    }
+
+    private fun normalizeQuery(query: String): String {
+        return query.toLowerCase().replace("-", " ")
     }
 
     private fun preloadOptions() {
