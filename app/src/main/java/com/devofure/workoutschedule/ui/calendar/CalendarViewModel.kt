@@ -17,7 +17,7 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
     private val database = AppDatabase.getDatabase(application)
     private val logDao = database.logDao()
     private val exerciseRepository =
-        ExerciseRepository(application.applicationContext, database.exerciseDao())
+        ExerciseRepository(application.applicationContext, database.exerciseDao(), database)
 
     private var cachedLogDatesForMonth = mutableMapOf<String, List<LocalDate>>()
 

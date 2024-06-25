@@ -2,6 +2,8 @@ package com.devofure.workoutschedule.data.exercise
 
 import android.content.Context
 import androidx.annotation.Keep
+import androidx.room.withTransaction
+import com.devofure.workoutschedule.data.AppDatabase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +33,7 @@ data class Exercise(
 class ExerciseRepository(
     private val context: Context,
     private val exerciseDao: ExerciseDao,
+    private val appDatabase: AppDatabase,
     coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
 ) {
     private val _exercises = MutableStateFlow<List<Exercise>>(emptyList())
@@ -57,18 +60,17 @@ class ExerciseRepository(
     }
 
     private suspend fun loadExercises() {
-        val jsonString = loadJSONFromAsset("exercises.json")
-        val exerciseListType = object : TypeToken<ExerciseWrapper>() {}.type
-        val exerciseWrapper: ExerciseWrapper = Gson().fromJson(jsonString, exerciseListType)
-
-        // Insert exercises into the database
-        exerciseDao.insertAll(exerciseWrapper.exercises.map { it.toExerciseEntity() })
-
-        // Load exercises from the database
-        val exercisesFromDb = exerciseDao.getAllExercises().map { it.toExercise() }
-        _exercises.update { exercisesFromDb }
+        appDatabase.withTransaction {
+            if (exerciseDao.getExerciseCount() == 0) {
+                val jsonString = loadJSONFromAsset("exercises.json")
+                val exerciseListType = object : TypeToken<ExerciseWrapper>() {}.type
+                val exerciseWrapper: ExerciseWrapper = Gson().fromJson(jsonString, exerciseListType)
+                exerciseDao.insertAll(exerciseWrapper.exercises.map { it.toExerciseEntity() })
+            }
+            val exercisesFromDb = exerciseDao.getAllExercises().map { it.toExercise() }
+            _exercises.update { exercisesFromDb }
+        }
     }
-
     private fun loadJSONFromAsset(fileName: String): String? {
         return try {
             val inputStream = context.assets.open(fileName)

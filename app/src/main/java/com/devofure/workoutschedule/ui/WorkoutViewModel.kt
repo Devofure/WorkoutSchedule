@@ -57,7 +57,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
     init {
         val context = application.applicationContext
-        exerciseRepository = ExerciseRepository(context, exerciseDao)
+        exerciseRepository = ExerciseRepository(context, exerciseDao, database)
         equipmentOptions = exerciseRepository.equipmentOptions
         muscleOptions = exerciseRepository.primaryMusclesOptions
         categoryOptions = exerciseRepository.categoryOptions
