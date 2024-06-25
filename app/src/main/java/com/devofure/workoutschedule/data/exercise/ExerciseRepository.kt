@@ -1,6 +1,7 @@
 package com.devofure.workoutschedule.data.exercise
 
 import android.content.Context
+import androidx.annotation.Keep
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
@@ -13,6 +14,7 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.IOException
 
+@Keep
 data class Exercise(
     val rowid: Int,
     val name: String,
@@ -100,6 +102,7 @@ class ExerciseRepository(
         _muscleOptions.value = distinctMuscleOptions
     }
 
+    @Keep
     private data class ExerciseWrapper(
         val exercises: List<Exercise>
     )
