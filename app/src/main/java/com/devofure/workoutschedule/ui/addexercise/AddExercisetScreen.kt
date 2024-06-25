@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -137,10 +138,15 @@ fun AddExerciseScreen(
                     }
                 },
                 actions = {
-                    TextButton(onClick = {
-                        onAddWorkouts(dayIndex, selectedExercises)
-                        navigate.back()
-                    }) {
+                    TextButton(
+                        onClick = {
+                            onAddWorkouts(dayIndex, selectedExercises)
+                            navigate.back()
+                        },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
                         Text(text = "Save")
                     }
                 },

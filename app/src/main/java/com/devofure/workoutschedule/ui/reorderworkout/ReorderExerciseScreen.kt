@@ -1,4 +1,5 @@
-@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
+@file:OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
     ExperimentalMaterial3Api::class
 )
 
@@ -18,6 +19,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -72,11 +74,16 @@ fun ReorderExerciseScreen(
                     }
                 },
                 actions = {
-                    TextButton(onClick = {
-                        updateWorkoutOrder(dayOfWeek.dayIndex, workouts)
-                        navigate.back()
-                    }) {
-                        Text("Save")
+                    TextButton(
+                        onClick = {
+                            updateWorkoutOrder(dayOfWeek.dayIndex, workouts)
+                            navigate.back()
+                        },
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        )
+                    ) {
+                        Text(text = "Save")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
