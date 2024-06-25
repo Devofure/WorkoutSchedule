@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.IOException
+import java.util.Locale
 
 @Keep
 data class Exercise(
@@ -27,14 +28,14 @@ data class Exercise(
     val secondaryMuscles: List<String>,
     val force: String? = null,
     val instructions: List<String>? = null,
-    val category: String,
+    val category: String? = null,
 )
 
 class ExerciseRepository(
     private val context: Context,
     private val exerciseDao: ExerciseDao,
     private val appDatabase: AppDatabase,
-    coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
+    private val coroutineScope: CoroutineScope = CoroutineScope(Dispatchers.IO),
 ) {
     private val _exercises = MutableStateFlow<List<Exercise>>(emptyList())
     val exercises: StateFlow<List<Exercise>> = _exercises.asStateFlow()
@@ -71,6 +72,7 @@ class ExerciseRepository(
             _exercises.update { exercisesFromDb }
         }
     }
+
     private fun loadJSONFromAsset(fileName: String): String? {
         return try {
             val inputStream = context.assets.open(fileName)
@@ -96,19 +98,31 @@ class ExerciseRepository(
     }
 
     private fun normalizeQuery(query: String): String {
-        // Add wildcards for partial matching
-        val parts = query.toLowerCase().split(" ").map { it + "*" }
+        val normalized = query.lowercase(Locale.getDefault())
+        val noHyphens = normalized.replace("-", " ")
+        val parts = noHyphens.split(" ").map { "$it*" }
         return parts.joinToString(" ")
     }
 
     private fun preloadOptions() {
         val exercises = _exercises.value
         _equipmentOptions.value = exercises.mapNotNull { it.equipment }.distinct()
-        _categoryOptions.value = exercises.map { it.category }.distinct()
+        _categoryOptions.value = exercises.mapNotNull { it.category }.distinct()
         val primaryMuscleOptions = exercises.flatMap { it.primaryMuscles }
         val secondaryMuscleOptions = exercises.flatMap { it.secondaryMuscles }
         val distinctMuscleOptions = (primaryMuscleOptions + secondaryMuscleOptions).distinct()
         _muscleOptions.value = distinctMuscleOptions
+    }
+
+    fun insertExercise(it: Exercise) {
+        coroutineScope.launch {
+            appDatabase.withTransaction {
+                exerciseDao.insertExercise(it.toExerciseEntity())
+                val exercisesFromDb = exerciseDao.getAllExercises().map { it.toExercise() }
+                _exercises.update { exercisesFromDb }
+                preloadOptions()
+            }
+        }
     }
 
     @Keep

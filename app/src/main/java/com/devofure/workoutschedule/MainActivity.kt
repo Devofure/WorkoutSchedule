@@ -137,7 +137,7 @@ class MainActivity : ComponentActivity() {
                 composable(Route.CreateExercise.route) {
                     CreateExerciseScreen(
                         navigate = navigate,
-                        onAddExercise = {}
+                        onAddExercise = { workoutViewModel.addExercise(it) }
                     )
                 }
                 composable(Route.EditWorkout.route) { backStackEntry ->

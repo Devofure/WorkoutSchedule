@@ -272,4 +272,10 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     fun getNickname(dayIndex: Int): String {
         return sharedPreferences.getString("nicknames_$dayIndex", "") ?: ""
     }
+
+    fun addExercise(it: Exercise) {
+        viewModelScope.launch {
+            exerciseRepository.insertExercise(it)
+        }
+    }
 }

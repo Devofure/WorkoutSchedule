@@ -14,11 +14,9 @@ interface ExerciseDao {
         SELECT rowid, * 
         FROM exercisesFts 
         WHERE name MATCH :query 
-        OR level MATCH :query 
         OR equipment MATCH :query 
         OR primaryMuscles MATCH :query 
         OR secondaryMuscles MATCH :query 
-        OR category MATCH :query
     """)
     fun searchExercises(query: String): List<ExerciseFtsEntity>
 
@@ -27,4 +25,7 @@ interface ExerciseDao {
 
     @Query("SELECT COUNT(*) FROM exercises")
     suspend fun getExerciseCount(): Int
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertExercise(exercise: ExerciseEntity)
 }

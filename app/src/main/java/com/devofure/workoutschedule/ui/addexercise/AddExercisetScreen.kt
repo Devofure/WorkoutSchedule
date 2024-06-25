@@ -29,11 +29,11 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -51,7 +51,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -158,15 +157,6 @@ fun AddExerciseScreen(
                 ),
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navigate.to(Route.CreateExercise) },
-                containerColor = MaterialTheme.colorScheme.secondary,
-                contentColor = Color.White
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = "Create Exercise")
-            }
-        }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -194,6 +184,9 @@ fun AddExerciseScreen(
                 }
                 IconButton(onClick = { showDialog = true }) {
                     Icon(Icons.Filled.FilterList, contentDescription = "Filter")
+                }
+                OutlinedIconButton(onClick = { navigate.to(Route.CreateExercise) }) {
+                    Icon(Icons.Filled.Add, contentDescription = "Create new exercise")
                 }
             }
 
@@ -226,24 +219,35 @@ fun AddExerciseScreen(
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
-            } else if (filteredExercises.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "No exercises found", style = MaterialTheme.typography.titleMedium)
-                }
             } else {
-                LazyColumn {
-                    items(filteredExercises) { exercise ->
-                        ExerciseItem(
-                            exercise = exercise,
-                            isSelected = selectedExercises.contains(exercise),
-                            onSelected = {
-                                selectedExercises = if (selectedExercises.contains(exercise)) {
-                                    selectedExercises - exercise
-                                } else {
-                                    selectedExercises + exercise
-                                }
-                            }
+                Text(
+                    text = "${filteredExercises.size} exercises found",
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(8.dp)
+                )
+
+                if (filteredExercises.isEmpty()) {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = "No exercises found",
+                            style = MaterialTheme.typography.titleMedium
                         )
+                    }
+                } else {
+                    LazyColumn {
+                        items(filteredExercises) { exercise ->
+                            ExerciseItem(
+                                exercise = exercise,
+                                isSelected = selectedExercises.contains(exercise),
+                                onSelected = {
+                                    selectedExercises = if (selectedExercises.contains(exercise)) {
+                                        selectedExercises - exercise
+                                    } else {
+                                        selectedExercises + exercise
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
             }
