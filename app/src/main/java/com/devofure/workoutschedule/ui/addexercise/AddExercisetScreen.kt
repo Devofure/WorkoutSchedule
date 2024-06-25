@@ -66,165 +66,33 @@ import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 fun AddExerciseScreen(
     subTitle: String,
     dayIndex: Int,
-    searchQuery: String,
-    filteredExercises: List<Exercise>,
-    isLoading: Boolean,
-    onSearchQueryChange: (String) -> Unit,
-    onAddWorkouts: (Int, List<Exercise>) -> Unit,
+    workoutViewModel: WorkoutViewModel,
     navigate: Navigate,
-    equipmentOptions: List<String>,
-    musclesOptions: List<String>,
-    categoryOptions: List<String>,
-    selectedFilters: List<Pair<String, String>>,
-    onFiltersSelected: (List<Pair<String, String>>) -> Unit
 ) {
-    var selectedExercises by remember { mutableStateOf<List<Exercise>>(emptyList()) }
-    val isSearchExpanded by remember { mutableStateOf(false) }
-    val focusRequester = remember { FocusRequester() }
-    var showDialog by remember { mutableStateOf(false) }
+    val isLoading by workoutViewModel.isLoading.collectAsState()
+    val filteredExercises by workoutViewModel.filteredExercises.collectAsState()
+    val searchQuery by workoutViewModel.filterQuery.collectAsState()
+    val selectedFilters by workoutViewModel.selectedFilters.collectAsState()
 
-    LaunchedEffect(isSearchExpanded) {
-        if (isSearchExpanded) {
-            focusRequester.requestFocus()
-        }
-    }
+    val equipmentOptions by workoutViewModel.equipmentOptions.collectAsState()
+    val musclesOptions by workoutViewModel.muscleOptions.collectAsState()
+    val categoryOptions by workoutViewModel.categoryOptions.collectAsState()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text("Add Exercises")
-                        Text(subTitle, style = MaterialTheme.typography.titleMedium)
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = navigate::back) {
-                        Icon(Icons.Filled.Close, contentDescription = "Close")
-                    }
-                },
-                actions = {
-                    TextButton(
-                        onClick = {
-                            onAddWorkouts(dayIndex, selectedExercises)
-                            navigate.back()
-                        },
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.onPrimary // Ensure the text color contrasts with the toolbar background
-                        )
-                    ) {
-                        Text(text = "Save")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
-                ),
-            )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navigate.to(Route.CreateExercise) },
-                containerColor = MaterialTheme.colorScheme.secondary,
-                contentColor = Color.White
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = "Create Exercise")
-            }
-        }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-                Box(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    TextField(
-                        value = searchQuery,
-                        onValueChange = { onSearchQueryChange(it) },
-                        placeholder = { Text("Search Exercises") },
-                        singleLine = true,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(focusRequester)
-                    )
-                }
-                IconButton(onClick = { showDialog = true }) {
-                    Icon(Icons.Filled.FilterList, contentDescription = "Filter")
-                }
-            }
-
-            if (selectedFilters.isNotEmpty()) {
-                FlowRow(modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
-                    selectedFilters.forEach { (attribute, value) ->
-                        InputChip(
-                            label = { Text("$attribute: $value") },
-                            onClick = {},
-                            selected = false,
-                            trailingIcon = {
-                                IconButton(
-                                    onClick = {
-                                        val newFilters = selectedFilters.toMutableList().apply {
-                                            remove(Pair(attribute, value))
-                                        }
-                                        onFiltersSelected(newFilters)
-                                    },
-                                    modifier = Modifier.size(24.dp)
-                                ) {
-                                    Icon(Icons.Filled.Close, contentDescription = "Remove")
-                                }
-                            },
-                        )
-                    }
-                }
-            }
-
-            if (isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
-            } else if (filteredExercises.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(text = "No exercises found", style = MaterialTheme.typography.titleMedium)
-                }
-            } else {
-                LazyColumn {
-                    items(filteredExercises) { exercise ->
-                        ExerciseItem(
-                            exercise = exercise,
-                            isSelected = selectedExercises.contains(exercise),
-                            onSelected = {
-                                selectedExercises = if (selectedExercises.contains(exercise)) {
-                                    selectedExercises - exercise
-                                } else {
-                                    selectedExercises + exercise
-                                }
-                            }
-                        )
-                    }
-                }
-            }
-        }
-        if (showDialog) {
-            FilterDialog(
-                showDialog = { showDialog = it },
-                selectedFilters = onFiltersSelected,
-                currentFilters = selectedFilters,
-                equipmentOptions = equipmentOptions,
-                musclesOptions = musclesOptions,
-                categoryOptions = categoryOptions,
-            )
-        }
-    }
+    AddExerciseScreen(
+        dayIndex = dayIndex,
+        subTitle = subTitle,
+        searchQuery = searchQuery,
+        filteredExercises = filteredExercises,
+        isLoading = isLoading,
+        onSearchQueryChange = { workoutViewModel.filterQuery.value = it },
+        onAddWorkouts = workoutViewModel::addWorkouts,
+        navigate = navigate,
+        equipmentOptions = equipmentOptions,
+        musclesOptions = musclesOptions,
+        categoryOptions = categoryOptions,
+        selectedFilters = selectedFilters,
+        onFiltersSelected = { workoutViewModel.selectedFilters.value = it }
+    )
 }
 
 @Composable
