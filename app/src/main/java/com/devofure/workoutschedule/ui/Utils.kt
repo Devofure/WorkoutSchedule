@@ -58,37 +58,37 @@ fun getTotalCells(
 
 val SAMPLE_EXERCISE_SCHEDULE = mapOf(
     0 to listOf(
+        "Push-Up",
         "Dumbbell Bench Press",
-        "Close-Grip Push-Up off of a Dumbbell",
-        "Dumbbell Flyes",
-        "Cable Chest Press",
-        "Triceps Pushdown - Rope Attachment"
+        "Chest Flyes with Bands",
+        "Close-Grip Push-Up",
+        "Triceps Extension with Bands"
     ),
     1 to listOf(
-        "Bent Over Barbell Row",
-        "One-Arm Dumbbell Row",
-        "Alternating Kettlebell Row",
-        "Hammer Curls",
-        "Dumbbell Bicep Curl"
+        "Bodyweight Rows",
+        "Dumbbell Rows",
+        "Band Pull-Aparts",
+        "Bicep Curls with Dumbbells",
+        "Hammer Curls with Bands"
     ),
     2 to listOf(
-        "Barbell Squat",
+        "Bodyweight Squats",
         "Dumbbell Lunges",
-        "Goblet Squat",
-        "Hamstring Stretch",
-        "Calf Raises - With Bands"
+        "Goblet Squat with Dumbbell",
+        "Band Hamstring Curls",
+        "Calf Raises"
     ),
     3 to listOf(
-        "Arnold Dumbbell Press",
+        "Bodyweight Shoulder Press",
         "Dumbbell Shoulder Press",
-        "Side Lateral Raise",
-        "3/4 Sit-Up",
-        "Cable Russian Twists"
+        "Lateral Raises with Bands",
+        "Plank",
+        "Russian Twists"
     ),
     4 to listOf(
-        "Deadlift",
+        "Deadlift with Dumbbells",
         "Kettlebell Dead Clean",
-        "Bear Crawl Sled Drags",
+        "Bear Crawl with Bands",
         "Child's Pose",
         "Dynamic Chest Stretch"
     ),
@@ -103,7 +103,7 @@ val SAMPLE_EXERCISE_SCHEDULE = mapOf(
         "Cat Stretch",
         "Quad Stretch",
         "Hamstring Stretch",
-        "Butterfly",
+        "Butterfly Stretch",
         "Child's Pose"
     )
 )
