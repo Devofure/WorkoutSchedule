@@ -94,7 +94,9 @@ class ExerciseRepository(
     }
 
     private fun normalizeQuery(query: String): String {
-        return query.toLowerCase().replace("-", " ")
+        // Add wildcards for partial matching
+        val parts = query.toLowerCase().split(" ").map { it + "*" }
+        return parts.joinToString(" ")
     }
 
     private fun preloadOptions() {
