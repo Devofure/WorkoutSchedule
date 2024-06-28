@@ -141,8 +141,9 @@ fun WorkoutItem(
                         Text(
                             text = "${repsList.size} sets:",
                             style = MaterialTheme.typography.titleMedium.copy(
-                                color = MaterialTheme.colorScheme.primary
-                            ),
+                                color = MaterialTheme.colorScheme.primary.copy(
+                                    alpha = textAlpha
+                                )                            ),
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Start
                         )

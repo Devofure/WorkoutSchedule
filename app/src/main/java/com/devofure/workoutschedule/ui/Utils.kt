@@ -57,55 +57,26 @@ fun getTotalCells(
 }
 
 val SAMPLE_EXERCISE_SCHEDULE = mapOf(
-    0 to listOf(
-        "Push-Up",
-        "Dumbbell Bench Press",
-        "Chest Flyes with Bands",
-        "Close-Grip Push-Up",
-        "Triceps Extension with Bands"
-    ),
-    1 to listOf(
-        "Bodyweight Rows",
-        "Dumbbell Rows",
-        "Band Pull-Aparts",
-        "Bicep Curls with Dumbbells",
-        "Hammer Curls with Bands"
-    ),
-    2 to listOf(
-        "Bodyweight Squats",
-        "Dumbbell Lunges",
-        "Goblet Squat with Dumbbell",
-        "Band Hamstring Curls",
-        "Calf Raises"
-    ),
-    3 to listOf(
-        "Bodyweight Shoulder Press",
-        "Dumbbell Shoulder Press",
-        "Lateral Raises with Bands",
-        "Plank",
-        "Russian Twists"
-    ),
-    4 to listOf(
-        "Deadlift with Dumbbells",
-        "Kettlebell Dead Clean",
-        "Bear Crawl with Bands",
-        "Child's Pose",
-        "Dynamic Chest Stretch"
-    ),
-    5 to listOf(
-        "Mountain Climbers",
-        "Air Bike",
-        "Plank",
-        "Russian Twist",
-        "Flutter Kicks"
-    ),
-    6 to listOf(
-        "Cat Stretch",
-        "Quad Stretch",
-        "Hamstring Stretch",
-        "Butterfly Stretch",
-        "Child's Pose"
-    )
+    // Day 0: Upper body with curls and presses.
+    0 to listOf("Alternate Hammer Curl", "Alternate Incline Dumbbell Curl", "Alternating Cable Shoulder Press", "Alternating Deltoid Raise"),
+
+    // Day 1: Core day with sit-ups and roller exercises.
+    1 to listOf("3/4 Sit-Up", "Ab Crunch Machine", "Ab Roller", "Advanced Kettlebell Windmill"),
+
+    // Day 2: Lower body focus with hamstring and quad exercises.
+    2 to listOf("90/90 Hamstring", "Adductor", "Adductor/Groin", "All Fours Quad Stretch"),
+
+    // Day 3: Rest day for recovery.
+    3 to listOf(),
+
+    // Day 4: Full body mix with presses and cleans.
+    4 to listOf("Alternating Floor Press", "Alternating Kettlebell Press", "Air Bike", "Alternate Heel Touchers", "Alternate Leg Diagonal Bound", "Alternating Hang Clean"),
+
+    // Day 5: Additional core and lower body exercises.
+    5 to listOf("Barbell Side Bend", "Atlas Stone Trainer", "Band Good Morning"),
+
+    // Day 6: Flexibility and recovery exercises.
+    6 to listOf("Adductor", "Ankle Circles", "All Fours Quad Stretch")
 )
 
 @Preview(

@@ -146,11 +146,11 @@ fun CalendarScreen(
                         )
                     }
                 } else {
+                    var expandedWorkoutIds by remember { mutableStateOf(setOf<Int>()) }
                     LazyColumn {
                         items(logs) { log ->
                             val workout = calendarViewModel.getWorkoutByName(log)
                             workout?.let {
-                                var expandedWorkoutIds by remember { mutableStateOf(setOf<Int>()) }
                                 WorkoutItem(
                                     workout = workout,
                                     hideInstruction = true,

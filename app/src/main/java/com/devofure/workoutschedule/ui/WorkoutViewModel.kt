@@ -55,6 +55,9 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     val filterQuery = MutableStateFlow("")
     val selectedFilters = MutableStateFlow<List<Pair<String, String>>>(emptyList())
 
+    private val _deleteEvent = MutableStateFlow<Pair<Workout, Int>?>(null)
+    val deleteEvent: StateFlow<Pair<Workout, Int>?> = _deleteEvent
+
     init {
         val context = application.applicationContext
         exerciseRepository = ExerciseRepository(context, exerciseDao, database)
@@ -241,6 +244,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             existingWorkouts?.remove(workout)
             if (existingWorkouts != null) {
                 this[dayIndex] = existingWorkouts
+                _deleteEvent.value = workout to dayIndex
             }
         }
         saveUserSchedule(_workouts.value)
@@ -281,5 +285,15 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         viewModelScope.launch {
             exerciseRepository.insertExercise(it)
         }
+    }
+
+    fun undoRemoveWorkout(workout: Workout, dayIndex: Int) {
+        _workouts.value = _workouts.value.toMutableMap().apply {
+            val existingWorkouts = this[dayIndex]?.toMutableList() ?: mutableListOf()
+            existingWorkouts.add(workout)
+            this[dayIndex] = existingWorkouts
+        }
+        saveUserSchedule(_workouts.value)
+        _deleteEvent.value = null
     }
 }

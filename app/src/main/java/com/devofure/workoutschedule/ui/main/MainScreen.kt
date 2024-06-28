@@ -26,6 +26,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -63,6 +66,20 @@ fun MainScreen(
     var showDateConfirmationDialog by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
     var editedNickname by remember { mutableStateOf("") }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val deleteEvent by workoutViewModel.deleteEvent.collectAsState()
+
+    LaunchedEffect(deleteEvent) {
+        deleteEvent?.let { (workout, dayIndex) ->
+            val result = snackbarHostState.showSnackbar(
+                message = "Workout removed",
+                actionLabel = "Undo"
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                workoutViewModel.undoRemoveWorkout(workout, dayIndex)
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -86,6 +103,7 @@ fun MainScreen(
                 }
             }
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         content = { paddingValues ->
             Column(
                 modifier = Modifier
