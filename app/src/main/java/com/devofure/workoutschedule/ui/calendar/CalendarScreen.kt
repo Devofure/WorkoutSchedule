@@ -128,13 +128,27 @@ fun CalendarScreen(
                         items(logs) { log ->
                             val workout = calendarViewModel.getWorkoutByName(log)
                             workout?.let {
+                                var expandedWorkoutIds by remember { mutableStateOf(setOf<Int>()) }
                                 WorkoutItem(
                                     workout = workout,
-                                    expanded = false,
-                                    onClick = {},
-                                    onWorkoutRemove = {},
-                                    onWorkoutDetail = {},
-                                    onWorkoutEdit = {},
+                                    hideInstruction = true,
+                                    expanded = expandedWorkoutIds.contains(workout.id),
+                                    onClick = {
+                                        expandedWorkoutIds =
+                                            if (expandedWorkoutIds.contains(workout.id)) {
+                                                expandedWorkoutIds - workout.id
+                                            } else {
+                                                expandedWorkoutIds + workout.id
+                                            }
+                                    },
+                                    itemMoreMenu = mapOf(
+                                        "Edit" to {
+                                            //navigate.to(Route.EditLog(workout.id))
+                                        },
+                                        "Delete" to {
+                                            calendarViewModel.deleteLog(log)
+                                        }
+                                    )
                                 )
                             }
                         }

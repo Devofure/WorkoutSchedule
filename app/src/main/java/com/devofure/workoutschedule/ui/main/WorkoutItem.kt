@@ -51,10 +51,9 @@ import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 fun WorkoutItem(
     workout: Workout,
     expanded: Boolean,
+    hideInstruction: Boolean = false,
     onClick: () -> Unit,
-    onWorkoutRemove: () -> Unit,
-    onWorkoutDetail: () -> Unit,
-    onWorkoutEdit: () -> Unit,
+    itemMoreMenu: Map<String, () -> Unit> = emptyMap(),
     onWorkoutChecked: ((Int, Boolean) -> Unit)? = null,
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -120,27 +119,15 @@ fun WorkoutItem(
                         onDismissRequest = { showMenu = false },
                         offset = DpOffset(x = (-16).dp, y = 0.dp)
                     ) {
-                        DropdownMenuItem(
-                            text = { Text("Details") },
-                            onClick = {
-                                showMenu = false
-                                onWorkoutDetail()
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Edit") },
-                            onClick = {
-                                showMenu = false
-                                onWorkoutEdit()
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Remove") },
-                            onClick = {
-                                showMenu = false
-                                onWorkoutRemove()
-                            }
-                        )
+                        itemMoreMenu.forEach { (title, menuItemAction) ->
+                            DropdownMenuItem(
+                                text = { Text(title) },
+                                onClick = {
+                                    showMenu = false
+                                    menuItemAction()
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -172,43 +159,46 @@ fun WorkoutItem(
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Instructions:",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            color = MaterialTheme.colorScheme.primary.copy(
-                                alpha = textAlpha
-                            )
-                        ),
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Start
-                    )
-                    workout.exercise.instructions?.forEachIndexed { _, instruction ->
-                        Row(
-                            verticalAlignment = Alignment.Top,
-                            modifier = Modifier.padding(bottom = 4.dp)
-                        ) {
-                            Text(
-                                text = "\u2022", // Bullet point
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    color = textColor.copy(
-                                        alpha = textAlpha
-                                    )
-                                ),
-                                modifier = Modifier.padding(end = 8.dp)
-                            )
-                            Text(
-                                text = instruction,
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    color = textColor.copy(
-                                        alpha = textAlpha
-                                    )
-                                ),
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Start
-                            )
+                    if (hideInstruction.not()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Instructions:",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                color = MaterialTheme.colorScheme.primary.copy(
+                                    alpha = textAlpha
+                                )
+                            ),
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Start
+                        )
+                        workout.exercise.instructions?.forEachIndexed { _, instruction ->
+                            Row(
+                                verticalAlignment = Alignment.Top,
+                                modifier = Modifier.padding(bottom = 4.dp)
+                            ) {
+                                Text(
+                                    text = "\u2022", // Bullet point
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        color = textColor.copy(
+                                            alpha = textAlpha
+                                        )
+                                    ),
+                                    modifier = Modifier.padding(end = 8.dp)
+                                )
+                                Text(
+                                    text = instruction,
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        color = textColor.copy(
+                                            alpha = textAlpha
+                                        )
+                                    ),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Start
+                                )
+                            }
                         }
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
@@ -252,9 +242,11 @@ fun PreviewWorkoutItem() {
             workout = workout,
             expanded = true,
             onClick = {},
-            onWorkoutRemove = {},
-            onWorkoutDetail = {},
-            onWorkoutEdit = {},
+            itemMoreMenu = mapOf(
+                "Details" to {},
+                "Edit" to {},
+                "Remove" to {}
+            ),
             onWorkoutChecked = { _, _ -> }
         )
     }

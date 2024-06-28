@@ -163,6 +163,10 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         return workoutsByDay
     }
 
+    fun getCheckedWorkoutsForDay(dayIndex: Int): List<Workout> {
+        return _workouts.value[dayIndex]?.filter { it.isDone } ?: emptyList()
+    }
+
     private fun saveUserSchedule(workouts: Map<Int, List<Workout>>) {
         val editor = sharedPreferences.edit()
         val workoutsJson = gson.toJson(workouts)

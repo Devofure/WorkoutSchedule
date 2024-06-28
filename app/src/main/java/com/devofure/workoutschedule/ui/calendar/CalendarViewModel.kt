@@ -2,14 +2,18 @@ package com.devofure.workoutschedule.ui.calendar
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.devofure.workoutschedule.data.AppDatabase
 import com.devofure.workoutschedule.data.Workout
 import com.devofure.workoutschedule.data.exercise.ExerciseRepository
 import com.devofure.workoutschedule.data.log.LogEntity
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -48,5 +52,11 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
             exercise = exercise,
             repsList = log.repsList,
         )
+    }
+
+     fun deleteLog(log: LogEntity) = viewModelScope.launch {
+        withContext(Dispatchers.IO) {
+            logDao.deleteLog(log.id)
+        }
     }
 }

@@ -1,4 +1,3 @@
-// MainScreen.kt
 @file:OptIn(
     ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class,
     ExperimentalFoundationApi::class
@@ -41,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.devofure.workoutschedule.data.DayOfWeek
 import com.devofure.workoutschedule.data.WEEK
-import com.devofure.workoutschedule.data.Workout
 import com.devofure.workoutschedule.ui.Navigate
 import com.devofure.workoutschedule.ui.Route
 import com.devofure.workoutschedule.ui.SharedViewModel
@@ -64,7 +62,6 @@ fun MainScreen(
     var showEditNicknameDialog by remember { mutableStateOf(false) }
     var showDateConfirmationDialog by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
-    var selectedWorkouts by remember { mutableStateOf<List<Workout>>(emptyList()) }
     var editedNickname by remember { mutableStateOf("") }
 
     Scaffold(
@@ -116,7 +113,6 @@ fun MainScreen(
                     )
                     LaunchedEffect(workouts) {
                         editedNickname = dayNickname
-                        selectedWorkouts = workouts
                     }
 
                     Column(
@@ -168,20 +164,22 @@ fun MainScreen(
                                                 isChecked
                                             )
                                         },
-                                        onWorkoutRemove = {
-                                            workoutViewModel.removeWorkout(
-                                                dayOfWeek.dayIndex,
-                                                workout,
-                                            )
-                                        },
-                                        onWorkoutDetail = {
-                                            sharedViewModel.selectWorkout(workout)
-                                            navigate.to(Route.WorkoutDetail)
-                                        },
-                                        onWorkoutEdit = {
-                                            sharedViewModel.selectWorkout(workout)
-                                            navigate.to(Route.EditWorkout(dayName))
-                                        },
+                                        itemMoreMenu = mapOf(
+                                            "Details" to {
+                                                sharedViewModel.selectWorkout(workout)
+                                                navigate.to(Route.WorkoutDetail)
+                                            },
+                                            "Edit" to {
+                                                sharedViewModel.selectWorkout(workout)
+                                                navigate.to(Route.EditWorkout(dayName))
+                                            },
+                                            "Remove" to {
+                                                workoutViewModel.removeWorkout(
+                                                    dayOfWeek.dayIndex,
+                                                    workout,
+                                                )
+                                            }
+                                        ),
                                     )
                                 }
                             }
@@ -215,7 +213,9 @@ fun MainScreen(
         DateConfirmationDialog(
             selectedDate = selectedDate,
             onConfirm = {
-                selectedWorkouts.forEach { workout ->
+                val checkedWorkouts =
+                    workoutViewModel.getCheckedWorkoutsForDay(WEEK[pagerState.currentPage].dayIndex)
+                checkedWorkouts.forEach { workout ->
                     workoutViewModel.logWorkout(workout, selectedDate)
                 }
                 showDateConfirmationDialog = false
