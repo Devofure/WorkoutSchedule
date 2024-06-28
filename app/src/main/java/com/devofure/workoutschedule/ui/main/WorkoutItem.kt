@@ -159,6 +159,10 @@ fun WorkoutItem(
                             )
                         }
                     }
+
+                    if (hideInstruction && workout.repsList?.isNotEmpty() == true) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                     if (hideInstruction.not()) {
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
@@ -198,7 +202,6 @@ fun WorkoutItem(
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }

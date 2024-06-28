@@ -9,6 +9,8 @@ import com.devofure.workoutschedule.data.exercise.ExerciseRepository
 import com.devofure.workoutschedule.data.log.LogEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -24,6 +26,9 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
         ExerciseRepository(application.applicationContext, database.exerciseDao(), database)
 
     private var cachedLogDatesForMonth = mutableMapOf<String, List<LocalDate>>()
+
+    private val _deleteEvent = MutableStateFlow<LogEntity?>(null)
+    val deleteEvent: StateFlow<LogEntity?> = _deleteEvent
 
     fun getLogsForDate(date: LocalDate): Flow<List<LogEntity>> {
         val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -54,9 +59,19 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
         )
     }
 
-     fun deleteLog(log: LogEntity) = viewModelScope.launch {
+    fun deleteLog(log: LogEntity) = viewModelScope.launch {
         withContext(Dispatchers.IO) {
             logDao.deleteLog(log.id)
+        }
+        _deleteEvent.value = log
+    }
+
+    fun undoDeleteLog(log: LogEntity) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                logDao.insertLog(log)
+            }
+            _deleteEvent.value = null
         }
     }
 }

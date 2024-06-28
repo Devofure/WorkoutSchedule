@@ -19,10 +19,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,6 +65,21 @@ fun CalendarScreen(
         currentYearMonth.value.second
     ).collectAsState(initial = emptyList())
 
+    val deleteEvent by calendarViewModel.deleteEvent.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(deleteEvent) {
+        deleteEvent?.let { log ->
+            val result = snackbarHostState.showSnackbar(
+                message = "Log deleted",
+                actionLabel = "Undo"
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                calendarViewModel.undoDeleteLog(log)
+            }
+        }
+    }
+
     val backgroundColor = MaterialTheme.colorScheme.background
 
     Scaffold(
@@ -85,7 +104,9 @@ fun CalendarScreen(
                     }
                     IconButton(onClick = { isMonthView = !isMonthView }) {
                         Icon(
-                            imageVector = if (isMonthView) Icons.Filled.ViewWeek else Icons.Filled.ViewModule,
+                            imageVector =
+                            if (isMonthView) Icons.Filled.ViewWeek
+                            else Icons.Filled.ViewModule,
                             contentDescription = "Toggle View"
                         )
                     }
@@ -98,6 +119,7 @@ fun CalendarScreen(
                 )
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         content = { paddingValues ->
             Column(
                 modifier = Modifier

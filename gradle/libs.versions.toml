@@ -9,10 +9,9 @@ composeUiTest = "1.6.8"  # Same as Compose version
 constraintlayout = "2.1.4"
 coreKtx = "1.13.1"
 detekt = "1.23.6"
-detektCompose = "1.23.0"
 espressoCore = "3.5.1"
 firebase-appdistribution = "5.0.0"
-firebase-bom = "33.1.0"
+firebase-bom = "33.1.1"
 firebase-crashlytics-gradle = "3.0.2"
 firebase-ui-auth = "8.0.2"
 google-services = "4.4.2"
@@ -56,7 +55,6 @@ androidx-material3 = { module = "androidx.compose.material3:material3", version.
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigation" }
-detekt-compose = { module = "io.gitlab.arturbosch.detekt:detekt-compose", version.ref = "detektCompose" }
 firebase-analytics-ktx = { group = "com.google.firebase", name = "firebase-analytics-ktx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
 firebase-crashlytics-ktx = { group = "com.google.firebase", name = "firebase-crashlytics-ktx" }

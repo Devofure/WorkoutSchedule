@@ -96,7 +96,6 @@ firebaseAppDistribution {
 }
 
 dependencies {
-    detektPlugins(libs.detekt.compose)
     implementation(libs.accompanist.systemuicontroller)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
@@ -137,4 +136,13 @@ dependencies {
     testImplementation(libs.androidx.arch.core.testing)
     testImplementation(libs.androidx.junit.ktx)
     testImplementation(libs.kotlinx.coroutines.test)
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    config.setFrom(files("$rootDir/config/detekt.yml"))
+    buildUponDefaultConfig = true
+    allRules = false
+    autoCorrect = true
 }
