@@ -52,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.compose.rememberNavController
@@ -414,7 +415,7 @@ fun AddExerciseScreenPreview() {
         )
     )
 
-    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+    MyWorkoutsTheme(primaryColor = Colors.DefaultThemeColor) {
         AddExerciseScreen(
             subTitle = "Monday",
             dayIndex = 1,
@@ -433,7 +434,7 @@ fun AddExerciseScreenPreview() {
     }
 }
 
-@Preview
+@PreviewLightDark
 @Composable
 fun AddExerciseScreenPreviewWithFilter() {
     val navController = rememberNavController()
@@ -476,7 +477,7 @@ fun AddExerciseScreenPreviewWithFilter() {
         )
     )
 
-    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+    MyWorkoutsTheme(primaryColor = Colors.DefaultThemeColor) {
         AddExerciseScreen(
             subTitle = "Monday",
             dayIndex = 1,
@@ -498,7 +499,7 @@ fun AddExerciseScreenPreviewWithFilter() {
 @Preview
 @Composable
 fun ExerciseItemPreview() {
-    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+    MyWorkoutsTheme(primaryColor = Colors.DefaultThemeColor) {
         ExerciseItem(
             exercise = Exercise(
                 rowid = 1,
@@ -524,7 +525,7 @@ fun ExerciseItemPreview() {
 @Preview
 @Composable
 fun ExerciseFilterPreview() {
-    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+    MyWorkoutsTheme(primaryColor = Colors.DefaultThemeColor) {
         FilterDialog(
             showDialog = {},
             selectedFilters = {},

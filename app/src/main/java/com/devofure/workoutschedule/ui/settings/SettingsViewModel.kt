@@ -16,6 +16,7 @@ import com.devofure.workoutschedule.data.DayOfWeek
 import com.devofure.workoutschedule.data.FirstDayOfWeek
 import com.devofure.workoutschedule.data.ReminderTime
 import com.devofure.workoutschedule.receiver.ReminderReceiver
+import com.devofure.workoutschedule.ui.theme.Colors
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,7 +33,7 @@ class SettingsViewModel(application: Application) : AndroidViewModel(application
     private val _theme = MutableStateFlow(ThemeType.SYSTEM)
     val theme: StateFlow<ThemeType> = _theme
 
-    private val _primaryColor = MutableStateFlow(Color.Blue) // Default primary color
+    private val _primaryColor = MutableStateFlow(Colors.DefaultThemeColor) // Default primary color
     val primaryColor: StateFlow<Color> = _primaryColor
 
     private val _reminderTime = MutableStateFlow(ReminderTime(0, 0))

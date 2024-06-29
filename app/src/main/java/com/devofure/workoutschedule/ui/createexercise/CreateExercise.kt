@@ -155,7 +155,7 @@ fun CreateExerciseScreen(
 @Preview
 @Composable
 fun CreateExerciseScreenPreview() {
-    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+    MyWorkoutsTheme(primaryColor = Colors.DefaultThemeColor) {
         CreateExerciseScreen({}, Navigate(rememberNavController()))
     }
 }

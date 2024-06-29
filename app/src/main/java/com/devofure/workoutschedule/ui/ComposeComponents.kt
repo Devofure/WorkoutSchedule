@@ -85,7 +85,7 @@ fun GenericItem(
 @OrientationPreviews
 @Composable
 fun PreviewSettingsItem() {
-    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+    MyWorkoutsTheme(primaryColor = Colors.DefaultThemeColor) {
         GenericItem(
             imageVector = Icons.Default.Settings,
             headline = "Workout Reminders",
@@ -102,7 +102,7 @@ fun PreviewSettingsItem() {
 @OrientationPreviews
 @Composable
 fun PreviewSettingsItemWithoutIcon() {
-    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+    MyWorkoutsTheme(primaryColor = Colors.DefaultThemeColor) {
         GenericItem(
             headline = "Workout Reminders",
             supporting = "Set up your workout reminder time",
@@ -118,7 +118,7 @@ fun PreviewSettingsItemWithoutIcon() {
 @OrientationPreviews
 @Composable
 fun PreviewSettingsItemOneLine() {
-    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+    MyWorkoutsTheme(primaryColor = Colors.DefaultThemeColor) {
         GenericItem(
             imageVector = Icons.Default.Settings,
             headline = "Workout Reminders",
@@ -134,7 +134,7 @@ fun PreviewSettingsItemOneLine() {
 @OrientationPreviews
 @Composable
 fun PreviewSettingsItemOneLineWithoutIcon() {
-    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+    MyWorkoutsTheme(primaryColor = Colors.DefaultThemeColor) {
         GenericItem(
             headline = "Workout Reminders",
             onClick = {},

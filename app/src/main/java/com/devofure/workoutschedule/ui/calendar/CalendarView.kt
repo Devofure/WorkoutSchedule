@@ -32,7 +32,7 @@ import com.devofure.workoutschedule.ui.getFirstDayOfMonthWeekIndex
 import com.devofure.workoutschedule.ui.getTotalCells
 import com.devofure.workoutschedule.ui.getWeekStartDate
 import com.devofure.workoutschedule.ui.isSameDay
-import com.devofure.workoutschedule.ui.theme.Colors.GreenAccent
+import com.devofure.workoutschedule.ui.theme.Colors.DefaultThemeColor
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -259,7 +259,7 @@ fun WeekDayHeaders(firstDayOfWeek: FirstDayOfWeek) {
 @Preview(showBackground = true)
 @Composable
 fun CalendarViewPreview() {
-    MyWorkoutsTheme(primaryColor = GreenAccent) {
+    MyWorkoutsTheme(primaryColor = DefaultThemeColor) {
         CalendarView(
             selectedDate = LocalDate.now(),
             logDates = listOf(LocalDate.now().minusDays(1), LocalDate.now().plusDays(1)),

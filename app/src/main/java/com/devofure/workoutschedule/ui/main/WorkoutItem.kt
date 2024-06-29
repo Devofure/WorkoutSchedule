@@ -34,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewFontScale
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -44,7 +45,6 @@ import com.devofure.workoutschedule.data.SetDetails
 import com.devofure.workoutschedule.data.Workout
 import com.devofure.workoutschedule.data.exercise.Exercise
 import com.devofure.workoutschedule.ui.OrientationPreviews
-import com.devofure.workoutschedule.ui.theme.Colors.BlueAccent
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 
 @Composable
@@ -241,7 +241,7 @@ fun PreviewWorkoutItem() {
         ),
         isDone = false
     )
-    MyWorkoutsTheme(primaryColor = BlueAccent) {
+    MyWorkoutsTheme(primaryColor = Color.Green) {
         WorkoutItem(
             workout = workout,
             expanded = true,

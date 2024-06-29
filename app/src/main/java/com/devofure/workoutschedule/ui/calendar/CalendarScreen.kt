@@ -188,7 +188,7 @@ fun CalendarScreen(
 @Composable
 fun CalendarScreenPreview() {
     val navigate = Navigate(rememberNavController())
-    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+    MyWorkoutsTheme(primaryColor = Colors.DefaultThemeColor) {
         CalendarScreen(
             calendarViewModel = viewModel(),
             navigate = navigate,

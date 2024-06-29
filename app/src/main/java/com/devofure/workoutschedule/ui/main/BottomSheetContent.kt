@@ -78,7 +78,7 @@ fun BottomSheetContent(
 @Composable
 fun BottomSheetContentPreview() {
     val navigate = Navigate(navController = androidx.navigation.compose.rememberNavController())
-    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+    MyWorkoutsTheme(primaryColor = Colors.DefaultThemeColor) {
         BottomSheetContent(
             navigate = navigate,
             dayOfWeek = WEEK[0],

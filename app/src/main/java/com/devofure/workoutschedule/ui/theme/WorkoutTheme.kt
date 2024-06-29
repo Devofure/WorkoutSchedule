@@ -15,11 +15,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.devofure.workoutschedule.ui.settings.ThemeType
+import com.devofure.workoutschedule.ui.theme.Colors.Gray
 import com.devofure.workoutschedule.ui.theme.Colors.Gray100
 import com.devofure.workoutschedule.ui.theme.Colors.Gray300
 import com.devofure.workoutschedule.ui.theme.Colors.Gray400
 import com.devofure.workoutschedule.ui.theme.Colors.Gray500
-import com.devofure.workoutschedule.ui.theme.Colors.Gray700
 import com.devofure.workoutschedule.ui.theme.Colors.Gray800
 import com.devofure.workoutschedule.ui.theme.Colors.Gray900
 import com.devofure.workoutschedule.ui.theme.Colors.White
@@ -62,16 +62,17 @@ object Colors {
     val Gray400 = Color(0xFFBDBDBD)
     val Gray500 = Color(0xFF9E9E9E)
     val Gray600 = Color(0xFF757575)
-    val Gray700 = Color(0xFF616161)
+    val Gray = Color(0xFF616161)
     val Gray800 = Color(0xFF424242)
     val Gray900 = Color(0xFF212121)
     val White = Color(0xFFFFFFFF)
-    val BlueAccent = Color(0xFF2196F3)
     val GreenAccent = Color(0xFF009688)
+    val BlueAccent = Color(0xFF2196F3)
     val YellowAccent = Color(0xFFFFC107)
     val PurpleAccent = Color(0xFF673AB7)
     val RedAccent = Color(0xFFE91E63)
     val OrangeAccent = Color(0xFFFF5722)
+    val DefaultThemeColor = GreenAccent
 }
 
 private fun customLightColorScheme(primaryColor: Color) = lightColorScheme(
@@ -79,7 +80,7 @@ private fun customLightColorScheme(primaryColor: Color) = lightColorScheme(
     onPrimary = White,
     primaryContainer = primaryColor.copy(alpha = 0.1f),
     onPrimaryContainer = Gray900,
-    secondary = Gray700,
+    secondary = Gray,
     onSecondary = White,
     secondaryContainer = Gray400,
     onSecondaryContainer = Gray900,

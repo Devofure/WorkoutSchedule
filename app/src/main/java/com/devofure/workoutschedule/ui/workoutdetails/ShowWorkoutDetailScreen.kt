@@ -182,7 +182,7 @@ fun PreviewWorkoutDetailScreen() {
         repsList = listOf(SetDetails(10), SetDetails(10), SetDetails(10)),
         durationInSeconds = 117
     )
-    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+    MyWorkoutsTheme(primaryColor = Colors.DefaultThemeColor) {
         WorkoutDetailScreen(workout = workout, navigate = Navigate(rememberNavController()))
     }
 }

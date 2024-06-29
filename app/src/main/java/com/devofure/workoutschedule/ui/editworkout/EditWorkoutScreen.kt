@@ -469,7 +469,7 @@ fun EditWorkoutScreenPreview() {
         durationInSeconds = 30006
     )
 
-    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+    MyWorkoutsTheme(primaryColor = Colors.DefaultThemeColor) {
         EditWorkoutScreen(
             dayIndex = 0,
             updateWorkout = { _, _ -> },

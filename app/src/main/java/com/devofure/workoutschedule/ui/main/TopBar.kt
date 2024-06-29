@@ -41,7 +41,7 @@ fun TopBar(onSettingsClick: () -> Unit, onCalendarClick: () -> Unit) {
 @PreviewLightDark
 @Composable
 fun TopBarPreview() {
-    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+    MyWorkoutsTheme(primaryColor = Colors.DefaultThemeColor) {
         TopBar(
             onSettingsClick = {},
             onCalendarClick = {}

@@ -228,7 +228,7 @@ fun ReorderExerciseScreenPreview() {
         repsList = listOf(SetDetails(reps = 10), SetDetails(reps = 8)),
         durationInSeconds = 30
     )
-    MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
+    MyWorkoutsTheme(primaryColor = Colors.DefaultThemeColor) {
         ReorderExerciseScreen(
             navigate = Navigate(rememberNavController()),
             dayOfWeek = DayOfWeek.Monday,
