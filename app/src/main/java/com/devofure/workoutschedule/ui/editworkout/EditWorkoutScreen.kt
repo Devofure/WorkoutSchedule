@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -43,9 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.PreviewFontScale
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.rememberNavController
 import com.devofure.workoutschedule.data.SetDetails
@@ -224,6 +223,7 @@ fun EditWorkoutScreen(
         }
     )
 }
+
 @Composable
 fun DurationPickerField(
     value: String,
@@ -312,15 +312,27 @@ fun SetDetailsRow(
     var reps by remember { mutableStateOf(setDetails.reps.toString()) }
     var weight by remember { mutableStateOf(setDetails.weight?.toString() ?: "") }
     var duration by remember { mutableStateOf(setDetails.duration?.toString() ?: "") }
-
+    val setTitleNumber = setIndex + 1
     Column {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            HorizontalDivider(modifier = Modifier.weight(1f))
+            Text(
+                text = "Set $setTitleNumber",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(end = 8.dp)
+            )
+            HorizontalDivider(modifier = Modifier.weight(1f))
+        }
         ValidatedTextField(
             value = reps,
             onValueChange = {
                 reps = it
                 onSetDetailsChange(setDetails.copy(reps = it.toIntOrNull() ?: 1))
             },
-            label = "Reps for set ${setIndex + 1}",
+            label = "Reps for set $setTitleNumber",
             error = null,
             keyboardType = KeyboardType.Number
         )
@@ -331,7 +343,7 @@ fun SetDetailsRow(
                 weight = it
                 onSetDetailsChange(setDetails.copy(weight = it.toFloatOrNull()))
             },
-            label = "Weight for set ${setIndex + 1} (kg)",
+            label = "Weight for set $setTitleNumber (kg)",
             error = null,
             keyboardType = KeyboardType.Number
         )
@@ -342,7 +354,7 @@ fun SetDetailsRow(
                 duration = it
                 onSetDetailsChange(setDetails.copy(duration = it.toIntOrNull()))
             },
-            label = "Duration for set ${setIndex + 1}",
+            label = "Duration for set $setTitleNumber",
             error = null,
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -413,8 +425,6 @@ data class ValidationResult(
 )
 
 @PreviewLightDark
-@PreviewScreenSizes
-@PreviewFontScale
 @OrientationPreviews
 @Composable
 fun EditWorkoutScreenPreview() {
