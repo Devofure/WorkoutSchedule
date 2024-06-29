@@ -95,7 +95,7 @@ class MainActivity : ComponentActivity() {
                 }
                 composable(Route.AddExercise.route) { backStackEntry ->
                     val dayIndexParam =
-                        backStackEntry.arguments?.getInt(Route.AddExercise.parameterName)
+                        backStackEntry.arguments?.getString(Route.AddExercise.parameterName)?.toInt()
                             ?: return@composable
                     AddExerciseScreen(
                         dayIndex = dayIndexParam,
@@ -142,7 +142,7 @@ class MainActivity : ComponentActivity() {
                 }
                 composable(Route.EditWorkout.route) { backStackEntry ->
                     val dayIndex =
-                        backStackEntry.arguments?.getInt(Route.EditWorkout.parameterName)
+                        backStackEntry.arguments?.getString(Route.EditWorkout.parameterName)?.toInt()
                             ?: return@composable
                     sharedViewModel.selectedWorkout.collectAsState().value?.let { workout ->
                         EditWorkoutScreen(
@@ -157,7 +157,7 @@ class MainActivity : ComponentActivity() {
                 }
                 composable(Route.ReorderExercise.route) { backStackEntry ->
                     val dayIndex =
-                        backStackEntry.arguments?.getInt(Route.ReorderExercise.parameterName)
+                        backStackEntry.arguments?.getString(Route.ReorderExercise.parameterName)?.toInt()
                             ?: return@composable
                     val dayOfWeek = WEEK[dayIndex]
                     val workouts by workoutViewModel.workoutsForDay(dayOfWeek).collectAsState()

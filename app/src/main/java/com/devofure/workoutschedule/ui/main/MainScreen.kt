@@ -189,7 +189,7 @@ fun MainScreen(
                                             },
                                             "Edit" to {
                                                 sharedViewModel.selectWorkout(workout)
-                                                navigate.to(Route.EditWorkout(dayName))
+                                                navigate.to(Route.EditWorkout(dayOfWeek.dayIndex))
                                             },
                                             "Remove" to {
                                                 workoutViewModel.removeWorkout(

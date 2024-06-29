@@ -22,7 +22,7 @@ sealed class Route(val route: String) {
         }
     }
 
-    data class EditWorkout(val dayName: String) : Route("edit_workout/$dayName") {
+    data class EditWorkout(val dayIndex: Int) : Route("edit_workout/$dayIndex") {
         companion object {
             const val parameterName = "dayIndex"
             const val route = "edit_workout/{$parameterName}"
