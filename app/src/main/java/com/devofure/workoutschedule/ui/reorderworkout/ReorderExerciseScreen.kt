@@ -226,7 +226,7 @@ fun ReorderExerciseScreenPreview() {
             rowid = 1
         ),
         repsList = listOf(SetDetails(reps = 10), SetDetails(reps = 8)),
-        duration = 30
+        durationInSeconds = 30
     )
     MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
         ReorderExerciseScreen(

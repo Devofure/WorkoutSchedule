@@ -2,6 +2,7 @@
 
 package com.devofure.workoutschedule.ui.editworkout
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +26,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -35,13 +37,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewFontScale
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -63,20 +63,16 @@ fun EditWorkoutScreen(
     workout: Workout,
     navigate: Navigate,
 ) {
-
-    var sets by remember { mutableIntStateOf(workout.repsList?.size ?: 0) }
+    var sets by remember { mutableStateOf(workout.repsList?.size ?: 0) }
     var setDetailsList by remember {
         mutableStateOf(
-            workout.repsList ?: List(workout.repsList?.size ?: 0) {
-                SetDetails(reps = 0)
-            }
+            workout.repsList ?: List(workout.repsList?.size ?: 0) { SetDetails(reps = 0) }
         )
     }
-    var duration by remember { mutableStateOf(workout.duration?.toString() ?: "") }
+    var duration by remember { mutableStateOf(workout.durationInSeconds?.toString() ?: "") }
     var setsError by remember { mutableStateOf<String?>(null) }
     var repsError by remember { mutableStateOf<String?>(null) }
     var durationError by remember { mutableStateOf<String?>(null) }
-    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -84,10 +80,7 @@ fun EditWorkoutScreen(
                 title = {
                     Column {
                         Text("Edit Workout")
-                        Text(
-                            workout.exercise.name,
-                            style = MaterialTheme.typography.titleSmall
-                        )
+                        Text(workout.exercise.name, style = MaterialTheme.typography.titleSmall)
                     }
                 },
                 navigationIcon = {
@@ -97,9 +90,7 @@ fun EditWorkoutScreen(
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
                             .size(32.dp)
-                            .clickable {
-                                navigate.back()
-                            }
+                            .clickable { navigate.back() }
                     )
                 },
                 actions = {
@@ -117,7 +108,7 @@ fun EditWorkoutScreen(
                             if (validationResult.isValid) {
                                 val updatedWorkout = workout.copy(
                                     repsList = setDetailsList,
-                                    duration = duration.toIntOrNull()
+                                    durationInSeconds = duration.toIntOrNull()
                                 )
                                 updateWorkout(dayIndex, updatedWorkout)
                                 navigate.back()
@@ -125,9 +116,9 @@ fun EditWorkoutScreen(
                         }
                     ) {
                         Text(
-                            text = "Save",
+                            "Save",
                             style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onPrimary,
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 },
@@ -154,9 +145,8 @@ fun EditWorkoutScreen(
                     DurationPickerField(
                         value = duration,
                         onValueChange = { duration = it },
-                        label = "Total Duration (mins)",
+                        label = "Total Duration",
                         error = durationError,
-                        context = context
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(
@@ -173,9 +163,7 @@ fun EditWorkoutScreen(
                         )
                         OutlinedIconButton(
                             modifier = Modifier.padding(horizontal = 8.dp),
-                            colors = IconButtonDefaults.iconButtonColors(
-                                contentColor = MaterialTheme.colorScheme.primary
-                            ),
+                            colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary),
                             onClick = {
                                 if (sets > 0) {
                                     sets -= 1
@@ -190,20 +178,14 @@ fun EditWorkoutScreen(
                         }
                         OutlinedIconButton(
                             modifier = Modifier.padding(horizontal = 8.dp),
-                            colors = IconButtonDefaults.iconButtonColors(
-                                contentColor = MaterialTheme.colorScheme.primary
-                            ),
+                            colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary),
                             onClick = {
                                 sets += 1
-                                setDetailsList = setDetailsList.toMutableList().apply {
-                                    add(SetDetails())
-                                }
+                                setDetailsList =
+                                    setDetailsList.toMutableList().apply { add(SetDetails()) }
                             }
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Add Set"
-                            )
+                            Icon(imageVector = Icons.Default.Add, contentDescription = "Add Set")
                         }
                     }
                     if (setsError != null) {
@@ -220,9 +202,8 @@ fun EditWorkoutScreen(
                             SetDetailsRow(
                                 setDetails = setDetails,
                                 onSetDetailsChange = { updatedSetDetails ->
-                                    setDetailsList = setDetailsList.toMutableList().apply {
-                                        this[index] = updatedSetDetails
-                                    }
+                                    setDetailsList = setDetailsList.toMutableList()
+                                        .apply { this[index] = updatedSetDetails }
                                 },
                                 setIndex = index
                             )
@@ -243,47 +224,63 @@ fun EditWorkoutScreen(
         }
     )
 }
-
 @Composable
 fun DurationPickerField(
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
     error: String?,
-    context: android.content.Context
 ) {
-    val initialHour = remember { value.toIntOrNull()?.div(60) ?: 0 }
-    val initialMinute = remember { value.toIntOrNull()?.rem(60) ?: 0 }
+    val totalSeconds = value.toIntOrNull() ?: 0
+    val hours = totalSeconds / 3600
+    val minutes = (totalSeconds % 3600) / 60
+    val seconds = totalSeconds % 60
+
+    val formattedTime = buildString {
+        if (hours > 0) append("$hours h ")
+        if (minutes > 0) append("$minutes m ")
+        if (seconds > 0) append("$seconds s")
+    }.trim()
+
     var showPicker by remember { mutableStateOf(false) }
 
-    Box {
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            label = { Text(label) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+    Column {
+        Text(text = label, style = MaterialTheme.typography.bodySmall)
+        Spacer(modifier = Modifier.height(4.dp))
+        OutlinedButton(
+            onClick = { showPicker = true },
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { showPicker = true },
-            isError = error != null,
-            readOnly = true,
-            trailingIcon = {
+                .height(56.dp),
+            border = BorderStroke(
+                width = 1.dp,
+                color = if (error == null) MaterialTheme.colorScheme.outline else MaterialTheme.colorScheme.error
+            ),
+            shape = MaterialTheme.shapes.small
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = formattedTime.ifEmpty { "Select time" },
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.weight(1f)
+                )
                 Icon(
                     imageVector = Icons.Default.Schedule,
                     contentDescription = "Pick Time",
-                    modifier = Modifier.clickable { showPicker = true },
                     tint = MaterialTheme.colorScheme.primary
                 )
-            },
-            colors = OutlinedTextFieldDefaults.colors(
-                errorBorderColor = MaterialTheme.colorScheme.error
-            )
-        )
+            }
+        }
         if (error != null) {
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = error,
                 color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(start = 16.dp)
             )
         }
@@ -291,17 +288,20 @@ fun DurationPickerField(
 
     if (showPicker) {
         TimePickerDialog(
-            initialHour = initialHour,
-            initialMinute = initialMinute,
-            onTimeSelected = { _, selectedHour: Int, selectedMinute: Int ->
-                val totalMinutes = selectedHour * 60 + selectedMinute
-                onValueChange(totalMinutes.toString())
+            initialHour = hours,
+            initialMinute = minutes,
+            initialSecond = seconds,
+            onTimeSelected = { selectedHour: Int, selectedMinute: Int, selectedSecond: Int ->
+                val totalSecondsSelected =
+                    (selectedHour * 3600) + (selectedMinute * 60) + selectedSecond
+                onValueChange(totalSecondsSelected.toString())
                 showPicker = false
             },
             onDismiss = { showPicker = false }
         )
     }
 }
+
 
 @Composable
 fun SetDetailsRow(
@@ -342,9 +342,8 @@ fun SetDetailsRow(
                 duration = it
                 onSetDetailsChange(setDetails.copy(duration = it.toIntOrNull()))
             },
-            label = "Duration for set ${setIndex + 1} (minutes)",
+            label = "Duration for set ${setIndex + 1}",
             error = null,
-            context = LocalContext.current
         )
         Spacer(modifier = Modifier.height(16.dp))
     }
@@ -436,7 +435,7 @@ fun EditWorkoutScreenPreview() {
             rowid = 0
         ),
         repsList = listOf(SetDetails(reps = 10), SetDetails(reps = 8)),
-        duration = 30
+        durationInSeconds = 30006
     )
 
     MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {

@@ -129,7 +129,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 exerciseName = workout.exercise.name,
                 dayOfWeek = date.format(DateTimeFormatter.ofPattern("EEEE", Locale.getDefault())),
                 repsList = workout.repsList,
-                duration = workout.duration,
+                duration = workout.durationInSeconds,
             )
             logDao.insertLog(logEntity)
         }

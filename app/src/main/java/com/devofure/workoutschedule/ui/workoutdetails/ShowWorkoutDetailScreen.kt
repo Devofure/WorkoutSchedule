@@ -81,7 +81,7 @@ fun WorkoutDetailScreen(workout: Workout, navigate: Navigate) {
                     Spacer(modifier = Modifier.height(12.dp))
                 }
 
-                workout.duration?.let { duration ->
+                workout.durationInSeconds?.let { duration ->
                     DetailItem(label = "Duration", value = "$duration mins")
                 }
 
@@ -185,7 +185,7 @@ fun PreviewWorkoutDetailScreen() {
             equipment = "None",
         ),
         repsList = listOf(SetDetails(10), SetDetails(10), SetDetails(10)),
-        duration = 45,
+        durationInSeconds = 45,
     )
     MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
         WorkoutDetailScreen(workout = workout, navigate = Navigate(rememberNavController()))
