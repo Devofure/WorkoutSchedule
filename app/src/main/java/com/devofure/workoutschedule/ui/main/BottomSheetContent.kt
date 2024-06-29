@@ -39,32 +39,32 @@ fun BottomSheetContent(
     ) {
         GenericItem(
             imageVector = Icons.Filled.CalendarToday,
-            headline = "Log day",
+            headline = "Log finished workouts",
             onClick = showLogWorkoutDay,
         )
         GenericItem(
-            imageVector = Icons.Filled.Edit,
-            headline = "Edit Day Nickname",
-            onClick = showEditDialogDayNickname
-        )
-        GenericItem(
             imageVector = Icons.Filled.CheckCircle,
-            headline = "Mark all as done",
+            headline = "Mark all workouts as done",
         ) {
             checkAllWorkouts(dayOfWeek.dayIndex)
         }
         GenericItem(
             imageVector = Icons.Filled.FitnessCenter,
-            headline = "Add Exercise",
+            headline = "Add Exercise to this day",
         ) {
             navigate.to(Route.AddExercise(dayOfWeek.dayIndex))
         }
         GenericItem(
             imageVector = Icons.Filled.Reorder,
-            headline = "Reorder Exercises",
+            headline = "Reorder Workouts",
         ) {
             navigate.to(Route.ReorderExercise(dayOfWeek.dayIndex))
         }
+        GenericItem(
+            imageVector = Icons.Filled.Edit,
+            headline = "Edit the name of this day",
+            onClick = showEditDialogDayNickname
+        )
     }
 }
 
