@@ -5,15 +5,14 @@ package com.devofure.workoutschedule.ui.editworkout
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -130,95 +129,101 @@ fun EditWorkoutScreen(
             )
         },
         content = { paddingValues ->
-            Box(
+            Column(
                 modifier = Modifier
                     .padding(paddingValues)
-                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp)
+                    .fillMaxWidth()
             ) {
-                Column(
+                DurationPickerField(
+                    value = duration,
+                    onValueChange = { duration = it },
+                    label = "Total Duration",
+                    error = durationError,
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(16.dp)
                         .fillMaxWidth()
+                        .padding(top = 16.dp)
                 ) {
-                    DurationPickerField(
-                        value = duration,
-                        onValueChange = { duration = it },
-                        label = "Total Duration",
-                        error = durationError,
+                    HorizontalDivider()
+                }
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .fillMaxWidth(),
+                ) {
+                    Text(
+                        "Sets: $sets",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp),
+                    OutlinedIconButton(
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        ),
+                        onClick = {
+                            if (sets > 0) {
+                                sets -= 1
+                                setDetailsList = setDetailsList.dropLast(1).toMutableList()
+                            }
+                        }
                     ) {
-                        Text(
-                            "Sets: $sets",
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(horizontal = 16.dp)
+                        Icon(
+                            imageVector = Icons.Default.Remove,
+                            contentDescription = "Remove Set"
                         )
-                        OutlinedIconButton(
-                            modifier = Modifier.padding(horizontal = 8.dp),
-                            colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary),
-                            onClick = {
-                                if (sets > 0) {
-                                    sets -= 1
-                                    setDetailsList = setDetailsList.dropLast(1).toMutableList()
-                                }
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Remove,
-                                contentDescription = "Remove Set"
-                            )
-                        }
-                        OutlinedIconButton(
-                            modifier = Modifier.padding(horizontal = 8.dp),
-                            colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary),
-                            onClick = {
-                                sets += 1
-                                setDetailsList =
-                                    setDetailsList.toMutableList().apply { add(SetDetails()) }
-                            }
-                        ) {
-                            Icon(imageVector = Icons.Default.Add, contentDescription = "Add Set")
-                        }
                     }
-                    if (setsError != null) {
+                    OutlinedIconButton(
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary
+                        ),
+                        onClick = {
+                            sets += 1
+                            setDetailsList =
+                                setDetailsList.toMutableList().apply { add(SetDetails()) }
+                        }
+                    ) {
+                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add Set")
+                    }
+                }
+                if (setsError != null) {
+                    Text(
+                        text = setsError ?: "",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall,
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Column {
+                    setDetailsList.forEachIndexed { index, setDetails ->
+                        SetDetailsRow(
+                            setDetails = setDetails,
+                            onSetDetailsChange = { updatedSetDetails ->
+                                setDetailsList = setDetailsList.toMutableList()
+                                    .apply { this[index] = updatedSetDetails }
+                            },
+                            setIndex = index
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    if (repsError != null) {
                         Text(
-                            text = setsError ?: "",
+                            text = repsError ?: "",
                             color = MaterialTheme.colorScheme.error,
                             style = MaterialTheme.typography.bodySmall,
                             modifier = Modifier.padding(start = 16.dp)
                         )
                     }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Column {
-                        setDetailsList.forEachIndexed { index, setDetails ->
-                            SetDetailsRow(
-                                setDetails = setDetails,
-                                onSetDetailsChange = { updatedSetDetails ->
-                                    setDetailsList = setDetailsList.toMutableList()
-                                        .apply { this[index] = updatedSetDetails }
-                                },
-                                setIndex = index
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-                        if (repsError != null) {
-                            Text(
-                                text = repsError ?: "",
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.bodySmall,
-                                modifier = Modifier.padding(start = 16.dp)
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(80.dp)) // Add space to avoid the button covering content
                 }
+                Spacer(modifier = Modifier.height(80.dp)) // Add space to avoid the button covering content
             }
         }
     )
@@ -263,7 +268,7 @@ fun DurationPickerField(
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
             ) {
                 Text(
-                    text = formattedTime.ifEmpty { "Select time" },
+                    text = formattedTime.ifEmpty { "0 s" },
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
@@ -302,7 +307,6 @@ fun DurationPickerField(
     }
 }
 
-
 @Composable
 fun SetDetailsRow(
     setDetails: SetDetails,
@@ -313,40 +317,56 @@ fun SetDetailsRow(
     var weight by remember { mutableStateOf(setDetails.weight?.toString() ?: "") }
     var duration by remember { mutableStateOf(setDetails.duration?.toString() ?: "") }
     val setTitleNumber = setIndex + 1
+
     Column {
         Row(
+            horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.padding(top = 8.dp).fillMaxWidth()
         ) {
-            HorizontalDivider(modifier = Modifier.weight(1f))
+            HorizontalDivider(
+                modifier = Modifier.width(width = 32.dp)
+            )
             Text(
                 text = "Set $setTitleNumber",
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(end = 8.dp)
+                modifier = Modifier.padding(horizontal = 8.dp)
             )
-            HorizontalDivider(modifier = Modifier.weight(1f))
+            HorizontalDivider(
+                modifier = Modifier.width(width = 32.dp)
+            )
         }
-        ValidatedTextField(
-            value = reps,
-            onValueChange = {
-                reps = it
-                onSetDetailsChange(setDetails.copy(reps = it.toIntOrNull() ?: 1))
-            },
-            label = "Reps for set $setTitleNumber",
-            error = null,
-            keyboardType = KeyboardType.Number
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        ValidatedTextField(
-            value = weight,
-            onValueChange = {
-                weight = it
-                onSetDetailsChange(setDetails.copy(weight = it.toFloatOrNull()))
-            },
-            label = "Weight for set $setTitleNumber (kg)",
-            error = null,
-            keyboardType = KeyboardType.Number
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            ValidatedTextField(
+                value = reps,
+                onValueChange = {
+                    reps = it
+                    onSetDetailsChange(setDetails.copy(reps = it.toIntOrNull() ?: 1))
+                },
+                label = "Reps",
+                error = null,
+                keyboardType = KeyboardType.Number,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp),
+            )
+            ValidatedTextField(
+                value = weight,
+                onValueChange = {
+                    weight = it
+                    onSetDetailsChange(setDetails.copy(weight = it.toFloatOrNull()))
+                },
+                label = "Weight (kg)",
+                error = null,
+                keyboardType = KeyboardType.Number,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp),
+            )
+        }
         Spacer(modifier = Modifier.height(8.dp))
         DurationPickerField(
             value = duration,
@@ -354,12 +374,13 @@ fun SetDetailsRow(
                 duration = it
                 onSetDetailsChange(setDetails.copy(duration = it.toIntOrNull()))
             },
-            label = "Duration for set $setTitleNumber",
+            label = "Duration",
             error = null,
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
+
 
 @Composable
 fun ValidatedTextField(
@@ -367,28 +388,28 @@ fun ValidatedTextField(
     onValueChange: (String) -> Unit,
     label: String,
     error: String?,
-    keyboardType: KeyboardType
+    keyboardType: KeyboardType,
+    modifier: Modifier = Modifier
 ) {
-    Column {
+    if (error == null)
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
             label = { Text(label) },
             keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
-            modifier = Modifier.fillMaxWidth(),
-            isError = error != null,
+            modifier = modifier,
+            isError = false,
             colors = OutlinedTextFieldDefaults.colors(
                 errorBorderColor = MaterialTheme.colorScheme.error
             )
         )
-        if (error != null) {
-            Text(
-                text = error,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 16.dp)
-            )
-        }
+    if (error != null) {
+        Text(
+            text = error,
+            color = MaterialTheme.colorScheme.error,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(start = 16.dp)
+        )
     }
 }
 
