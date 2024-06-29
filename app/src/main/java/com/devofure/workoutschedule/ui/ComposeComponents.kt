@@ -29,9 +29,10 @@ fun GenericItem(
     imageVector: ImageVector? = null,
     backgroundColor: Color? = null,
     onClick: () -> Unit,
+    enabled: Boolean = true
 ) {
     val baseModifier = modifier
-        .clickable { onClick() }
+        .clickable(enabled = enabled) { if (enabled) onClick() }
         .padding(vertical = 4.dp)
     val finalModifier = if (backgroundColor != null) {
         baseModifier.background(backgroundColor)
@@ -45,26 +46,32 @@ fun GenericItem(
         )
     }
 
+    val textColor = if (enabled) {
+        MaterialTheme.colorScheme.onBackground
+    } else {
+        MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f)
+    }
+
     ListItem(
         leadingContent = {
             if (imageVector != null)
                 Icon(
                     imageVector,
                     contentDescription = "$headline icon",
-                    tint = MaterialTheme.colorScheme.onBackground
+                    tint = textColor
                 )
         },
         headlineContent = {
             Text(
                 text = headline,
-                color = MaterialTheme.colorScheme.onBackground
+                color = textColor
             )
         },
         supportingContent = {
             if (supporting != null)
                 Text(
                     text = supporting,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                    color = textColor.copy(alpha = 0.7f)
                 )
         },
         modifier = finalModifier,
@@ -83,7 +90,8 @@ fun PreviewSettingsItem() {
             imageVector = Icons.Default.Settings,
             headline = "Workout Reminders",
             supporting = "Set up your workout reminder time",
-            onClick = { },
+            onClick = {},
+            enabled = true,
         )
     }
 }
@@ -98,7 +106,8 @@ fun PreviewSettingsItemWithoutIcon() {
         GenericItem(
             headline = "Workout Reminders",
             supporting = "Set up your workout reminder time",
-            onClick = { },
+            onClick = {},
+            enabled = false,
         )
     }
 }
@@ -113,7 +122,8 @@ fun PreviewSettingsItemOneLine() {
         GenericItem(
             imageVector = Icons.Default.Settings,
             headline = "Workout Reminders",
-            onClick = { },
+            onClick = {},
+            enabled = true,
         )
     }
 }
@@ -127,7 +137,8 @@ fun PreviewSettingsItemOneLineWithoutIcon() {
     MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
         GenericItem(
             headline = "Workout Reminders",
-            onClick = { },
+            onClick = {},
+            enabled = false,
         )
     }
 }

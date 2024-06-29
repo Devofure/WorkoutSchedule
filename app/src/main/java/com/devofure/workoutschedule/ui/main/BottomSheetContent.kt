@@ -31,6 +31,8 @@ fun BottomSheetContent(
     showEditDialogDayNickname: () -> Unit,
     showLogWorkoutDay: () -> Unit,
     checkAllWorkouts: (Int) -> Unit,
+    hasFinishedWorkouts: Boolean,
+    hasWorkouts: Boolean
 ) {
     Column(
         modifier = Modifier
@@ -41,25 +43,25 @@ fun BottomSheetContent(
             imageVector = Icons.Filled.CalendarToday,
             headline = "Log finished workouts",
             onClick = showLogWorkoutDay,
+            enabled = hasFinishedWorkouts // Disable if no finished workouts
         )
         GenericItem(
             imageVector = Icons.Filled.CheckCircle,
             headline = "Mark all workouts as done",
-        ) {
-            checkAllWorkouts(dayOfWeek.dayIndex)
-        }
+            onClick = { checkAllWorkouts(dayOfWeek.dayIndex) },
+            enabled = hasWorkouts // Disable if no workouts
+        )
         GenericItem(
             imageVector = Icons.Filled.FitnessCenter,
             headline = "Add Exercise to this day",
-        ) {
-            navigate.to(Route.AddExercise(dayOfWeek.dayIndex))
-        }
+            onClick = { navigate.to(Route.AddExercise(dayOfWeek.dayIndex)) }
+        )
         GenericItem(
             imageVector = Icons.Filled.Reorder,
             headline = "Reorder Workouts",
-        ) {
-            navigate.to(Route.ReorderExercise(dayOfWeek.dayIndex))
-        }
+            onClick = { navigate.to(Route.ReorderExercise(dayOfWeek.dayIndex)) },
+            enabled = hasWorkouts // Disable if no workouts
+        )
         GenericItem(
             imageVector = Icons.Filled.Edit,
             headline = "Edit the name of this day",
@@ -67,6 +69,7 @@ fun BottomSheetContent(
         )
     }
 }
+
 
 @PreviewLightDark
 @PreviewScreenSizes
@@ -81,7 +84,9 @@ fun BottomSheetContentPreview() {
             dayOfWeek = WEEK[0],
             showEditDialogDayNickname = {},
             showLogWorkoutDay = {},
-            checkAllWorkouts = {}
+            checkAllWorkouts = {},
+            hasFinishedWorkouts = true,
+            hasWorkouts = true,
         )
     }
 }

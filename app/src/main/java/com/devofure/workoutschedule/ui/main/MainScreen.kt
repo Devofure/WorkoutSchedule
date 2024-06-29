@@ -213,16 +213,18 @@ fun MainScreen(
             onDismissRequest = { showBottomSheet = false },
             sheetState = sheetState
         ) {
+            val workouts = workoutViewModel.workoutsForDay(WEEK[pagerState.currentPage]).collectAsState().value
+            val hasWorkouts = workouts.isNotEmpty()
+            val hasFinishedWorkouts = workouts.any { it.isDone }
+
             BottomSheetContent(
-                showEditDialogDayNickname = {
-                    showEditNicknameDialog = true
-                },
-                showLogWorkoutDay = {
-                    showDateConfirmationDialog = true
-                },
+                showEditDialogDayNickname = { showEditNicknameDialog = true },
+                showLogWorkoutDay = { showDateConfirmationDialog = true },
                 navigate = navigate,
                 dayOfWeek = WEEK[pagerState.currentPage],
                 checkAllWorkouts = workoutViewModel::onAllWorkoutsChecked,
+                hasFinishedWorkouts = hasFinishedWorkouts,
+                hasWorkouts = hasWorkouts
             )
         }
     }
