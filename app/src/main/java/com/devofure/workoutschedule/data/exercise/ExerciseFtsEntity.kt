@@ -28,6 +28,7 @@ data class ExerciseEntity(
     val secondaryMuscles: String,
     val instructions: String? = null,
     val category: String? = null,
+    val muscleCategory: String? = null,
 )
 
 fun ExerciseFtsEntity.toExercise(): Exercise {

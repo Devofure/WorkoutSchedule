@@ -51,17 +51,14 @@ fun WorkoutDetailScreen(workout: Workout, navigate: Navigate) {
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        navigate.back()
-                    }) {
+                    IconButton(onClick = { navigate.back() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
         },
@@ -76,47 +73,44 @@ fun WorkoutDetailScreen(workout: Workout, navigate: Navigate) {
                 workout.repsList?.let { repsList ->
                     SectionHeader(title = "Sets & Reps")
                     repsList.forEachIndexed { index, reps ->
-                        DetailText(text = "Set ${index + 1}: $reps reps")
+                        DetailText(text = "Set ${index + 1}: ${reps.reps} reps")
                     }
                     Spacer(modifier = Modifier.height(12.dp))
                 }
 
                 workout.durationInSeconds?.let { duration ->
-                    DetailItem(label = "Duration", value = "$duration mins")
+                    val hours = duration / 3600
+                    val minutes = (duration % 3600) / 60
+                    val seconds = duration % 60
+                    val detailedDuration = buildString {
+                        if (hours > 0) append("$hours h ")
+                        if (minutes > 0) append("$minutes m ")
+                        if (seconds > 0) append("$seconds s")
+                    }.trim()
+                    DetailItem(label = "Duration", value = detailedDuration)
                 }
 
-                workout.exercise.equipment?.takeIf { equipment -> equipment.isNotEmpty() }
-                    ?.let { equipment ->
-                        DetailItem(label = "Equipment", value = equipment)
-                    }
+                workout.exercise.equipment.takeIf { it?.isNotEmpty() == true }?.let { equipment ->
+                    DetailItem(label = "Equipment", value = equipment)
+                }
 
-                workout.exercise.primaryMuscles.takeIf { primaryMuscles -> primaryMuscles.isNotEmpty() }
-                    ?.let { primaryMuscles ->
-                        DetailItem(
-                            label = "Primary Muscles",
-                            value = primaryMuscles.joinToString(", ")
-                        )
-                    }
+                workout.exercise.primaryMuscles.takeIf { it.isNotEmpty() }?.let { primaryMuscles ->
+                    DetailItem(label = "Primary Muscles", value = primaryMuscles.joinToString(", "))
+                }
 
-                workout.exercise.secondaryMuscles.takeIf { secondaryMuscles -> secondaryMuscles.isNotEmpty() }
-                    ?.let { secondaryMuscles ->
-                        DetailItem(
-                            label = "Secondary Muscles",
-                            value = secondaryMuscles.joinToString(", ")
-                        )
-                    }
+                workout.exercise.secondaryMuscles.takeIf { it.isNotEmpty() }?.let { secondaryMuscles ->
+                    DetailItem(label = "Secondary Muscles", value = secondaryMuscles.joinToString(", "))
+                }
 
-                workout.exercise.instructions.takeIf { instructions -> instructions?.isNotEmpty() != null }
-                    ?.let { instructions ->
-                        SectionHeader(title = "Instructions")
-                        instructions.forEachIndexed { _, instruction ->
-                            InstructionItem(instruction)
-                        }
+                workout.exercise.instructions?.takeIf { it.isNotEmpty() }?.let { instructions ->
+                    SectionHeader(title = "Instructions")
+                    instructions.forEach { instruction ->
+                        InstructionItem(instruction)
                     }
+                }
             }
         }
     )
-
 }
 
 @Composable
@@ -125,7 +119,7 @@ fun SectionHeader(title: String) {
         text = title,
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(bottom = 8.dp),
+        modifier = Modifier.padding(bottom = 8.dp)
     )
 }
 
@@ -154,7 +148,7 @@ fun InstructionItem(instruction: String) {
         modifier = Modifier.padding(bottom = 4.dp)
     ) {
         Text(
-            text = "\u2022", // Bullet point
+            text = "\u2022",
             style = MaterialTheme.typography.bodyMedium.copy(color = Color.Gray),
             modifier = Modifier.padding(end = 4.dp, start = 8.dp)
         )
@@ -183,9 +177,10 @@ fun PreviewWorkoutDetailScreen() {
             primaryMuscles = listOf("Chest"),
             secondaryMuscles = listOf("Triceps"),
             equipment = "None",
+            instructions = listOf("Keep your back straight", "Lower your body until your chest nearly touches the floor")
         ),
         repsList = listOf(SetDetails(10), SetDetails(10), SetDetails(10)),
-        durationInSeconds = 45,
+        durationInSeconds = 117
     )
     MyWorkoutsTheme(primaryColor = Colors.GreenAccent) {
         WorkoutDetailScreen(workout = workout, navigate = Navigate(rememberNavController()))
