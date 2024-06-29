@@ -2,7 +2,6 @@
 
 package com.devofure.workoutschedule.ui.editworkout
 
-import android.app.TimePickerDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -197,7 +196,7 @@ fun EditWorkoutScreen(
                             onClick = {
                                 sets += 1
                                 setDetailsList = setDetailsList.toMutableList().apply {
-                                    add(SetDetails(reps = 0))
+                                    add(SetDetails())
                                 }
                             }
                         ) {
@@ -292,18 +291,15 @@ fun DurationPickerField(
 
     if (showPicker) {
         TimePickerDialog(
-            context,
-            { _, selectedHour: Int, selectedMinute: Int ->
+            initialHour = initialHour,
+            initialMinute = initialMinute,
+            onTimeSelected = { _, selectedHour: Int, selectedMinute: Int ->
                 val totalMinutes = selectedHour * 60 + selectedMinute
                 onValueChange(totalMinutes.toString())
                 showPicker = false
             },
-            initialHour,
-            initialMinute,
-            true
-        ).apply {
-            setOnDismissListener { showPicker = false }
-        }.show()
+            onDismiss = { showPicker = false }
+        )
     }
 }
 
@@ -322,7 +318,7 @@ fun SetDetailsRow(
             value = reps,
             onValueChange = {
                 reps = it
-                onSetDetailsChange(setDetails.copy(reps = it.toIntOrNull() ?: 0))
+                onSetDetailsChange(setDetails.copy(reps = it.toIntOrNull() ?: 1))
             },
             label = "Reps for set ${setIndex + 1}",
             error = null,

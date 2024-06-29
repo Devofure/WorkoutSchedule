@@ -15,7 +15,7 @@ data class Workout(
 )
 
 data class SetDetails(
-    val reps: Int,
+    val reps: Int = 1,
     val weight: Float? = null,
     val duration: Int? = null
 )
