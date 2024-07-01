@@ -43,6 +43,7 @@ jobs:
           base64 --decode keystore.jks.enc.base64 > keystore.jks.enc
 
       - name: Decrypt the keystore file
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         run: |
           openssl enc -d -aes-256-cbc -pbkdf2 -in keystore.jks.enc -out keystore.jks -pass pass:${{ secrets.ENC_STORE_PASSWORD }}
 
