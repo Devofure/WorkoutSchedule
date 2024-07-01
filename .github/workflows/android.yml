@@ -42,8 +42,16 @@ jobs:
         run: |
           base64 --decode keystore.jks.enc.base64 > keystore.jks.enc
 
+      - name: Debugging - Check if secret is available
+        run: |
+          echo "ENC_STORE_PASSWORD=${{ secrets.ENC_STORE_PASSWORD }}" | grep "ENC_STORE_PASSWORD"
+
+      - name: Debugging - Print Working Directory and List Files
+        run: |
+          pwd
+          ls -la
+
       - name: Decrypt the keystore file
-        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
         run: |
           openssl enc -d -aes-256-cbc -pbkdf2 -in keystore.jks.enc -out keystore.jks -pass pass:${{ secrets.ENC_STORE_PASSWORD }}
 
