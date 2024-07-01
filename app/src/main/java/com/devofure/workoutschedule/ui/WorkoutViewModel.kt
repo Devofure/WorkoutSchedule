@@ -15,6 +15,7 @@ import com.devofure.workoutschedule.data.exercise.toExercise
 import com.devofure.workoutschedule.data.log.LogEntity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -29,21 +30,25 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import javax.inject.Inject
 
-class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
+@HiltViewModel
+class WorkoutViewModel  @Inject constructor(
+    application: Application,
+    private val dataStoreManager : WorkoutDataStoreManager,
+) : AndroidViewModel(application) {
     private val exerciseRepository: ExerciseRepository
     val equipmentOptions: StateFlow<List<String>>
     val muscleOptions: StateFlow<List<String>>
     val categoryOptions: StateFlow<List<String>>
 
     private val _workouts = MutableStateFlow<Map<Int, List<Workout>>>(emptyMap())
-    private val dataStoreManager = WorkoutDataStoreManager(application.applicationContext)
     private val database by lazy { AppDatabase.getDatabase(application) }
     private val logDao by lazy { database.logDao() }
     private val exerciseDao by lazy { database.exerciseDao() }
     private val gson = Gson()
 
-    private val _isFirstLaunch = MutableStateFlow(true)
+    private val _isFirstLaunch = MutableStateFlow(false)
     val isFirstLaunch: StateFlow<Boolean> = _isFirstLaunch
 
     private var nextWorkoutId = 1

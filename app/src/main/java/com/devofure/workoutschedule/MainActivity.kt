@@ -35,7 +35,9 @@ import com.devofure.workoutschedule.ui.settings.SettingsScreen
 import com.devofure.workoutschedule.ui.settings.SettingsViewModel
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 import com.devofure.workoutschedule.ui.workoutdetails.WorkoutDetailScreen
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

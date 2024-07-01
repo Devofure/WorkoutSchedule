@@ -1,6 +1,3 @@
-import java.io.FileInputStream
-import java.util.Properties
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
@@ -10,6 +7,8 @@ plugins {
     alias(libs.plugins.google.services)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.detekt.android)
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -24,59 +23,17 @@ android {
         versionName = "1.0-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        javaCompileOptions {
-            annotationProcessorOptions {
-                arguments(
-                    mapOf("room.schemaLocation" to "$projectDir/schemas")
-                )
-            }
-        }
-    }
-
-    signingConfigs {
-        create("release") {
-            val keyAliasEnv = System.getenv("KEY_ALIAS")
-            val keyPasswordEnv = System.getenv("KEY_PASSWORD")
-            val storeFileEnv = System.getenv("STORE_FILE")
-            val storePasswordEnv = System.getenv("STORE_PASSWORD")
-
-            if (keyAliasEnv != null) {
-                keyAlias = keyAliasEnv
-                keyPassword = keyPasswordEnv
-                storeFile = file(storeFileEnv)
-                storePassword = storePasswordEnv
-            } else {
-                val keystorePropertiesFile = rootProject.file("keystore.properties")
-                val keystoreProperties = Properties()
-                keystoreProperties.load(FileInputStream(keystorePropertiesFile))
-
-                keyAlias = keystoreProperties["keyAlias"] as String
-                keyPassword = keystoreProperties["keyPassword"] as String
-                storeFile = file(keystoreProperties["storeFile"] as String)
-                storePassword = keystoreProperties["storePassword"] as String
-            }
-        }
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = true
-            signingConfig = signingConfigs.getByName("release")
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
     }
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
     }
+
     buildFeatures {
         compose = true
     }
@@ -89,10 +46,12 @@ composeCompiler {
 }
 
 firebaseAppDistribution {
-//    releaseNotesFile = "release-notes.txt"
-//    artifactType = "AAB"
     groups = "testers"
     serviceCredentialsFile = "app/service-account.json"
+}
+
+kapt {
+    correctErrorTypes = true
 }
 
 dependencies {
@@ -125,6 +84,10 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     ksp(libs.room.compiler)
 
+    // Hilt dependencies
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+
     // Testing dependencies
     androidTestImplementation(libs.androidx.arch.core.testing)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
@@ -137,6 +100,8 @@ dependencies {
     testImplementation(libs.androidx.arch.core.testing)
     testImplementation(libs.androidx.junit.ktx)
     testImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.hilt.android.testing)
+    kaptAndroidTest(libs.hilt.android.compiler)
 }
 
 detekt {

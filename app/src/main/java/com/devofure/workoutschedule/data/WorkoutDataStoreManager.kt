@@ -7,14 +7,16 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.io.IOException
+import javax.inject.Inject
 
 val Context.workoutDataStore: DataStore<Preferences> by preferencesDataStore(name = "workout_data")
 
-class WorkoutDataStoreManager(private val context: Context) {
+class WorkoutDataStoreManager @Inject constructor(@ApplicationContext private val context: Context) {
 
     companion object {
         val IS_FIRST_LAUNCH = stringPreferencesKey("isFirstLaunch")
@@ -74,5 +76,9 @@ class WorkoutDataStoreManager(private val context: Context) {
         context.workoutDataStore.edit { preferences ->
             preferences[USER_SCHEDULE] = userSchedule
         }
+    }
+
+    suspend fun deleteDatabase() {
+        context.workoutDataStore.edit { it.clear() }
     }
 }

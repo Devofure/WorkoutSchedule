@@ -26,12 +26,14 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import javax.inject.Inject
 
 enum class ThemeType {
     LIGHT, DARK, SYSTEM
 }
 
-class SettingsViewModel(application: Application) : AndroidViewModel(application) {
+class SettingsViewModel @Inject constructor(application: Application) :
+    AndroidViewModel(application) {
     private val dataStoreManager = SettingsDataStoreManager(application.applicationContext)
 
     private val _theme = MutableStateFlow(ThemeType.SYSTEM)

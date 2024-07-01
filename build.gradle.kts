@@ -6,4 +6,5 @@ plugins {
     alias(libs.plugins.devtools.ksp) apply false
     alias(libs.plugins.google.services) apply false
     alias(libs.plugins.firebase.crashlytics) apply false
+    id("com.google.dagger.hilt.android") version "2.44" apply false
 }

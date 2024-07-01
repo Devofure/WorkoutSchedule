@@ -3,8 +3,10 @@ package com.devofure.workoutschedule
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 
+@HiltAndroidApp
 class WorkoutScheduleApplication : Application() {
     override fun onCreate() {
         super.onCreate()
