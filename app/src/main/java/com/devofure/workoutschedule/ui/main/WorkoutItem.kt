@@ -41,9 +41,9 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.devofure.workoutschedule.data.Exercise
 import com.devofure.workoutschedule.data.SetDetails
 import com.devofure.workoutschedule.data.Workout
-import com.devofure.workoutschedule.data.exercise.Exercise
 import com.devofure.workoutschedule.ui.OrientationPreviews
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 
@@ -239,7 +239,8 @@ fun PreviewWorkoutItem() {
             SetDetails(reps = 10),
             SetDetails(reps = 10)
         ),
-        isDone = false
+        isDone = false,
+        position = 1
     )
     MyWorkoutsTheme(primaryColor = Color.Green) {
         WorkoutItem(

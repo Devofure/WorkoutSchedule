@@ -37,6 +37,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +49,7 @@ import com.devofure.workoutschedule.ui.Route
 import com.devofure.workoutschedule.ui.SharedViewModel
 import com.devofure.workoutschedule.ui.WorkoutViewModel
 import com.devofure.workoutschedule.ui.getDayName
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 @Composable
@@ -65,9 +67,10 @@ fun MainScreen(
     var showEditNicknameDialog by remember { mutableStateOf(false) }
     var showDateConfirmationDialog by remember { mutableStateOf(false) }
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
-    var editedNickname by remember { mutableStateOf("") }
+    var editedNickname by remember { mutableStateOf<String?>(null) }
     val snackbarHostState = remember { SnackbarHostState() }
     val deleteEvent by workoutViewModel.deleteEvent.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(deleteEvent) {
         deleteEvent?.let { (workout, dayIndex) ->
@@ -123,7 +126,8 @@ fun MainScreen(
                 ) { page ->
                     val dayOfWeek = WEEK[page]
                     val workouts by workoutViewModel.workoutsForDay(dayOfWeek).collectAsState()
-                    val dayNickname = workoutViewModel.getNickname(dayOfWeek.dayIndex)
+                    val dayNickname by workoutViewModel.getNicknameFlow(dayOfWeek.dayIndex)
+                        .collectAsState("")
                     val dayName = getDayName(
                         dayOfWeek,
                         dayNamingPreference,
@@ -213,7 +217,8 @@ fun MainScreen(
             onDismissRequest = { showBottomSheet = false },
             sheetState = sheetState
         ) {
-            val workouts = workoutViewModel.workoutsForDay(WEEK[pagerState.currentPage]).collectAsState().value
+            val workouts =
+                workoutViewModel.workoutsForDay(WEEK[pagerState.currentPage]).collectAsState().value
             val hasWorkouts = workouts.isNotEmpty()
             val hasFinishedWorkouts = workouts.any { it.isDone }
 
@@ -266,8 +271,10 @@ fun MainScreen(
             dayNamingPreference = dayNamingPreference,
             dayOfWeek = day,
             save = { dayOfWeek ->
-                workoutViewModel.saveNicknames(dayOfWeek.dayIndex, editedNickname)
-                showEditNicknameDialog = false
+                coroutineScope.launch {
+                    editedNickname?.let { workoutViewModel.saveNicknames(dayOfWeek.dayIndex, it) }
+                    showEditNicknameDialog = false
+                }
             },
             onDismiss = {
                 editedNickname = ""

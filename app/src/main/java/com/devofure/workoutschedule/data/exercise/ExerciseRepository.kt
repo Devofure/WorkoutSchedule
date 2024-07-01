@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.annotation.Keep
 import androidx.room.withTransaction
 import com.devofure.workoutschedule.data.AppDatabase
+import com.devofure.workoutschedule.data.Exercise
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
@@ -16,20 +17,6 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.io.IOException
 import java.util.Locale
-
-@Keep
-data class Exercise(
-    val rowid: Int,
-    val name: String,
-    val level: String? = null,
-    val mechanic: String? = null,
-    val equipment: String? = null,
-    val primaryMuscles: List<String>,
-    val secondaryMuscles: List<String>,
-    val force: String? = null,
-    val instructions: List<String>? = null,
-    val category: String? = null,
-)
 
 class ExerciseRepository(
     private val context: Context,

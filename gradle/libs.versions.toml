@@ -8,6 +8,7 @@ compose = "1.6.8"  # Ensure this is the latest stable version of Compose
 composeUiTest = "1.6.8"  # Same as Compose version
 constraintlayout = "2.1.4"
 coreKtx = "1.13.1"
+datastorePreferences = "1.1.1"
 detekt = "1.23.6"
 espressoCore = "3.6.1"
 firebase-appdistribution = "5.0.0"
@@ -46,6 +47,7 @@ androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview", version.ref = "compose" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJunit" }
 androidx-junit-ktx = { group = "androidx.test.ext", name = "junit-ktx", version.ref = "junitKtx" }

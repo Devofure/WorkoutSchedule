@@ -15,7 +15,7 @@ import com.devofure.workoutschedule.ui.getDayName
 
 @Composable
 fun EditNicknameDialog(
-    editedNickname: String,
+    editedNickname: String?,
     dayOfWeek: DayOfWeek,
     dayNamingPreference: DayOfWeek.DayNamingPreference,
     onNicknameChange: (String) -> Unit,
@@ -30,7 +30,7 @@ fun EditNicknameDialog(
         },
         text = {
             TextField(
-                value = editedNickname,
+                value = editedNickname ?: "",
                 onValueChange = onNicknameChange,
                 label = { Text("Day Name") },
                 colors = TextFieldDefaults.colors(

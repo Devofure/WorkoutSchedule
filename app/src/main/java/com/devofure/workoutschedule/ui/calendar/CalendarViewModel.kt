@@ -56,6 +56,7 @@ class CalendarViewModel(application: Application) : AndroidViewModel(application
             id = log.id,
             exercise = exercise,
             repsList = log.repsList,
+            position = null,
         )
     }
 

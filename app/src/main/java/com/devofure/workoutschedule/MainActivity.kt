@@ -30,7 +30,7 @@ import com.devofure.workoutschedule.ui.calendar.CalendarViewModel
 import com.devofure.workoutschedule.ui.createexercise.CreateExerciseScreen
 import com.devofure.workoutschedule.ui.editworkout.EditWorkoutScreen
 import com.devofure.workoutschedule.ui.main.MainScreen
-import com.devofure.workoutschedule.ui.reorderworkout.ReorderExerciseScreen
+import com.devofure.workoutschedule.ui.reorderexercise.ReorderExerciseScreen
 import com.devofure.workoutschedule.ui.settings.SettingsScreen
 import com.devofure.workoutschedule.ui.settings.SettingsViewModel
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme

@@ -1,14 +1,15 @@
+// WorkoutViewModel.kt
 package com.devofure.workoutschedule.ui
 
 import android.app.Application
-import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.devofure.workoutschedule.data.AppDatabase
 import com.devofure.workoutschedule.data.DayOfWeek
+import com.devofure.workoutschedule.data.Exercise
 import com.devofure.workoutschedule.data.SetDetails
 import com.devofure.workoutschedule.data.Workout
-import com.devofure.workoutschedule.data.exercise.Exercise
+import com.devofure.workoutschedule.data.WorkoutDataStoreManager
 import com.devofure.workoutschedule.data.exercise.ExerciseRepository
 import com.devofure.workoutschedule.data.exercise.toExercise
 import com.devofure.workoutschedule.data.log.LogEntity
@@ -18,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -35,8 +37,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     val categoryOptions: StateFlow<List<String>>
 
     private val _workouts = MutableStateFlow<Map<Int, List<Workout>>>(emptyMap())
-    private val sharedPreferences = application.applicationContext
-        .getSharedPreferences("WorkoutApp", Context.MODE_PRIVATE)
+    private val dataStoreManager = WorkoutDataStoreManager(application.applicationContext)
     private val database by lazy { AppDatabase.getDatabase(application) }
     private val logDao by lazy { database.logDao() }
     private val exerciseDao by lazy { database.exerciseDao() }
@@ -59,17 +60,18 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     val deleteEvent: StateFlow<Pair<Workout, Int>?> = _deleteEvent
 
     init {
-        val context = application.applicationContext
-        exerciseRepository = ExerciseRepository(context, exerciseDao, database)
+        exerciseRepository =
+            ExerciseRepository(application.applicationContext, exerciseDao, database)
         equipmentOptions = exerciseRepository.equipmentOptions
         muscleOptions = exerciseRepository.primaryMusclesOptions
         categoryOptions = exerciseRepository.categoryOptions
 
         viewModelScope.launch {
-            val isFirstLaunch = sharedPreferences.getBoolean("isFirstLaunch", true)
-            _isFirstLaunch.value = isFirstLaunch
-            if (!isFirstLaunch) {
-                loadUserSchedule()
+            dataStoreManager.isFirstLaunch.collectLatest { isFirstLaunchString ->
+                _isFirstLaunch.value = isFirstLaunchString?.toBoolean() ?: true
+                if (!_isFirstLaunch.value) {
+                    loadUserSchedule()
+                }
             }
         }
         setupFilter()
@@ -138,27 +140,33 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     fun generateSampleSchedule() {
         viewModelScope.launch {
             val sampleWorkouts = loadWorkoutsFromExercises()
-            _workouts.value = sampleWorkouts
+            _workouts.value = sampleWorkouts.mapValues { (dayIndex, workouts) ->
+                workouts.mapIndexed { index, workout ->
+                    workout.copy(position = index)
+                }
+            }
             saveUserSchedule(sampleWorkouts)
-            sharedPreferences.edit().putBoolean("isFirstLaunch", false).apply()
+            dataStoreManager.setIsFirstLaunch(false)
             _isFirstLaunch.value = false
         }
     }
 
     fun declineSampleSchedule() {
         viewModelScope.launch {
-            sharedPreferences.edit().putBoolean("isFirstLaunch", false).apply()
+            dataStoreManager.setIsFirstLaunch(false)
             _isFirstLaunch.value = false
         }
     }
 
     private fun loadWorkoutsFromExercises(): Map<Int, List<Workout>> {
+        var index = 0
         val workoutsByDay = SAMPLE_EXERCISE_SCHEDULE.mapValues { (_, exercises) ->
             exercises.mapNotNull { exerciseName ->
                 exerciseRepository.getExerciseByName(exerciseName)?.let { exercise ->
                     Workout(
                         id = getNextWorkoutId(),
                         exercise = exercise,
+                        position = index++,
                     )
                 }
             }
@@ -171,20 +179,28 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     }
 
     private fun saveUserSchedule(workouts: Map<Int, List<Workout>>) {
-        val editor = sharedPreferences.edit()
-        val workoutsJson = gson.toJson(workouts)
-        editor.putString("userSchedule", workoutsJson)
-        editor.apply()
+        viewModelScope.launch {
+            val workoutsJson = gson.toJson(workouts.mapValues { (_, workouts) ->
+                workouts.sortedBy { it.position }
+            })
+            dataStoreManager.setUserSchedule(workoutsJson)
+        }
     }
 
     private fun loadUserSchedule() {
-        val workoutsJson = sharedPreferences.getString("userSchedule", null)
-        if (!workoutsJson.isNullOrEmpty()) {
-            val workoutType = object : TypeToken<Map<Int, List<Workout>>>() {}.type
-            val loadedWorkouts: Map<Int, List<Workout>> =
-                gson.fromJson(workoutsJson, workoutType)
-            _workouts.value = loadedWorkouts
-            nextWorkoutId = loadedWorkouts.values.flatten().maxOfOrNull { it.id + 1 } ?: 1
+        viewModelScope.launch {
+            dataStoreManager.userSchedule.collectLatest { workoutsJson ->
+                if (!workoutsJson.isNullOrEmpty()) {
+                    val workoutType = object : TypeToken<Map<Int, List<Workout>>>() {}.type
+                    val loadedWorkouts: Map<Int, List<Workout>> =
+                        gson.fromJson<Map<Int, List<Workout>>>(workoutsJson, workoutType)
+                            .mapValues { (_, workouts) ->
+                                workouts.sortedBy { it.position }
+                            }
+                    _workouts.value = loadedWorkouts
+                    nextWorkoutId = loadedWorkouts.values.flatten().maxOfOrNull { it.id + 1 } ?: 1
+                }
+            }
         }
     }
 
@@ -229,7 +245,8 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                         repsList = listOf(
                             SetDetails(reps = 1),
                             SetDetails(reps = 1)
-                        )
+                        ),
+                        position = existingWorkouts.size // Assign position based on current size
                     )
                 )
             }
@@ -243,7 +260,10 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             val existingWorkouts = this[dayIndex]?.toMutableList()
             existingWorkouts?.remove(workout)
             if (existingWorkouts != null) {
-                this[dayIndex] = existingWorkouts
+                // Update positions of remaining workouts
+                this[dayIndex] = existingWorkouts.mapIndexed { index, existingWorkout ->
+                    existingWorkout.copy(position = index)
+                }
                 _deleteEvent.value = workout to dayIndex
             }
         }
@@ -268,17 +288,22 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
     fun updateWorkoutOrder(dayIndex: Int, updatedList: List<Workout>) {
         _workouts.value = _workouts.value.toMutableMap().apply {
-            this[dayIndex] = updatedList
+            this[dayIndex] = updatedList.mapIndexed { index, workout ->
+                workout.copy(position = index)
+            }
         }
         saveUserSchedule(_workouts.value)
     }
 
     fun saveNicknames(dayIndex: Int, dayName: String) {
-        sharedPreferences.edit().putString("nicknames_$dayIndex", dayName).apply()
+        viewModelScope.launch {
+            dataStoreManager.setNickname(dayIndex, dayName)
+        }
     }
 
-    fun getNickname(dayIndex: Int): String {
-        return sharedPreferences.getString("nicknames_$dayIndex", "") ?: ""
+    fun getNicknameFlow(dayIndex: Int): StateFlow<String?> {
+        return dataStoreManager.getNickname(dayIndex)
+            .stateIn(viewModelScope, SharingStarted.Eagerly, "")
     }
 
     fun addExercise(it: Exercise) {
@@ -290,7 +315,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     fun undoRemoveWorkout(workout: Workout, dayIndex: Int) {
         _workouts.value = _workouts.value.toMutableMap().apply {
             val existingWorkouts = this[dayIndex]?.toMutableList() ?: mutableListOf()
-            existingWorkouts.add(workout)
+            existingWorkouts.add(workout.copy(position = existingWorkouts.size))
             this[dayIndex] = existingWorkouts
         }
         saveUserSchedule(_workouts.value)

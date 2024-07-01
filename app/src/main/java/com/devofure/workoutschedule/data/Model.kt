@@ -1,7 +1,7 @@
 // Model.kt
 package com.devofure.workoutschedule.data
 
-import com.devofure.workoutschedule.data.exercise.Exercise
+import androidx.annotation.Keep
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -11,13 +11,28 @@ data class Workout(
     val exercise: Exercise,
     val repsList: List<SetDetails>? = null,
     val durationInSeconds: Int? = null,
-    val isDone: Boolean = false
+    val isDone: Boolean = false,
+    val position: Int? = null,
 )
 
 data class SetDetails(
     val reps: Int = 1,
     val weight: Float? = null,
-    val duration: Int? = null
+    val duration: Int? = null,
+)
+
+@Keep
+data class Exercise(
+    val rowid: Int,
+    val name: String,
+    val level: String? = null,
+    val mechanic: String? = null,
+    val equipment: String? = null,
+    val primaryMuscles: List<String>,
+    val secondaryMuscles: List<String>,
+    val force: String? = null,
+    val instructions: List<String>? = null,
+    val category: String? = null,
 )
 
 val WEEK = listOf(
@@ -27,13 +42,11 @@ val WEEK = listOf(
     DayOfWeek.Thursday,
     DayOfWeek.Friday,
     DayOfWeek.Saturday,
-    DayOfWeek.Sunday
+    DayOfWeek.Sunday,
 )
 
 sealed class DayOfWeek(val dayIndex: Int, private val fullName: String) {
-    enum class DayNamingPreference {
-        DAY_NAMES, DAY_NUMBERS
-    }
+    enum class DayNamingPreference { DAY_NAMES, DAY_NUMBERS, }
 
     fun getFullName(dayNamingPreference: DayNamingPreference): String {
         return when (dayNamingPreference) {
@@ -72,6 +85,4 @@ data class ReminderTime(
     }
 }
 
-enum class FirstDayOfWeek {
-    SUNDAY, MONDAY
-}
+enum class FirstDayOfWeek { SUNDAY, MONDAY, }

@@ -2,14 +2,16 @@
 package com.devofure.workoutschedule.ui.main
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.activity.compose.setContent
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.devofure.workoutschedule.MainActivity
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -22,15 +24,14 @@ class MainActivityTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
-    private lateinit var sharedPreferences: SharedPreferences
+    private val Context.dataStore by preferencesDataStore(name = "workout_data")
 
     @Before
     fun setUp() {
-        // Initialize SharedPreferences
-        sharedPreferences =
-            composeTestRule.activity.getSharedPreferences("WorkoutApp", Context.MODE_PRIVATE)
-        // Clear SharedPreferences before each test
-        sharedPreferences.edit().clear().apply()
+        // Clear DataStore before each test
+        runBlocking {
+            composeTestRule.activity.dataStore.edit { it.clear() }
+        }
 
         // Set the content for each test
         composeTestRule.activity.setContent {
@@ -51,8 +52,10 @@ class MainActivityTest {
 
     @After
     fun tearDown() {
-        // Clear SharedPreferences after each test
-        sharedPreferences.edit().clear().apply()
+        // Clear DataStore after each test
+        runBlocking {
+            composeTestRule.activity.dataStore.edit { it.clear() }
+        }
     }
 
     @Test

@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.Fts4
 import androidx.room.FtsOptions
 import androidx.room.PrimaryKey
+import com.devofure.workoutschedule.data.Exercise
 
 @Entity(tableName = "exercisesFts")
 @Fts4(contentEntity = ExerciseEntity::class, tokenizer = FtsOptions.TOKENIZER_PORTER)
