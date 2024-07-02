@@ -1,5 +1,7 @@
 package com.devofure.workoutschedule.ui.settings
 
+import android.app.Activity
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,8 +24,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import com.devofure.workoutschedule.LoginActivity
 import com.devofure.workoutschedule.ui.GenericItem
 import com.devofure.workoutschedule.ui.Navigate
+import com.firebase.ui.auth.AuthUI
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,6 +109,20 @@ fun SettingsScreen(
                     supporting = "Choose between week day and numeric naming",
                     backgroundColor = MaterialTheme.colorScheme.background,
                     onClick = { showDayNamingPreferenceDialog = true },
+                )
+
+                val context = LocalContext.current
+                GenericItem(
+                    headline = "Sign Out",
+                    supporting = "Sign out from your account",
+                    backgroundColor = MaterialTheme.colorScheme.background,
+                    onClick = {
+                        AuthUI.getInstance().signOut(context).addOnCompleteListener {
+                            val intent = Intent(context, LoginActivity::class.java)
+                            context.startActivity(intent)
+                            (context as Activity).finish()
+                        }
+                    }
                 )
 
                 if (showReminderSetup) {

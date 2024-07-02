@@ -12,7 +12,20 @@
           "package_name": "com.devofure.workoutschedule"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "123616374675-abpogi3dml02hcun3dh14ke8fvs7fr5j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.devofure.workoutschedule",
+            "certificate_hash": "c5c2e5dc3599d95b79c3089d326ed7b30bb3aa9f"
+          }
+        },
+        {
+          "client_id": "123616374675-pap416folvchhivoktbirci3p2kn933d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCzELIhwx_QOPAlxqcjXKFakxZ_FawWm30"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "123616374675-pap416folvchhivoktbirci3p2kn933d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

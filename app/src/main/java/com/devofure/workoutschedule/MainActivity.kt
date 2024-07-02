@@ -4,6 +4,7 @@ package com.devofure.workoutschedule
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -35,10 +36,20 @@ import com.devofure.workoutschedule.ui.settings.SettingsScreen
 import com.devofure.workoutschedule.ui.settings.SettingsViewModel
 import com.devofure.workoutschedule.ui.theme.MyWorkoutsTheme
 import com.devofure.workoutschedule.ui.workoutdetails.WorkoutDetailScreen
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val auth = FirebaseAuth.getInstance()
+        if (auth.currentUser == null) {
+            // User is not signed in; launch LoginActivity
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish()
+            return
+        }
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
         createNotificationChannel()
         setContent {

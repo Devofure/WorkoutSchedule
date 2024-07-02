@@ -22,7 +22,7 @@ android {
         targetSdk = 34
         versionCode = 2
         versionName = "1.0-beta"
-
+        resourceConfigurations.addAll(listOf("en"))
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         javaCompileOptions {

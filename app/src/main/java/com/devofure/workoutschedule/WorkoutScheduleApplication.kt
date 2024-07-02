@@ -3,15 +3,15 @@ package com.devofure.workoutschedule
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import com.google.firebase.FirebaseApp
 import timber.log.Timber
 
 class WorkoutScheduleApplication : Application() {
+
     override fun onCreate() {
         super.onCreate()
-
-        // Initialize Timber
         Timber.plant(Timber.DebugTree())
-
+        FirebaseApp.initializeApp(this)
         createNotificationChannel()
     }
 
