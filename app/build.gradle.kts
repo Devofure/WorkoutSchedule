@@ -20,8 +20,8 @@ android {
         applicationId = "com.devofure.workoutschedule"
         minSdk = 29
         targetSdk = 34
-        versionCode = 3
-        versionName = "1.0.3-beta"
+        versionCode = 4
+        versionName = "1.0.4-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
