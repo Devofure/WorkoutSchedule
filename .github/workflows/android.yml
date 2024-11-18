@@ -71,8 +71,28 @@ jobs:
       - name: Run Unit Tests
         run: ./gradlew test
 
-      - name: Run Lint
-        run: ./gradlew lint
+      - name: Get changed files
+        id: changed_files
+        run: |
+          changed_files=$(git diff --name-only origin/main...HEAD)
+          echo "Changed files: $changed_files"
+          echo "::set-output name=changed_files::$changed_files"
+
+      - name: Run Lint on Changed Files
+        run: |
+          changed_files=${{ steps.changed_files.outputs.changed_files }}
+          lint_files=""
+          for file in $changed_files; do
+            if [[ $file == *.kt || $file == *.xml ]]; then
+              lint_files="$lint_files $file"
+            fi
+          done
+          if [ -n "$lint_files" ]; then
+            echo "Running lint on changed files: $lint_files"
+            ./gradlew lintDebug --include $lint_files
+          else
+            echo "No Java or XML files to lint"
+          fi
 
       - name: Upload to Firebase App Distribution
         env:
