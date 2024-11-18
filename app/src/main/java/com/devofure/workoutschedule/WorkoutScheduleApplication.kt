@@ -4,14 +4,18 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import com.google.firebase.FirebaseApp
+import com.google.firebase.firestore.FirebaseFirestore
 import timber.log.Timber
 
 class WorkoutScheduleApplication : Application() {
+
+    lateinit var firestore: FirebaseFirestore
 
     override fun onCreate() {
         super.onCreate()
         Timber.plant(Timber.DebugTree())
         FirebaseApp.initializeApp(this)
+        firestore = FirebaseFirestore.getInstance()
         createNotificationChannel()
     }
 

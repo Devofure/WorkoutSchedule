@@ -2,37 +2,42 @@
 package com.devofure.workoutschedule.data
 
 import androidx.annotation.Keep
+import com.google.firebase.firestore.IgnoreExtraProperties
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
+@IgnoreExtraProperties
 data class Workout(
-    val id: Int,
-    val exercise: Exercise,
-    val repsList: List<SetDetails>? = null,
-    val durationInSeconds: Int? = null,
-    val isDone: Boolean = false,
-    val position: Int? = null,
+    var id: Int = 0,
+    var exercise: Exercise = Exercise(),
+    var repsList: List<SetDetails>? = null,
+    var durationInSeconds: Int? = null,
+    var position: Int? = null,
+    var dayIndex: Int = 0,
+    var isDone: Boolean = false
 )
 
+@IgnoreExtraProperties
 data class SetDetails(
-    val reps: Int = 1,
-    val weight: Float? = null,
+    var reps: Int = 0,
+    var weight: Float? = 0f,
     val duration: Int? = null,
 )
 
-@Keep
+@IgnoreExtraProperties
 data class Exercise(
-    val rowid: Int,
-    val name: String,
-    val level: String? = null,
-    val mechanic: String? = null,
-    val equipment: String? = null,
-    val primaryMuscles: List<String>,
-    val secondaryMuscles: List<String>,
-    val force: String? = null,
-    val instructions: List<String>? = null,
-    val category: String? = null,
+    var rowid: Int = 0,
+    var name: String = "",
+    var force: String? = null,
+    var level: String? = null,
+    var mechanic: String? = null,
+    var equipment: String? = null,
+    var primaryMuscles: List<String> = emptyList(),
+    var secondaryMuscles: List<String> = emptyList(),
+    var instructions: List<String>? = null,
+    var category: String? = null,
+    var muscleCategory: String? = null
 )
 
 val WEEK = listOf(

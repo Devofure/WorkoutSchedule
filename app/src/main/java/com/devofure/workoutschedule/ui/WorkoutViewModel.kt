@@ -1,4 +1,3 @@
-// WorkoutViewModel.kt
 package com.devofure.workoutschedule.ui
 
 import android.app.Application
@@ -13,8 +12,7 @@ import com.devofure.workoutschedule.data.WorkoutDataStoreManager
 import com.devofure.workoutschedule.data.exercise.ExerciseRepository
 import com.devofure.workoutschedule.data.exercise.toExercise
 import com.devofure.workoutschedule.data.log.LogEntity
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -25,23 +23,27 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 class WorkoutViewModel(application: Application) : AndroidViewModel(application) {
-    private val exerciseRepository: ExerciseRepository
-    val equipmentOptions: StateFlow<List<String>>
-    val muscleOptions: StateFlow<List<String>>
-    val categoryOptions: StateFlow<List<String>>
+    private val exerciseRepository: ExerciseRepository = ExerciseRepository(
+        application.applicationContext,
+        AppDatabase.getDatabase(application).exerciseDao(),
+        AppDatabase.getDatabase(application)
+    )
+    private val firestore: FirebaseFirestore by lazy {
+        FirebaseFirestore.getInstance()
+    }
+    val equipmentOptions: StateFlow<List<String>> = exerciseRepository.equipmentOptions
+    val muscleOptions: StateFlow<List<String>> = exerciseRepository.primaryMusclesOptions
+    val categoryOptions: StateFlow<List<String>> = exerciseRepository.categoryOptions
 
     private val _workouts = MutableStateFlow<Map<Int, List<Workout>>>(emptyMap())
     private val dataStoreManager = WorkoutDataStoreManager(application.applicationContext)
-    private val database by lazy { AppDatabase.getDatabase(application) }
-    private val logDao by lazy { database.logDao() }
-    private val exerciseDao by lazy { database.exerciseDao() }
-    private val gson = Gson()
 
     private val _isFirstLaunch = MutableStateFlow(true)
     val isFirstLaunch: StateFlow<Boolean> = _isFirstLaunch
@@ -60,11 +62,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     val deleteEvent: StateFlow<Pair<Workout, Int>?> = _deleteEvent
 
     init {
-        exerciseRepository =
-            ExerciseRepository(application.applicationContext, exerciseDao, database)
-        equipmentOptions = exerciseRepository.equipmentOptions
-        muscleOptions = exerciseRepository.primaryMusclesOptions
-        categoryOptions = exerciseRepository.categoryOptions
 
         viewModelScope.launch {
             dataStoreManager.isFirstLaunch.collectLatest { isFirstLaunchString ->
@@ -121,6 +118,23 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    private suspend fun loadUserSchedule() {
+        val snapshot = firestore.collection("workouts").get().await()
+        val workouts = snapshot.documents.mapNotNull { it.toObject(Workout::class.java) }
+        _workouts.value = workouts.groupBy { it.dayIndex }
+        nextWorkoutId = workouts.maxOfOrNull { it.id + 1 } ?: 1
+    }
+
+    fun saveUserSchedule(workouts: Map<Int, List<Workout>>) {
+        viewModelScope.launch {
+            val batch = firestore.batch()
+            workouts.values.flatten().forEach { workout ->
+                val docRef = firestore.collection("workouts").document(workout.id.toString())
+                batch.set(docRef, workout)
+            }
+            batch.commit().await()
+        }
+    }
 
     fun logWorkout(workout: Workout, date: LocalDate) {
         viewModelScope.launch {
@@ -133,7 +147,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                 repsList = workout.repsList,
                 duration = workout.durationInSeconds,
             )
-            logDao.insertLog(logEntity)
+            firestore.collection("logs").add(logEntity).await()
         }
     }
 
@@ -178,50 +192,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         return _workouts.value[dayIndex]?.filter { it.isDone } ?: emptyList()
     }
 
-    private fun saveUserSchedule(workouts: Map<Int, List<Workout>>) {
-        viewModelScope.launch {
-            val workoutsJson = gson.toJson(workouts.mapValues { (_, workouts) ->
-                workouts.sortedBy { it.position }
-            })
-            dataStoreManager.setUserSchedule(workoutsJson)
-        }
-    }
-
-    private fun loadUserSchedule() {
-        viewModelScope.launch {
-            dataStoreManager.userSchedule.collectLatest { workoutsJson ->
-                if (!workoutsJson.isNullOrEmpty()) {
-                    val workoutType = object : TypeToken<Map<Int, List<Workout>>>() {}.type
-                    val loadedWorkouts: Map<Int, List<Workout>> =
-                        gson.fromJson<Map<Int, List<Workout>>>(workoutsJson, workoutType)
-                            .mapValues { (_, workouts) ->
-                                workouts.sortedBy { it.position }
-                            }
-                    _workouts.value = loadedWorkouts
-                    nextWorkoutId = loadedWorkouts.values.flatten().maxOfOrNull { it.id + 1 } ?: 1
-                }
-            }
-        }
-    }
-
-    fun workoutsForDay(dayOfWeek: DayOfWeek): StateFlow<List<Workout>> {
-        return _workouts
-            .map { it[dayOfWeek.dayIndex] ?: emptyList() }
-            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
-    }
-
-    fun onWorkoutChecked(dayIndex: Int, workoutId: Int, isChecked: Boolean) {
-        _workouts.value = _workouts.value.toMutableMap().apply {
-            val updatedWorkouts = this[dayIndex]?.map { workout ->
-                if (workout.id == workoutId) workout.copy(isDone = isChecked) else workout
-            }
-            if (updatedWorkouts != null) {
-                this[dayIndex] = updatedWorkouts
-            }
-        }
-        saveUserSchedule(_workouts.value)
-    }
-
     fun onAllWorkoutsChecked(dayIndex: Int) {
         _workouts.value = _workouts.value.toMutableMap().apply {
             val updatedWorkouts = this[dayIndex]?.map { workout ->
@@ -246,7 +216,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
                             SetDetails(reps = 1),
                             SetDetails(reps = 1)
                         ),
-                        position = existingWorkouts.size // Assign position based on current size
+                        position = existingWorkouts.size
                     )
                 )
             }
@@ -260,7 +230,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
             val existingWorkouts = this[dayIndex]?.toMutableList()
             existingWorkouts?.remove(workout)
             if (existingWorkouts != null) {
-                // Update positions of remaining workouts
                 this[dayIndex] = existingWorkouts.mapIndexed { index, existingWorkout ->
                     existingWorkout.copy(position = index)
                 }
@@ -301,11 +270,6 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun getNicknameFlow(dayIndex: Int): StateFlow<String?> {
-        return dataStoreManager.getNickname(dayIndex)
-            .stateIn(viewModelScope, SharingStarted.Eagerly, "")
-    }
-
     fun addExercise(it: Exercise) {
         viewModelScope.launch {
             exerciseRepository.insertExercise(it)
@@ -320,5 +284,28 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
         }
         saveUserSchedule(_workouts.value)
         _deleteEvent.value = null
+    }
+
+    fun workoutsForDay(dayOfWeek: DayOfWeek): StateFlow<List<Workout>> {
+        return _workouts
+            .map { it[dayOfWeek.dayIndex] ?: emptyList() }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    }
+
+    fun getNicknameFlow(dayIndex: Int): StateFlow<String?> {
+        return dataStoreManager.getNickname(dayIndex)
+            .stateIn(viewModelScope, SharingStarted.Eagerly, "")
+    }
+
+    fun onWorkoutChecked(dayIndex: Int, workoutId: Int, isChecked: Boolean) {
+        _workouts.value = _workouts.value.toMutableMap().apply {
+            val updatedWorkouts = this[dayIndex]?.map { workout ->
+                if (workout.id == workoutId) workout.copy(isDone = isChecked) else workout
+            }
+            if (updatedWorkouts != null) {
+                this[dayIndex] = updatedWorkouts
+            }
+        }
+        saveUserSchedule(_workouts.value)
     }
 }

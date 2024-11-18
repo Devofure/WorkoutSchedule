@@ -115,6 +115,7 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     implementation(libs.firebase.analytics.ktx)
     implementation(libs.firebase.crashlytics.ktx)
+    implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.ui.auth)
     implementation(libs.gson)
     implementation(libs.material)

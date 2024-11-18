@@ -34,18 +34,6 @@ class WorkoutDataStoreManager(private val context: Context) {
             preferences[IS_FIRST_LAUNCH]
         }
 
-    val userSchedule: Flow<String?> = context.workoutDataStore.data
-        .catch { exception ->
-            if (exception is IOException) {
-                emit(emptyPreferences())
-            } else {
-                throw exception
-            }
-        }
-        .map { preferences ->
-            preferences[USER_SCHEDULE]
-        }
-
     fun getNickname(dayIndex: Int): Flow<String?> = context.workoutDataStore.data
         .catch { exception ->
             if (exception is IOException) {
