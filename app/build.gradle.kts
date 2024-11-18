@@ -14,14 +14,14 @@ plugins {
 
 android {
     namespace = "com.devofure.workoutschedule"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.devofure.workoutschedule"
         minSdk = 29
-        targetSdk = 34
-        versionCode = 4
-        versionName = "1.0.4-beta"
+        targetSdk = 35
+        versionCode = 5
+        versionName = "1.0.5-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
