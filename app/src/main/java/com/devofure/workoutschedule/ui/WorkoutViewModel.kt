@@ -68,7 +68,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
 
         viewModelScope.launch {
             dataStoreManager.isFirstLaunch.collectLatest { isFirstLaunchString ->
-                _isFirstLaunch.value = isFirstLaunchString?.toBoolean() ?: true
+                _isFirstLaunch.value = isFirstLaunchString?.toBoolean() != false
                 if (!_isFirstLaunch.value) {
                     loadUserSchedule()
                 }
@@ -140,7 +140,7 @@ class WorkoutViewModel(application: Application) : AndroidViewModel(application)
     fun generateSampleSchedule() {
         viewModelScope.launch {
             val sampleWorkouts = loadWorkoutsFromExercises()
-            _workouts.value = sampleWorkouts.mapValues { (dayIndex, workouts) ->
+            _workouts.value = sampleWorkouts.mapValues { (_, workouts) ->
                 workouts.mapIndexed { index, workout ->
                     workout.copy(position = index)
                 }

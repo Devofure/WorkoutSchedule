@@ -37,7 +37,7 @@ fun DraggableExerciseCard(
 ) {
     val density = LocalDensity.current
     var offsetY by remember { mutableStateOf(0f) }
-    val dragState = rememberDraggableState { delta ->
+    rememberDraggableState { delta ->
         offsetY += delta
     }
 
