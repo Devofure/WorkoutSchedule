@@ -63,7 +63,7 @@ jobs:
           echo "STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}" >> $GITHUB_ENV
 
       - name: Run Instrumented Tests
-        uses: reactivecircus/android-emulator-runner@v2.31.0
+        uses: reactivecircus/android-emulator-runner@v2.33.0
         with:
           api-level: 29
           script: ./gradlew connectedCheck
