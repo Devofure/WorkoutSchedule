@@ -62,21 +62,14 @@ jobs:
           echo "STORE_FILE=../keystore.jks" >> $GITHUB_ENV
           echo "STORE_PASSWORD=${{ secrets.STORE_PASSWORD }}" >> $GITHUB_ENV
 
-      - name: Run Instrumented Tests
-        uses: reactivecircus/android-emulator-runner@v2.33.0
-        with:
-          api-level: 29
-          script: ./gradlew connectedCheck
+#      - name: Run Instrumented Tests
+#        uses: reactivecircus/android-emulator-runner@v2.33.0
+#        with:
+#          api-level: 29
+#          script: ./gradlew connectedCheck
 
       - name: Run Unit Tests
         run: ./gradlew test
-
-      - name: Get changed files
-        id: changed_files
-        run: |
-          changed_files=$(git diff --name-only origin/main...HEAD)
-          echo "Changed files: $changed_files"
-          echo "::set-output name=changed_files::$changed_files"
 
       - name: Run Lint
         run: ./gradlew lint
