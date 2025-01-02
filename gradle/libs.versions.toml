@@ -1,7 +1,7 @@
 [versions]
 accompanist = "0.36.0"  # Accompanist version
 activityCompose = "1.9.3"
-agp = "8.7.2"  # Latest stable version of Android Gradle Plugin
+agp = "8.7.3"  # Latest stable version of Android Gradle Plugin
 androidxJunit = "1.2.1"
 appcompat = "1.7.0"
 compose = "1.7.6"  # Ensure this is the latest stable version of Compose
