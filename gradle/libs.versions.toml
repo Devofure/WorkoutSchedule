@@ -64,7 +64,7 @@ firebase-ui-auth = { group = "com.firebaseui", name = "firebase-ui-auth", versio
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version = "1.10.1" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-mockk = { group = "io.mockk", name = "mockk", version = "1.13.14" }
+mockk = { group = "io.mockk", name = "mockk", version = "1.13.16" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderableVersion" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
